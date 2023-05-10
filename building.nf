@@ -10,6 +10,7 @@ params.baktaDB         = "/mnt/blue/DATA/BIOINFO_LOCAL/bakta_database/db" //work
 params.training        = "/mnt/blue/DATA/BIOINFO_LOCAL/Listeria_monocytogenes.trn" //work
 params.genus           = "Listeria"
 params.species         = "monocytogenes"
+params.comment         = "comments to add to db" 
 
 
 // temp 
@@ -93,8 +94,8 @@ process RUN_NUCDIFF{
         output: 
         tuple val(ref_query), val(ref), val(query), emit: ref_query_param_ch
         tuple path("results/${ref_query}_ref_snps.vcf"), path("results/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
-        file("*")
-        // file(*.{gff, out}, emit: nucdiff_res_ch
+        tuple path ("results/*.gff"), path("results/*.out"), emit: nucdiff_res_ch
+        //file("*")
 
         script: 
         if (ref == sample1)
@@ -164,27 +165,26 @@ process RUN_VCF_ANNOTATOR{
 }
 // Here the problem is to make that run for all the results in the same db
 
-/* process WRANGLING_TO_DB{
+process WRANGLING_TO_DB{
         // for testing
         debug true
         conda '/home/vi2067/.conda/envs/py_test'
         
         input:
         path(db)
-        tuple val(ref_query), val(ref), val(query) // from RUN_VCF_ANNOTATOR.out.ref_query_param_ch
+        val(comment)
         tuple path("${ref_query}_ref_snps_annotated.vcf"), path("${ref_query}_query_snps_annotated.vcf") //from RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
-        file("*") // from RUN_NUCDIFF.out.nucdiff_res_ch  which is file(*.{gff, out}
+        tuple path (gff), path(out) // from RUN_NUCDIFF.out.nucdiff_res_ch  
         // so all the files have to be in
 
         output:
         path(db)
-
-        sript:
         
+        script:
         """
-        python ${params.results_to_db} --resdir . --database ${db}
+        python ${params.results_to_db} --resdir . --database ${db} --comment ${comment}
         """
-} */
+}
 
 
 workflow {
@@ -223,6 +223,10 @@ workflow {
                 ANNOTATE.out.bakta_gbff_ch)
         
         db_path=Channel.fromPath(params.sqlitedb, checkIfExists: false)
+        comment_ch=Channel.from(params.comment) 
 
-        WRANGLING_TO_DB(db_path, RUN_VCF_ANNOTATOR.out.annotated_vcf_ch)
+
+        WRANGLING_TO_DB(db_path, comment_ch, RUN_VCF_ANNOTATOR.out.annotated_vcf_ch, RUN_NUCDIFF.out.nucdiff_res_ch)
         }
+
+        

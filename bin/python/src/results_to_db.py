@@ -26,12 +26,6 @@ parser.add_argument("--comment",
                     action="store",
                     default=False,
                     help="Comment to add to the tables in the database (eg. date analysis, type assembly)")
-
-parser.add_argument("--test",
-                    action="store",
-                    default=False,
-                    help="Source paths for testing. Paths defined in test_paths.py")
-
 args = vars(parser.parse_args())
 
 ########################################################################################################################
