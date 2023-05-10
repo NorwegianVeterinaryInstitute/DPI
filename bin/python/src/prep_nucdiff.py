@@ -1,10 +1,11 @@
 import argparse
 import os
-import sys
+import csv
+from Bio import SeqIO
 
 parser = argparse.ArgumentParser(
     prog="prep_nucdiff.py",
-    description="Step1. Prepare run nucdiff. Find longest assembly in the pair, output nucdiff run script",
+    description="Step1. Prepare run nucdiff. Find longest assembly in the pair, write file with parameters for nf",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument("--fasta1",
@@ -19,51 +20,37 @@ parser.add_argument("--suffix",
                     action="store",
                     default=".fna",
                     help="Suffix of fasta1 and fasta2 files")
-parser.add_argument("--outdir",
-                    action="store",
-                    default=".",
-                    help="path of output directory for nucdiff")
-parser.add_argument("--outdir_script",
-                    action="store",
-                    default=".",
-                    help="path where the script to run nucdiff will be deposited")
-parser.add_argument("--test",
-                    action="store",
-                    default=False,
-                    help="Source paths for testing. Paths defined in test_paths.py")
-
 args = vars(parser.parse_args())
 
-# sourcing functions dir
-sys.path.append(os.path.dirname(__file__) + "/" + "diff")
+# %% Functions
+## %% helper get length fasta file
+def get_fasta_len(file):
+    """ returns the length of an assembly in fasta format
+    """
+    contigs = list(SeqIO.parse(file, "fasta"))
+    return sum(list(map(len, contigs)))
 
-# script
-if args["test"]:
-    sys.path.append(os.path.dirname(__file__) + "/" + "test")
-    import test_paths
-    #print("INPUTDIR" + os.getenv('INPUTDIR'))
-    work_dir = os.getenv('INPUTDIR')
-    pc_out = os.getenv("OUTPUTDIR")
-    args["fasta1"] = work_dir + args["fasta1"]
-    args["fasta2"] = work_dir + args["fasta2"]
-    args["outdir"] = pc_out
-    args["outdir_script"] = pc_out
+## %% choosing the longest assembly (fasta file) as ref
+def chose_ref_query(file1, file2, suffix) :
+    """ returns the name of the assembly file that has the
+        longest length and therefore should be used
+        as reference
+    """
+    if get_fasta_len(file1) >= get_fasta_len(file2):
+        ref_file, query_file = file1, file2
+    else:
+        ref_file, query_file = file2, file1
 
-# get the paths if ".":
-## should not work for test
-if not args["test"] and args["outdir"] == ".":
-    args["outdir"] = os.getcwd()
-if not args["test"] and args["outdir_script"] == ".":
-    args["outdir_script"] = os.getcwd()
+    ref = os.path.basename(ref_file).replace(suffix, '')
+    query = os.path.basename(query_file).replace(suffix, '')
+    return f"{ref}_{query}", ref, ref_file, query, query_file
 
-# so if test can set $INPUTDIR/fasta1
-from chose_ref_query import chose_ref_query
-ref_file, query_file, nucdiff_pattern = chose_ref_query(args["fasta1"], args["fasta2"], args["suffix"])
+#%% Script the parameters ref or query for nextflow
+with open('ref_query_params.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(list(chose_ref_query(args["fasta1"], args["fasta2"], args["suffix"])))
+file.close()
 
-# Create the nucdiff run command
-from create_run_nucdiff import create_run_nucdiff
-create_run_nucdiff(ref_file, query_file, args["outdir"], nucdiff_pattern, args["outdir_script"])
-
-# Test commands
-# python prep_nucdiff.py --fasta1 SRR11262033.fna --fasta2 SRR11262179.fna --test True
-# python src/prep_nucdiff.py --fasta1 ${INPUT}/SRR11262033.fna --fasta2 ${INPUT}/SRR11262179.fna --outdir .
+# test
+# prepnucdiff="/home/vi2067/Documents/onedrive_sync/NEW_WORK/2_Projects/2023/1_2023_Lm_ost_er_ikke_ost/DPI/bin/python/src/prep_nucdiff.py"
+# python $prepnucdiff --fasta1 SRR11262033.fna --fasta2 SRR11262179.fna
