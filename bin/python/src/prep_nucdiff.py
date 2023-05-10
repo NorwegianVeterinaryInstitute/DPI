@@ -43,7 +43,7 @@ def chose_ref_query(file1, file2, suffix) :
 
     ref = os.path.basename(ref_file).replace(suffix, '')
     query = os.path.basename(query_file).replace(suffix, '')
-    return f"{ref}_{query}", ref, ref_file, query, query_file
+    return f"{ref}_{query}", ref, query
 
 #%% Script the parameters ref or query for nextflow
 with open('ref_query_params.csv', 'w', newline='') as file:
