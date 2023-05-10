@@ -10,12 +10,13 @@ params.baktaDB         = "/mnt/blue/DATA/BIOINFO_LOCAL/bakta_database/db" //work
 params.training        = "/mnt/blue/DATA/BIOINFO_LOCAL/Listeria_monocytogenes.trn" //work
 params.genus           = "Listeria"
 params.species         = "monocytogenes"
-params.out_dir         = "/home/vi2067/Documents/NOSYNC/NF_TEST"
+
 
 // temp 
+params.out_dir         = "/home/vi2067/Documents/NOSYNC/NF_TEST"
 params.prep_nucdiff    = "${SCRIPTDIR}/prep_nucdiff.py" 
-params.prep_vcfannot    = "${SCRIPTDIR}/prep_vcf_annotator.py" 
-
+params.prep_vcfannot   = "${SCRIPTDIR}/prep_vcf_annotator.py" 
+params.sqlitedb        = "${params.out_dir}/test.sqlite"
 
 process ANNOTATE {
         // for testing
@@ -56,16 +57,18 @@ process PREPARE_NUCDIFF {
         // for testing
         debug true
         conda '/home/vi2067/.conda/envs/py_test'
-        //container 'evezeyl/py ??'
+        //conda (params.enable_conda ? 'bioconda::chewbbaca=3.1.2' : null) // make install for that
+        //container 'evezeyl/py_docker'
         
         // No need to publish
-        // publishDir "${params.out_dir}/PREP_NUCDIFF", mode: 'copy'
+        publishDir "${params.out_dir}/PREP_NUCDIFF", mode: 'copy'
 
         input:
         tuple val(sample1), path(path1), val(sample2), path(path2)
         
         output: 
-        path("ref_query_params.csv"), emit: longest_param_ch 
+        path("ref_query_params.csv"), emit: longest_param_ch
+        tuple val(sample1), path(path1), val(sample2), path(path2), emit: fna_ch
 
         shell:
         """
@@ -82,71 +85,99 @@ process RUN_NUCDIFF{
 
         publishDir "${params.out_dir}/NUCDIFF", mode: 'copy'
 
-
         input:
-        tuple val(ref_query), val(ref), path(ref_bakta_fna), val(query), path(query_bakta_fna)
-        // paths
-        path ref_bakta_fna
-        path query_bakta_fna
-
+        tuple val(ref_query), val(ref), val(query)
+        tuple val(sample1), path(path1), val(sample2), path(path2)
 
         output: 
-        tuple val(ref_query), paths("*")
-        // all the files we need 
+        tuple val(ref_query), val(ref), val(query), emit: ref_query_param_ch
+        tuple path("results/${ref_query}_ref_snps.vcf"), path("results/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
+        file("*")
 
-
-        shell:
+        script: 
+        if (ref == sample1)
         """
-        nucdiff  --vcf yes ${ref_bakta_fna} ${query_bakta_fna} . ${ref_query}
+        nucdiff  --vcf yes ${path1} ${path2} . ${ref_query}
+        """
+        else if (ref == sample2)
+        """
+        nucdiff  --vcf yes ${path2} ${path1} . ${ref_query}
         """
 }
 
-/* process PREPARE_VCF_ANNOTATOR {
+process PREPARE_VCF_ANNOTATOR {
         
         // for testing
         debug true
         conda '/home/vi2067/.conda/envs/py_test'
-        //container 'evezeyl/python ...'
+        //container 'evezeyl/py_docker'
 
         publishDir "${params.out_dir}/PREP_VCF_ANNOTATOR", mode: 'copy'
 
         input:
-        tuple val(ref_query), val(ref), path(ref_snp_vcf), path(query_snp_vcf), 
-        tuple val(ref), path(ref_gbff), val(query), path(query_gbff) 
+        tuple val(ref_query), val(ref), val(query)
+        tuple path(ref_vcf), path(query_vcf)
 
         output:
-        path("*")
-        shell:
+        tuple val(ref_query), val(ref), val(query), emit: ref_query_param_ch
+        tuple path("${ref_query}_ref_snps_reformated.vcf"), path("${ref_query}_query_snps_reformated.vcf"), emit: prep_vcf_ch
+        
 
         """
-        python ${params.prep_vcfannot} --vcf1 ${ref_query}_ref_snps.vcf --vcf2 ${ref_query}_query_snps.vcf --gbff1 ${ref}.gbff --gbff2 ${query}.gbff --outdir . --outdir_script .
-        ${ref_query}_ref_snps.vcf  = ref_snp_vcf
-        ${ref_query}_query_snps.vcf
+        python ${params.prep_vcfannot} --vcf ${ref_vcf}
+        python ${params.prep_vcfannot} --vcf ${query_vcf}
         """
-} */
+}
 
 /* process RUN_VCF_ANNOTATOR{
         // for testing
         debug true
         conda '/home/vi2067/.conda/envs/vcf-annotator'
-        input:
-        // patterns
-        val ref_query 
-        val ref 
-        val query
-        // files
-        path ref_gbff
-        path query_gbff
 
+        publishDir "${params.out_dir}/VCF_ANNOTATOR", mode: 'copy'
+
+        input:
+        tuple val(ref_query), val(ref), val(query)
+        tuple path(ref_snps_reformated), path(query_snps_reformated)
+        tuple var(sample1), path(path1_gbff), var(sample2), path(path2_gbff), 
+        
+        output:
+        tuple val(ref_query), val(ref), val(query), emit: ref_query_param_ch
+        tuple path("${ref_query}_ref_snps_annotated.vcf"), path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
+        file("*")
+
+        if (ref == sample1)
+        
+        """
+        vcf-annotator ${ref_query}_ref_snps_reformated.vcf ${path1_gbff} --output ${ref_query}_ref_snps_annotated.vcf
+        vcf-annotator ${ref_query}_query_snps_reformated.vcf ${path2_gbff} --output ${ref_query}_query_snps_annotated.vcf
+        """
+
+        else if (ref == sample2)       
+        
+        """
+        vcf-annotator ${ref_query}_ref_snps_reformated.vcf ${path2_gbff} --output ${ref_query}_ref_snps_annotated.vcf
+        vcf-annotator ${ref_query}_query_snps_reformated.vcf ${path1_gbff} --output ${ref_query}_query_snps_annotated.vcf
+        """
+} */
+
+/* process WRANGLING_TO_DB{
+        // for testing
+        debug true
+        conda '/home/vi2067/.conda/envs/py_test'
+        
+        input:
+        path(db)
+        tuple val(ref_query), val(ref), val(query)
 
         output:
-        path ref_annotated_vcf
-        path query_annotated_vcf
+        
+        sript:
+        // maybe if exist db apprend else ...
+        // need a way to do all into one collect ? 
 
-        shell:
         """
-        vcf-annotator ${ref_query}_ref_snps_reformated.vcf ${ref_gbff} --output ${ref_query}_ref_snps_annotated.vcf
-        vcf-annotator ${ref_query}_query_snps_reformated.vcf ${query_gbff} --output ${ref_query}_query_snps_annotated.vcf
+        python results_to_db --resdir . --database ${db}
         """
 } */
 
@@ -167,13 +198,26 @@ workflow {
         //ANNOTATE.out.bakta_gbff_ch.view()
 
         PREPARE_NUCDIFF(ANNOTATE.out.bakta_fna_ch)
+        
 
         // Channel where we know which one is ref and which one is query 
         ref_query_ch = PREPARE_NUCDIFF.out.longest_param_ch
-                .splitCsv(header:['ref_query', 'ref', 'path_ref', 'query', 'path_query'], skip: 0, sep:",", strip:true)
-                .map {row -> tuple(row.ref_query, row.ref, file(row.path_ref), row.query, file(row.path_query))}
-                .view()
+                //.splitCsv(header:['ref_query', 'ref', 'path_ref', 'query', 'path_query'], skip: 0, sep:",", strip:true)
+                //.map {row -> tuple(row.ref_query, row.ref, file(row.path_ref), row.query, file(row.path_query))}
+                .splitCsv(header:['ref_query', 'ref', 'query'], skip: 0, sep:",", strip:true)
+                .map {row -> tuple(row.ref_query, row.ref, row.query)}
 
-        //PREPARE_NUCDIFF.out.view()
+        RUN_NUCDIFF(ref_query_ch, PREPARE_NUCDIFF.out.fna_ch)
 
+
+        RUN_NUCDIFF.out.ref_query_param_ch.view()
+        RUN_NUCDIFF.out.nucdiff_vcf_ch.view()
+
+        PREPARE_VCF_ANNOTATOR(RUN_NUCDIFF.out.ref_query_param_ch, RUN_NUCDIFF.out.nucdiff_vcf_ch)
+
+        //RUN_VCF_ANNOTATOR(PREP_VCF_ANNOTATOR.out.ref_query_param_ch, PREPARE_VCF_ANNOTATOR.prep_vcf_ch )
+        
+        //db_path=Channel.fromPath(params.sqlitedb, checkIfExists: false)
+
+        //WRANGLING_TO_DB(db_path, )
         }
