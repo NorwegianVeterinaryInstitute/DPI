@@ -173,6 +173,7 @@ process WRANGLING_TO_DB{
         input:
         path(db)
         val(comment)
+        tuple val(ref_query), val(ref), val(query)
         tuple path("${ref_query}_ref_snps_annotated.vcf"), path("${ref_query}_query_snps_annotated.vcf") //from RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
         tuple path (gff), path(out) // from RUN_NUCDIFF.out.nucdiff_res_ch  
         // so all the files have to be in
@@ -226,7 +227,8 @@ workflow {
         comment_ch=Channel.from(params.comment) 
 
 
-        WRANGLING_TO_DB(db_path, comment_ch, RUN_VCF_ANNOTATOR.out.annotated_vcf_ch, RUN_NUCDIFF.out.nucdiff_res_ch)
+        WRANGLING_TO_DB(db_path, comment_ch, RUN_VCF_ANNOTATOR.out.ref_query_param_ch, RUN_VCF_ANNOTATOR.out.annotated_vcf_ch, RUN_NUCDIFF.out.nucdiff_res_ch)
         }
 
-        
+
+// need to fix the python script running from db try from: /home/vi2067/Documents/onedrive_sync/NEW_WORK/2_Projects/2023/1_2023_Lm_ost_er_ikke_ost/DPI/work/ed/a8dab97407f16509cc595af27c8176
