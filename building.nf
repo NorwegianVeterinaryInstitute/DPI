@@ -4,12 +4,12 @@ DPIDIR="/home/vi2067/Documents/onedrive_sync/NEW_WORK/2_Projects/2023/1_2023_Lm_
 params.input= "${DPIDIR}/assets/pairsheet_local.csv"
 // Annotation options
 //baktaDB         = "/run/media/evezeyl/4T/DATABASES/bakta/db" //cliff
-//trainingFILE    = "/run/media/evezeyl/4T/DATABASES/Listeria_monocytogenes.trn" //cliff
+//training    = "/run/media/evezeyl/4T/DATABASES/Listeria_monocytogenes.trn" //cliff
 params.baktaDB         = "/mnt/blue/DATA/BIOINFO_LOCAL/bakta_database/db" //work
 params.training        = "/mnt/blue/DATA/BIOINFO_LOCAL/Listeria_monocytogenes.trn" //work
 params.genus           = "Listeria"
 params.species         = "monocytogenes"
-
+params.out_dir         = "/home/vi2067/Documents/NOSYNC/NF_TEST"
 
 
 
@@ -25,7 +25,11 @@ params.species         = "monocytogenes"
 
 process ANNOTATE {
         // for testing
+        debug true
         conda '/home/vi2067/.conda/envs/bakta'
+
+
+        publishDir "${params.out_dir}/ANNOTATE", mode: 'copy'
 
         input:
         tuple val(sample1), file(path1), val(sample2), file(path2)
@@ -35,8 +39,19 @@ process ANNOTATE {
         val species
 
         output:
-        file("*")
-        //path "reflist.txt", emit: reflist_ch
+        // in line is owrking
+        /*val(sample1)
+        path "${sample1}.fna"
+        val(sample2)
+        path "${sample2}.fna"
+        */
+
+        tuple val(sample1), path("${sample1}.fna"), val(sample2), path("${sample2}.fna"), emit: bakta_fna_ch
+
+        //file("*") 
+        //tuple val(sample1) , path "${sample1}'.fna'", val(sample2), path "${sample2}'.fna'", emit: bakta_fna_ch
+        //tuple val(sample1), path "${sample1}.fna", val(sample2), path "${sample2}.fna", emit: bakta_fna_ch
+        //tuple val(sample1), path "${sample1}.gbff", val(sample2), path "${sample2}.gbff", emit: bakta_gbff_ch
 
         shell:
         """
@@ -60,5 +75,7 @@ workflow {
         .splitCsv(header:['sample1', 'path1', 'sample2', 'path2'], skip: 1, sep:",", strip:true)
         .map {row -> tuple(row.sample1, file(row.path1), row.sample2, file(row.path2))}
         ANNOTATE(assembly_pair_ch, params.baktaDB, params.training, params.genus, params.species)
+
+       ANNOTATE.out.bakta_fna_ch.view()
     
         }
