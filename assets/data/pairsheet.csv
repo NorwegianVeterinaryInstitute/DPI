@@ -1,4 +1,4 @@
-sample1,path1,sample2,path2
-SRR11262033,https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR11262033.fasta,SRR11262179,https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR11262179.fastaSRR11262179.fasta
-SRR11262193,https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR11262193.fasta,SRR13588432,https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR13588432.fasta
-SRR11262179,https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR11262179.fasta,SRR13588387,https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR13588387.fasta
+'sample1','path1','sample2','path2'
+'SRR11262033','https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR11262033.fasta','SRR11262179','https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR11262179.fasta'
+'SRR11262193','https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR11262193.fasta','SRR13588432','https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR13588432.fasta'
+'SRR11262179','https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR11262179.fasta','SRR13588387','https://raw.githubusercontent.com/NorwegianVeterinaryInstitute/DPI/main/assets/data/assemblies/SRR13588387.fasta'
