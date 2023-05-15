@@ -77,7 +77,7 @@ process PREPARE_NUCDIFF {
         python ${params.prep_nucdiff} --fasta1 $path1 --fasta2 $path2 
         """
 
-} 
+}
 
 process RUN_NUCDIFF{
         // for testing
@@ -92,9 +92,8 @@ process RUN_NUCDIFF{
         tuple val(sample1), path(path1), val(sample2), path(path2)
 
         output: 
-        tuple val(ref_query), val(ref), val(query), emit: ref_query_param_ch
-        tuple path("results/${ref_query}_ref_snps.vcf"), path("results/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
-        tuple path ("results/*.gff"), path("results/*.out"), emit: nucdiff_res_ch
+        tuple val(ref_query), val(ref), val(query), path("results/${ref_query}_ref_snps.vcf"), path("results/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
+        tuple val(ref_query), val(ref), val(query), path ("results/*.gff"), path("results/*.out"), emit: nucdiff_res_ch
         //file("*")
 
         script: 
@@ -118,12 +117,13 @@ process PREPARE_VCF_ANNOTATOR {
         publishDir "${params.out_dir}/PREP_VCF_ANNOTATOR", mode: 'copy'
 
         input:
-        tuple val(ref_query), val(ref), val(query)
-        tuple path(ref_vcf), path(query_vcf)
+        tuple val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf)
 
         output:
-        tuple val(ref_query), val(ref), val(query), emit: ref_query_param_ch
-        tuple path("${ref_query}_ref_snps_reformated.vcf"), path("${ref_query}_query_snps_reformated.vcf"), emit: prep_vcf_ch
+        tuple val(ref_query), val(ref), val(query), 
+        path("${ref_query}_ref_snps_reformated.vcf"), 
+        path("${ref_query}_query_snps_reformated.vcf"), emit: prep_vcf_ch
+
         
         script:
         """
@@ -131,6 +131,8 @@ process PREPARE_VCF_ANNOTATOR {
         python ${params.prep_vcfannot} --vcf ${query_vcf}
         """
 }
+
+// problem here needs to be linked to the proper gff channel using a tag ... to put the correct channels together 
 
 process RUN_VCF_ANNOTATOR{
         // for testing
@@ -140,27 +142,28 @@ process RUN_VCF_ANNOTATOR{
         publishDir "${params.out_dir}/VCF_ANNOTATOR", mode: 'copy'
 
         input:
-        tuple val(ref_query), val(ref), val(query)
-        tuple path(ref_vcf), path(query_vcf)
+        tuple val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf)
         tuple val(sample1), path(path1_gbff), val(sample2), path(path2_gbff)
         
         output:
+        //tuple val(ref_query), val(ref), val(query),
+        //path("${ref_query}_ref_snps_annotated.vcf"), path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
         tuple val(ref_query), val(ref), val(query), emit: ref_query_param_ch
         tuple path("${ref_query}_ref_snps_annotated.vcf"), path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
 
         script:
-        if (ref == sample1)
+        if (ref == sample1 && query == sample2)
         """
         vcf-annotator ${ref_vcf} ${path1_gbff} --output ${ref_query}_ref_snps_annotated.vcf
         vcf-annotator ${query_vcf} ${path2_gbff} --output ${ref_query}_query_snps_annotated.vcf
         """
 
-        else if (ref == sample2)       
-        
+        else if (ref == sample2 && query == sample1)       
         """
         vcf-annotator ${ref_vcf} ${path2_gbff} --output ${ref_query}_ref_snps_annotated.vcf
         vcf-annotator ${query_vcf} ${path1_gbff} --output ${ref_query}_query_snps_annotated.vcf
         """
+
 
 }
 
@@ -186,7 +189,8 @@ process RUN_VCF_ANNOTATOR{
         """
         python ${params.results_to_db} --database "${db}" --comment "${comment}"
         """
-} */
+} 
+
 
 process WRANGLING_TO_DB{
         // for testing
@@ -209,26 +213,9 @@ process WRANGLING_TO_DB{
         """
 }
 
+*/
+// for testing for all 
 
- // for testing for all 
- /*
-        debug true
-        conda '/home/vi2067/.conda/envs/py_test'
-        
-        input:
-        path(db)
-        val(comment)
-        tuple path("*")
-
-        output:
-        path(db)
-        
-        script:
-        """
-        python ${params.results_to_db} --database "${db}" --comment "${comment}"
-        """
-}
-*/ 
 workflow {
         if (!params.input) {
 		exit 1, "Missing input file"
@@ -249,37 +236,38 @@ workflow {
         ref_query_ch = PREPARE_NUCDIFF.out.longest_param_ch
                 .splitCsv(header:['ref_query', 'ref', 'query'], skip: 0, sep:",", strip:true)
                 .map {row -> tuple(row.ref_query, row.ref, row.query)}
-
+                
+                
         RUN_NUCDIFF(ref_query_ch, PREPARE_NUCDIFF.out.fna_ch)
         
+        PREPARE_VCF_ANNOTATOR(RUN_NUCDIFF.out.nucdiff_vcf_ch)
 
-// SPLIT 
-/*
+        //PREPARE_VCF_ANNOTATOR.out.prep_vcf_ch.view()
+        ANNOTATE.out.bakta_gbff_ch.view()
 
-        PREPARE_VCF_ANNOTATOR(RUN_NUCDIFF.out.ref_query_param_ch, RUN_NUCDIFF.out.nucdiff_vcf_ch)
+        // HERE problem we need to combined the proper channels
 
-        RUN_VCF_ANNOTATOR(
-                PREPARE_VCF_ANNOTATOR.out.ref_query_param_ch,
-                PREPARE_VCF_ANNOTATOR.out.prep_vcf_ch,
-                ANNOTATE.out.bakta_gbff_ch)
-        
+        //RUN_VCF_ANNOTATOR(
+        //        PREPARE_VCF_ANNOTATOR.out.prep_vcf_ch,
+        //        ANNOTATE.out.bakta_gbff_ch)
+
+
+        /*
         db_path_ch=Channel.fromPath(params.sqlitedb, checkIfExists: false)
         //comment_ch=Channel.from(params.comment) 
         comment_ch=Channel.value(params.comment) 
 
-*/
 
 // This one is working with one
 
-/*         WRANGLING_TO_DB(db_path_ch, comment_ch, 
+        WRANGLING_TO_DB(db_path_ch, comment_ch, 
         RUN_VCF_ANNOTATOR.out.ref_query_param_ch, 
         RUN_VCF_ANNOTATOR.out.annotated_vcf_ch, 
         RUN_NUCDIFF.out.nucdiff_res_ch) 
-*/
+
 
 // Trying to put all results so can use same 
 
-        /*
         results_ch=Channel.fromPath(
                 RUN_VCF_ANNOTATOR.out.ref_query_param_ch.collect(), 
                 RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.collect(), 
@@ -289,13 +277,13 @@ workflow {
         results_ch.view()
         
         WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch) 
-        */
-
-/*
         WRANGLING_TO_DB(db_path_ch, comment_ch, 
                 RUN_VCF_ANNOTATOR.out.ref_query_param_ch.collect(), 
                 RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.collect(), 
                 RUN_NUCDIFF.out.nucdiff_res_ch.collect())
 
-*/
+
         }
+        */
+}
+
