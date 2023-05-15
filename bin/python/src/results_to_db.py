@@ -9,22 +9,23 @@ import sqlalchemy
 
 
 parser = argparse.ArgumentParser(
-    prog="prep_vcf_annotator.py",
+    prog="results_to_db.py",
     description='Wrangling results and appending to database',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument("--resdir",
+                    default=".",
                     action="store",
-                    required=True,
+                    required=False,
                     help="directory where all results to include in the database are deposited")
 parser.add_argument("--database",
                     action="store",
                     default="nucdiff.sqlite",
-                    required=True,
+                    required=False,
                     help="path/name of the database. If it does not exists, it will be created, otherwise results are append")
 parser.add_argument("--comment",
                     action="store",
-                    default=False,
+                    default="NA",
                     help="Comment to add to the tables in the database (eg. date analysis, type assembly)")
 args = vars(parser.parse_args())
 
