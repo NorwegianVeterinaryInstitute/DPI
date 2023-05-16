@@ -1,11 +1,11 @@
 import argparse
 import os
 import sys
-import pathlib
 import re
 import pandas as pd
 import gffpandas.gffpandas as gffpd
 import sqlalchemy
+import glob
 
 
 parser = argparse.ArgumentParser(
@@ -31,19 +31,32 @@ args = vars(parser.parse_args())
 
 ########################################################################################################################
 # %% Functions
-## %% detect all results files
-def detect_result_files(dir):
+## %% helper detect ref_query_patterns
+def ref_query_patterns(dir):
     """
-    detect results files in a dir and subdirectory (for one compared pair of isolate)
-    Return the path of all the files containing results to wrangle
-    :dir directory in which results files have to be detected
-    :returns dictionary of list file paths to analyze in different categories id(ref,query), query_files, ref_files, stat_file,
+    detect the difference ref query patterns that will need to be added in database
+    :returns list of existing ref_query
     """
-    # helpers
-    res_files = [str(p) for p in pathlib.Path(dir).rglob("*")]
+    list_path = glob.glob(dir + "/*_stat.out")
+    return list(map(lambda i: os.path.basename(i).replace("_stat.out", ""), list_path))
 
+#%% helper : return all the files per pattern
+def res_files_per_pattern(dir, list_patterns):
+    """
+    return each list element contain all the files per pattern
+    """
+    return list(map(lambda pattern: glob.glob(dir + "/" + pattern + "*"), list_patterns))
+
+## %% detect all results files per pattern
+def detect_result_files(res_files_element):
+    """
+    organize the detected result files for ONE ref_query pattern and create a dictionary so it can be wrangled correctly
+    builds on res_files_per_pattern
+    :res_files_element all the result files for one pattern (from res_files_per_pattern fun)
+    :returns dictionary of list file paths to analyze in different categories id(ref,query), query_files, ref_files, stat_file
+    """
     # should be better with case
-    for f in res_files:
+    for f in res_files_element:
         if "_query_blocks.gff" in f:
             query_blocks_file = str(f)
         elif "_query_snps.gff" in f:
@@ -93,7 +106,6 @@ def detect_result_files(dir):
                   'stat_files': stat_files,
                   "annotated_vcf_files": annotated_vcf_files}
     return files_dict
-
 
 ## %% table to database
 def df_to_database(df, db_file, table_name, if_exists='replace'):
@@ -296,45 +308,58 @@ def wrapper_stat_to_db(stat_file, id_dict, stat_pattern, comment, db_file, table
 
 ########################################################################################################################
 # %% SCRIPT
+## Testing
+os.chdir("/home/vi2067/Documents/onedrive_sync/NEW_WORK/2_Projects/2023/1_2023_Lm_ost_er_ikke_ost/DPI/work/98/13b009471d56dd4a50ff859d89ae11")
+args = {}
+args["resdir"] = os.getcwd()
+args["comment"] = "test comment"
+args["database"] = "again2.sqlite"
 
+# Get the different ref_query_patterns
+all_ref_query_patterns = ref_query_patterns(args["resdir"])
 
-## %% getting results files to add to database
-res_files_dict = detect_result_files(args["resdir"])
-id_dict = res_files_dict["id"]
-# %% getting df and adding the results to database
-# %% could be improved function by filetype detection ... but ok for now
-## %% the query_files to db
-query_files_dict = res_files_dict["query_files"]
-for key in query_files_dict.keys():
-   wrapper_gff_to_db(
-       gff_file=query_files_dict[key][0], id_dict=id_dict, gff_pattern=query_files_dict[key][1],
-       comment=args["comment"], db_file=args["database"],
-       table_name=key, if_exists='append')
+# list where each element is a list of files for each pattern that need to go in the db
+all_files_per_pattern = res_files_per_pattern(args["resdir"], all_ref_query_patterns)
 
-## %% the ref_files to db
-ref_files_dict = res_files_dict["ref_files"]
-for key in ref_files_dict.keys():
-   wrapper_gff_to_db(
-       gff_file=ref_files_dict[key][0], id_dict=id_dict, gff_pattern=ref_files_dict[key][1],
-       comment=args["comment"], db_file=args["database"],
-       table_name=key, if_exists='append')
+# now we need for each element of list:
+for file_set in all_files_per_pattern:
+    ## %% getting results files to add to database for each file set
+    res_files_dict = detect_result_files(file_set)
+    id_dict = res_files_dict["id"]
+    # %% getting df and adding the results to database
+    # %% could be improved function by filetype detection ... but ok for now
+    ## %% the query_files to db
+    query_files_dict = res_files_dict["query_files"]
+    for key in query_files_dict.keys():
+       wrapper_gff_to_db(
+           gff_file=query_files_dict[key][0], id_dict=id_dict, gff_pattern=query_files_dict[key][1],
+           comment=args["comment"], db_file=args["database"],
+           table_name=key, if_exists='append')
 
-## %% the stat_file to db
-stat_files_dict = res_files_dict["stat_files"]
+    ## %% the ref_files to db
+    ref_files_dict = res_files_dict["ref_files"]
+    for key in ref_files_dict.keys():
+       wrapper_gff_to_db(
+           gff_file=ref_files_dict[key][0], id_dict=id_dict, gff_pattern=ref_files_dict[key][1],
+           comment=args["comment"], db_file=args["database"],
+           table_name=key, if_exists='append')
 
-for key in stat_files_dict.keys():
-    wrapper_stat_to_db(stat_file=stat_files_dict[key][0],
-                       id_dict=id_dict, stat_pattern=stat_files_dict[key][1],
-                       comment=args["comment"], db_file=args["database"],
-                       table_name=key, if_exists='append')
+    ## %% the stat_file to db
+    stat_files_dict = res_files_dict["stat_files"]
 
-## %% the annotated_vcf to db
-vcf_files_dict=res_files_dict["annotated_vcf_files"]
+    for key in stat_files_dict.keys():
+        wrapper_stat_to_db(stat_file=stat_files_dict[key][0],
+                           id_dict=id_dict, stat_pattern=stat_files_dict[key][1],
+                           comment=args["comment"], db_file=args["database"],
+                           table_name=key, if_exists='append')
 
-for key in vcf_files_dict.keys():
-    wrapper_vcf_to_db(vcf_file=vcf_files_dict[key][0], id_dict=id_dict, vcf_pattern=vcf_files_dict[key][1],
-                      comment=args["comment"], db_file=args["database"],
-                      table_name=key, if_exists='append')
+    ## %% the annotated_vcf to db
+    vcf_files_dict=res_files_dict["annotated_vcf_files"]
+
+    for key in vcf_files_dict.keys():
+        wrapper_vcf_to_db(vcf_file=vcf_files_dict[key][0], id_dict=id_dict, vcf_pattern=vcf_files_dict[key][1],
+                          comment=args["comment"], db_file=args["database"],
+                          table_name=key, if_exists='append')
 
 
 
