@@ -18,14 +18,14 @@ params.out_dir         = "/home/vi2067/Documents/NOSYNC/NF_TEST"
 params.prep_nucdiff    = "${SCRIPTDIR}/prep_nucdiff.py" 
 params.prep_vcfannot   = "${SCRIPTDIR}/prep_vcf_annotator.py" 
 params.results_to_db   = "${SCRIPTDIR}/results_to_db.py" 
-params.sqlitedb        = "test2.sqlite"
+params.sqlitedb        = "test3.sqlite"
 
 process ANNOTATE {
         debug true
         tag "$pair"
         conda '/home/vi2067/.conda/envs/bakta'
 
-        publishDir "${params.out_dir}/ANNOTATE", mode: 'copy'
+        publishDir "${params.out_dir}/results/ANNOTATE", mode: 'copy'
 
         input:
         tuple val(pair), val(sample1), path(path1), val(sample2), path(path2)
@@ -58,7 +58,7 @@ process PREPARE_NUCDIFF {
         //container 'evezeyl/py_docker'
         
         // No need to publish execpt for debugging
-        // publishDir "${params.out_dir}/PREP_NUCDIFF", mode: 'copy'
+        publishDir "${params.out_dir}/results/PREP_NUCDIFF", mode: 'copy'
 
         input:
         tuple val(pair), val(sample1), path(path1), val(sample2), path(path2)
@@ -81,7 +81,7 @@ process RUN_NUCDIFF{
         conda '/home/vi2067/.conda/envs/nucdiff'
         //container ''
 
-        publishDir "${params.out_dir}/NUCDIFF", mode: 'copy'
+        publishDir "${params.out_dir}/results/NUCDIFF", mode: 'copy'
 
         input:
         tuple val(pair), val(ref_query), val(ref), val(query), 
@@ -116,7 +116,7 @@ process PREPARE_VCF_ANNOTATOR {
         //container 'evezeyl/py_docker'
         tag "$pair"
 
-        publishDir "${params.out_dir}/PREP_VCF_ANNOTATOR", mode: 'copy'
+        publishDir "${params.out_dir}/results/PREP_VCF_ANNOTATOR", mode: 'copy'
 
         input:
         tuple val(pair), val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf)
@@ -142,7 +142,7 @@ process RUN_VCF_ANNOTATOR{
         conda '/home/vi2067/.conda/envs/vcf-annotator'
         tag "$pair"
 
-        publishDir "${params.out_dir}/VCF_ANNOTATOR", mode: 'copy'
+        publishDir "${params.out_dir}/results/VCF_ANNOTATOR", mode: 'copy'
 
         input:
         tuple val(pair), val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf),
@@ -182,7 +182,7 @@ process WRANGLING_TO_DB{
         tag "$pair"
         conda '/home/vi2067/.conda/envs/py_test'
 
-        publishDir "${params.out_dir}/results", mode: 'copy'
+        publishDir "${params.out_dir}/results/DB", mode: 'copy'
         
         input:
         path(db)
