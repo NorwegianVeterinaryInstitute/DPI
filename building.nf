@@ -89,7 +89,10 @@ process RUN_NUCDIFF{
 
         output: 
         tuple val(pair), val(ref_query), val(ref), val(query), path("results/${ref_query}_ref_snps.vcf"), path("results/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
-        tuple val(pair), val(ref_query), val(ref), val(query), path ("results/*.gff"), path("results/*.out"), emit: nucdiff_res_ch
+        tuple path ("results/*.gff"), path("results/*.out"), emit: nucdiff_res_ch
+
+        // we only need the files here 
+        //tuple val(pair), val(ref_query), val(ref), val(query), path ("results/*.gff"), path("results/*.out"), emit: nucdiff_res_ch
         //file("*")
 
         script: 
@@ -146,9 +149,13 @@ process RUN_VCF_ANNOTATOR{
         val(sample1), path(path1_gbff), val(sample2), path(path2_gbff)
         
         output:
-        tuple val(pair), val(ref_query), val(ref), val(query), 
-        path("${ref_query}_ref_snps_annotated.vcf"), 
+        tuple path("${ref_query}_ref_snps_annotated.vcf"), 
         path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
+
+        // we only need the files
+        //tuple val(pair), val(ref_query), val(ref), val(query), 
+        //path("${ref_query}_ref_snps_annotated.vcf"), 
+        //path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
 
         script:
         if (ref == sample1 && query == sample2)
@@ -174,48 +181,27 @@ process WRANGLING_TO_DB{
         debug true
         tag "$pair"
         conda '/home/vi2067/.conda/envs/py_test'
+
+        publishDir "${params.out_dir}/results", mode: 'copy'
         
         input:
         path(db)
         val(comment)
-        tuple val(pair), val(ref_query), val(ref), val(query),
-        path("${ref_query}_ref_snps_annotated.vcf"), 
-        path("${ref_query}_query_snps_annotated.vcf"),
-        path (gff), path(out) 
+        path("*")
+        
+        //path("${ref_query}_ref_snps_annotated.vcf"), 
+        //path("${ref_query}_query_snps_annotated.vcf"),
+        //path (gff), path(out) 
 
         output:
         path(db), emit: db_path_ch
         
         script:
         """
-        python ${params.results_to_db} --database "${db}" --comment "${comment}"
+        #python ${params.results_to_db} --database "${db}" --comment "${comment}"
         """
 } 
 
-/*
-
-process WRANGLING_TO_DB{
-        // for testing
-        debug true
-        conda '/home/vi2067/.conda/envs/py_test'
-        
-        input:
-        path(db)
-        val(comment)
-        tuple val(ref_query), val(ref), val(query)
-        tuple path("${ref_query}_ref_snps_annotated.vcf"), path("${ref_query}_query_snps_annotated.vcf") 
-        tuple path (gff), path(out) 
-
-        output:
-        path(db)
-        
-        script:
-        """
-        python ${params.results_to_db} --database "${db}" --comment "${comment}"
-        """
-}
-
-*/
 // for testing for all 
 
 workflow {
@@ -279,25 +265,19 @@ workflow {
         comment_ch=Channel.value(params.comment) 
 
         //reconstruct paths that goes together for results: 
-        // combine fields: pair, ref_query, ref, query
-        wrangling_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
-                .combine(RUN_NUCDIFF.out.nucdiff_res_ch, by: 0..3)
-        
-        wrangling_ch.view()
+        // combine fields: pair, ref_query, ref, query ... 
+        // I do not need anmymore but was nice :D so let it
+        //wrangling_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
+        //        .combine(RUN_NUCDIFF.out.nucdiff_res_ch, by: 0..3)
+                
+
+        wrangling_ch =  RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
+                .concat(RUN_NUCDIFF.out.nucdiff_res_ch)
+                .flatten()
+
+        //wrangling_ch.view()
+        WRANGLING_TO_DB(db_path_ch, comment_ch, wrangling_ch) 
 
 
-        //WRANGLING_TO_DB(db_path_ch, comment_ch, wrangling_ch) 
-
-
-        // Trying to put all results so can use same 
-        /*
-        WRANGLING_TO_DB(db_path_ch, comment_ch, 
-                RUN_VCF_ANNOTATOR.out.ref_query_param_ch.collect(), 
-                RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.collect(), 
-                RUN_NUCDIFF.out.nucdiff_res_ch.collect())
-
-
-        }
-        */
 }
 
