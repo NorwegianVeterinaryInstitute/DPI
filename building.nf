@@ -21,29 +21,23 @@ params.results_to_db   = "${SCRIPTDIR}/results_to_db.py"
 params.sqlitedb        = "test2.sqlite"
 
 process ANNOTATE {
-        // for testing
         debug true
+        tag "$pair"
         conda '/home/vi2067/.conda/envs/bakta'
-
-        //conda (params.enable_conda ? 'bioconda::chewbbaca=3.1.2' : null)
-        // why cannot get full info
-        //container 'oschwengers/bakta:v1.7.0'
-        //label 'process_local'
-        //bakta 1.7.0 add version
 
         publishDir "${params.out_dir}/ANNOTATE", mode: 'copy'
 
         input:
-        tuple val(sample1), file(path1), val(sample2), file(path2)
+        tuple val(pair), val(sample1), path(path1), val(sample2), path(path2)
         path baktaDB
         path training
         val genus
         val species
 
         output:
-        tuple val(sample1), path("${sample1}.fna"), val(sample2), path("${sample2}.fna"), emit: bakta_fna_ch
-        tuple val(sample1), path("${sample1}.gbff"), val(sample2), path("${sample2}.gbff"), emit: bakta_gbff_ch
-        //file("*") // can add if we want all annotations
+        tuple val(pair), val(sample1), path("${sample1}.fna"), val(sample2), path("${sample2}.fna"), emit: bakta_fna_ch
+        tuple val(pair), val(sample1), path("${sample1}.gbff"), val(sample2), path("${sample2}.gbff"), emit: bakta_gbff_ch
+        // file("*") // can add if we want all annotations
 
         script:
         """
@@ -56,8 +50,9 @@ process ANNOTATE {
 }
 
 process PREPARE_NUCDIFF {
-        // for testing
         debug true
+        tag "$pair"
+        
         conda '/home/vi2067/.conda/envs/py_test'
         //conda (params.enable_conda ? 'bioconda::chewbbaca=3.1.2' : null) // make install for that
         //container 'evezeyl/py_docker'
@@ -66,11 +61,11 @@ process PREPARE_NUCDIFF {
         // publishDir "${params.out_dir}/PREP_NUCDIFF", mode: 'copy'
 
         input:
-        tuple val(sample1), path(path1), val(sample2), path(path2)
+        tuple val(pair), val(sample1), path(path1), val(sample2), path(path2)
         
         output: 
         path("ref_query_params.csv"), emit: longest_param_ch
-        tuple val(sample1), path(path1), val(sample2), path(path2), emit: fna_ch
+        tuple val(pair), val(sample1), path(path1), val(sample2), path(path2), emit: fna_ch
 
         script:
         """
@@ -82,29 +77,32 @@ process PREPARE_NUCDIFF {
 process RUN_NUCDIFF{
         // for testing
         debug true
+        tag "$pair"
         conda '/home/vi2067/.conda/envs/nucdiff'
         //container ''
 
         publishDir "${params.out_dir}/NUCDIFF", mode: 'copy'
 
         input:
-        tuple val(ref_query), val(ref), val(query)
-        tuple val(sample1), path(path1), val(sample2), path(path2)
+        tuple val(pair), val(ref_query), val(ref), val(query), 
+        val(sample1), path(path1), val(sample2), path(path2)
 
         output: 
-        tuple val(ref_query), val(ref), val(query), path("results/${ref_query}_ref_snps.vcf"), path("results/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
-        tuple val(ref_query), val(ref), val(query), path ("results/*.gff"), path("results/*.out"), emit: nucdiff_res_ch
+        tuple val(pair), val(ref_query), val(ref), val(query), path("results/${ref_query}_ref_snps.vcf"), path("results/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
+        tuple val(pair), val(ref_query), val(ref), val(query), path ("results/*.gff"), path("results/*.out"), emit: nucdiff_res_ch
         //file("*")
 
         script: 
         if (ref == sample1)
         """
-        nucdiff  --vcf yes ${path1} ${path2} . ${ref_query}
+        nucdiff  --vcf yes $path1 $path2 . $ref_query
         """
         else if (ref == sample2)
         """
-        nucdiff  --vcf yes ${path2} ${path1} . ${ref_query}
+        nucdiff  --vcf yes $path2 $path1 . $ref_query
         """
+        else
+        error "Correct ref-query not found"
 }
 
 process PREPARE_VCF_ANNOTATOR {
@@ -113,14 +111,15 @@ process PREPARE_VCF_ANNOTATOR {
         debug true
         conda '/home/vi2067/.conda/envs/py_test'
         //container 'evezeyl/py_docker'
+        tag "$pair"
 
         publishDir "${params.out_dir}/PREP_VCF_ANNOTATOR", mode: 'copy'
 
         input:
-        tuple val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf)
+        tuple val(pair), val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf)
 
         output:
-        tuple val(ref_query), val(ref), val(query), 
+        tuple val(pair), val(ref_query), val(ref), val(query), 
         path("${ref_query}_ref_snps_reformated.vcf"), 
         path("${ref_query}_query_snps_reformated.vcf"), emit: prep_vcf_ch
 
@@ -138,18 +137,18 @@ process RUN_VCF_ANNOTATOR{
         // for testing
         debug true
         conda '/home/vi2067/.conda/envs/vcf-annotator'
+        tag "$pair"
 
         publishDir "${params.out_dir}/VCF_ANNOTATOR", mode: 'copy'
 
         input:
-        tuple val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf)
-        tuple val(sample1), path(path1_gbff), val(sample2), path(path2_gbff)
+        tuple val(pair), val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf),
+        val(sample1), path(path1_gbff), val(sample2), path(path2_gbff)
         
         output:
-        //tuple val(ref_query), val(ref), val(query),
-        //path("${ref_query}_ref_snps_annotated.vcf"), path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
-        tuple val(ref_query), val(ref), val(query), emit: ref_query_param_ch
-        tuple path("${ref_query}_ref_snps_annotated.vcf"), path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
+        tuple val(pair), val(ref_query), val(ref), val(query), 
+        path("${ref_query}_ref_snps_annotated.vcf"), 
+        path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
 
         script:
         if (ref == sample1 && query == sample2)
@@ -163,27 +162,29 @@ process RUN_VCF_ANNOTATOR{
         vcf-annotator ${ref_vcf} ${path2_gbff} --output ${ref_query}_ref_snps_annotated.vcf
         vcf-annotator ${query_vcf} ${path1_gbff} --output ${ref_query}_query_snps_annotated.vcf
         """
-
+        else
+        error "vcf_annotator: correct ref-query not found"
 
 }
 
-// Here the problem is to make that run for all the results in the same db
-
-// working for one sample
-/* process WRANGLING_TO_DB{
+// working for one sample 
+// We need to find a way it works for all pairs 
+process WRANGLING_TO_DB{
         // for testing
         debug true
+        tag "$pair"
         conda '/home/vi2067/.conda/envs/py_test'
         
         input:
         path(db)
         val(comment)
-        tuple val(ref_query), val(ref), val(query)
-        tuple path("${ref_query}_ref_snps_annotated.vcf"), path("${ref_query}_query_snps_annotated.vcf") 
-        tuple path (gff), path(out) 
+        tuple val(pair), val(ref_query), val(ref), val(query),
+        path("${ref_query}_ref_snps_annotated.vcf"), 
+        path("${ref_query}_query_snps_annotated.vcf"),
+        path (gff), path(out) 
 
         output:
-        path(db)
+        path(db), emit: db_path_ch
         
         script:
         """
@@ -191,6 +192,7 @@ process RUN_VCF_ANNOTATOR{
         """
 } 
 
+/*
 
 process WRANGLING_TO_DB{
         // for testing
@@ -221,62 +223,74 @@ workflow {
 		exit 1, "Missing input file"
 		}
 	
+        // channel: get the sampleID, paths and creates a pair-key (nothing to do with ref used)
 	assembly_pair_ch = Channel
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header:['sample1', 'path1', 'sample2', 'path2'], skip: 1, sep:",", strip:true)
-        .map {row -> tuple(row.sample1, file(row.path1), row.sample2, file(row.path2))}
+        .map { row -> (pair, sample1, path1, sample2, path2) =  [ 
+                [row.sample1, row.sample2].sort().join("_"),
+                row.sample1, row.path1, row.sample2, row.path2 ]}
 
-
+        //assembly_pair_ch.view()
+ 
         ANNOTATE(assembly_pair_ch, params.baktaDB, params.training, params.genus, params.species)
 
-        PREPARE_NUCDIFF(ANNOTATE.out.bakta_fna_ch)
+        //ANNOTATE.out.bakta_fna_ch.view()
+        //ANNOTATE.out.bakta_gbff_ch.view()
+
+         PREPARE_NUCDIFF(ANNOTATE.out.bakta_fna_ch)
         
 
-        // Channel where we know which one is ref and which one is query 
+        // recreate the pair tag here, and tags for ref and query:
+        // reassociate channel by pair tag 
+
         ref_query_ch = PREPARE_NUCDIFF.out.longest_param_ch
                 .splitCsv(header:['ref_query', 'ref', 'query'], skip: 0, sep:",", strip:true)
-                .map {row -> tuple(row.ref_query, row.ref, row.query)}
-                
-                
-        RUN_NUCDIFF(ref_query_ch, PREPARE_NUCDIFF.out.fna_ch)
+                .map {row -> (pair, ref_query, ref, query) = [
+                        [row.ref, row.query].sort().join("_"), row.ref_query, row.ref, row.query]}
+                .combine(PREPARE_NUCDIFF.out.fna_ch, by:0)
+
+        //ref_query_ch.view()
+
+        RUN_NUCDIFF(ref_query_ch)
+
+        //RUN_NUCDIFF.out.nucdiff_vcf_ch.view()
+        //RUN_NUCDIFF.out.nucdiff_res_ch.view()
         
         PREPARE_VCF_ANNOTATOR(RUN_NUCDIFF.out.nucdiff_vcf_ch)
 
-        //PREPARE_VCF_ANNOTATOR.out.prep_vcf_ch.view()
-        ANNOTATE.out.bakta_gbff_ch.view()
-
-        // HERE problem we need to combined the proper channels
-
-        //RUN_VCF_ANNOTATOR(
-        //        PREPARE_VCF_ANNOTATOR.out.prep_vcf_ch,
-        //        ANNOTATE.out.bakta_gbff_ch)
+        //PREPARE_VCF_ANNOTATOR.out.prep_vcf_ch.view()       
+        //ANNOTATE.out.bakta_gbff_ch.view() 
 
 
-        /*
+       // Combine channels
+        vcf_annot_ch = PREPARE_VCF_ANNOTATOR.out.prep_vcf_ch
+                .combine(ANNOTATE.out.bakta_gbff_ch, by: 0)
+
+        //vcf_annot_ch.view()
+        
+        RUN_VCF_ANNOTATOR(vcf_annot_ch)
+
+        //RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.view() 
+        //RUN_NUCDIFF.out.nucdiff_res_ch.view()
+
+
         db_path_ch=Channel.fromPath(params.sqlitedb, checkIfExists: false)
-        //comment_ch=Channel.from(params.comment) 
         comment_ch=Channel.value(params.comment) 
 
-
-// This one is working with one
-
-        WRANGLING_TO_DB(db_path_ch, comment_ch, 
-        RUN_VCF_ANNOTATOR.out.ref_query_param_ch, 
-        RUN_VCF_ANNOTATOR.out.annotated_vcf_ch, 
-        RUN_NUCDIFF.out.nucdiff_res_ch) 
-
-
-// Trying to put all results so can use same 
-
-        results_ch=Channel.fromPath(
-                RUN_VCF_ANNOTATOR.out.ref_query_param_ch.collect(), 
-                RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.collect(), 
-                RUN_NUCDIFF.out.nucdiff_res_ch.collect())
-        )
-
-        results_ch.view()
+        //reconstruct paths that goes together for results: 
+        // combine fields: pair, ref_query, ref, query
+        wrangling_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
+                .combine(RUN_NUCDIFF.out.nucdiff_res_ch, by: 0..3)
         
-        WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch) 
+        wrangling_ch.view()
+
+
+        //WRANGLING_TO_DB(db_path_ch, comment_ch, wrangling_ch) 
+
+
+        // Trying to put all results so can use same 
+        /*
         WRANGLING_TO_DB(db_path_ch, comment_ch, 
                 RUN_VCF_ANNOTATOR.out.ref_query_param_ch.collect(), 
                 RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.collect(), 
