@@ -10,7 +10,7 @@ params.baktaDB         = "/mnt/blue/DATA/BIOINFO_LOCAL/bakta_database/db" //work
 params.training        = "/mnt/blue/DATA/BIOINFO_LOCAL/Listeria_monocytogenes.trn" //work
 params.genus           = "Listeria"
 params.species         = "monocytogenes"
-params.comment         = "comments to add to db" //  
+params.comment         = "'comments to add to db'" //  
 
 
 // temp 
@@ -174,31 +174,49 @@ process RUN_VCF_ANNOTATOR{
 
 }
 
+/* process foo {
+        debug true
+        conda '/home/vi2067/.conda/envs/py_test'
+
+        input:
+        val(db)
+        val(comment)
+        path("*")
+        path("*") 
+
+        '''
+        echo true
+        '''
+} */
+
+
 // working for one sample 
 // We need to find a way it works for all pairs 
 process WRANGLING_TO_DB{
         // for testing
         debug true
-        tag "$pair"
         conda '/home/vi2067/.conda/envs/py_test'
 
         publishDir "${params.out_dir}/results/DB", mode: 'copy'
         
         input:
-        path(db)
+        val(db)
         val(comment)
+        //path(files, stageAs: "*")
         path("*")
+        path("*") 
+        
+        
         
         //path("${ref_query}_ref_snps_annotated.vcf"), 
         //path("${ref_query}_query_snps_annotated.vcf"),
         //path (gff), path(out) 
 
         output:
-        path(db), emit: db_path_ch
-        
+        path("*")
         script:
         """
-        #python ${params.results_to_db} --database "${db}" --comment "${comment}"
+        python ${params.results_to_db} --database ${db} --comment ${comment}
         """
 } 
 
@@ -218,13 +236,13 @@ workflow {
                 row.sample1, row.path1, row.sample2, row.path2 ]}
 
         //assembly_pair_ch.view()
- 
+
         ANNOTATE(assembly_pair_ch, params.baktaDB, params.training, params.genus, params.species)
 
         //ANNOTATE.out.bakta_fna_ch.view()
         //ANNOTATE.out.bakta_gbff_ch.view()
 
-         PREPARE_NUCDIFF(ANNOTATE.out.bakta_fna_ch)
+        PREPARE_NUCDIFF(ANNOTATE.out.bakta_fna_ch)
         
 
         // recreate the pair tag here, and tags for ref and query:
@@ -261,23 +279,19 @@ workflow {
         //RUN_NUCDIFF.out.nucdiff_res_ch.view()
 
 
-        db_path_ch=Channel.fromPath(params.sqlitedb, checkIfExists: false)
+        db_path_ch=Channel.value(params.sqlitedb)
         comment_ch=Channel.value(params.comment) 
 
-        //reconstruct paths that goes together for results: 
-        // combine fields: pair, ref_query, ref, query ... 
-        // I do not need anmymore but was nice :D so let it
-        //wrangling_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
-        //        .combine(RUN_NUCDIFF.out.nucdiff_res_ch, by: 0..3)
-                
 
-        wrangling_ch =  RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
-                .concat(RUN_NUCDIFF.out.nucdiff_res_ch)
-                .flatten()
-
-        //wrangling_ch.view()
-        WRANGLING_TO_DB(db_path_ch, comment_ch, wrangling_ch) 
-
+/*         foo(db_path_ch, comment_ch,
+        RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect(),
+        RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
+                ) */
+        
+        WRANGLING_TO_DB(db_path_ch, comment_ch,
+        RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect(),
+        RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
+                )
 
 }
 
