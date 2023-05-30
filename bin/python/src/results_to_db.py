@@ -9,9 +9,6 @@ import glob
 import functools
 import operator
 
-from more_itertools import batched
-import numpy as np
-
 def parse_args(args):
     parser = argparse.ArgumentParser(
         prog="results_to_db.py",
@@ -197,7 +194,6 @@ def wrapper_gff_to_db(gff_file, id_dict, gff_pattern, comment, db_file, table_na
         col_to_add = list(set(all_keys) - set(list(df.columns)))
         for value_col in col_to_add:
             df[f'{value_col}']= None
-        #df.assign(**{{col_val} : None for col_val in col_to_add })
         df_to_database(df = df, db_file = db_file, table_name = table_name, if_exists = if_exists)
     else:
         print(f"No data to add for {gff_file}")
@@ -278,7 +274,7 @@ def unique_df_type_keys(list_data, type_data, append_col = ["_REF", "_QUERY", "_
 
     return new_keys
 
-def wrapper_vcf_to_db(vcf_file, id_dict, vcf_pattern, comment, db_file, table_name, if_exists = 'append'):
+def wrapper_vcf_to_db(vcf_file, id_dict, vcf_pattern, comment, db_file, table_name, all_keys, if_exists = 'append'):
     """
     transforms annotated vcf file to pandas df, appends required columns then appends to sqlite databae
     :param vcf_file annotated result from vcf-annotator
@@ -286,6 +282,8 @@ def wrapper_vcf_to_db(vcf_file, id_dict, vcf_pattern, comment, db_file, table_na
     :param vcf_pattern the pattern that is to remove from basename to obtain ref_query
     :param comment a string describing additional data to add to the table (or None)
     :param db_file sqlite database file
+   :param: table_name name of table in database to use
+    :param: all keys - list_ all the keys existing for this type of table
     :param if_exists pandas df.to_sql: if_exists 'replace','append','fail'
     """
 
@@ -302,7 +300,10 @@ def wrapper_vcf_to_db(vcf_file, id_dict, vcf_pattern, comment, db_file, table_na
         df = df.assign(_REF=id_dict["ref"], _QUERY=id_dict["query"], _RES_FILE=file_name, _COMMENT=comment)
 
         if not df is None:
-            df_to_database(df = df, db_file = db_file, table_name = table_name, if_exists = if_exists)
+            col_to_add = list(set(all_keys) - set(list(df.columns)))
+            for value_col in col_to_add:
+                df[f'{value_col}'] = None
+            df_to_database(df=df, db_file=db_file, table_name=table_name, if_exists=if_exists)
         else:
             print(f"No data to add for {vcf_file}")
 
@@ -364,9 +365,6 @@ if __name__ == '__main__':
     # list where each element is a list of files for each pattern that need to go in the db
     all_files_per_pattern = res_files_per_pattern(args["resdir"], all_ref_query_patterns)
 
-    #all_files_per_pattern_set = list(zip(*all_files_per_pattern))
-    #print(all_files_per_pattern_set)
-
     # flatten list of files containing the results files
     # We do not pair directly, in case order file is not same for each type
     all_files = functools.reduce(operator.iconcat, all_files_per_pattern, [])
@@ -381,94 +379,75 @@ if __name__ == '__main__':
     stat_files_dict = res_files_dict["stat_files"]
     vcf_files_dict = res_files_dict["annotated_vcf_files"]
 
-    # 3. Get all the keys for each type of table to create.
-    # 4. Create the tables with the complete set of keys
+    # 3. Get all the keys for each type of table to create and create the tables using the complete set of keys
+    ## %% the query_files to db
     for table in query_files_dict.keys():
         # list of keys
         list_files = query_files_dict.get(table)[0]
         key_list = unique_df_type_keys(list_files, "gff")
-        print(table)
-        print(list_files)
-        print(key_list)
+        gff_pattern = query_files_dict.get(table)[1]
+
         for i in range(0, len(list_files)):
             # because ordered previously
             each_id_dict = {"ref": id_dict.get("ref")[i], "query": id_dict.get("query")[i]}
-            gff_pattern = query_files_dict.get(table)[1]
-            wrapper_gff_to_db(list_files[i], each_id_dict, gff_pattern,
-                              comment=args["comment"], db_file= args["database"], table_name=table,
-                              all_keys=key_list, if_exists='append')
+            wrapper_gff_to_db(list_files[i],
+                              each_id_dict,
+                              gff_pattern,
+                              comment=args["comment"],
+                              db_file=args["database"],
+                              table_name=table,
+                              all_keys=key_list,
+                              if_exists='append')
+    ## %% the ref_files to db
+    for table in ref_files_dict.keys():
+        list_files = ref_files_dict.get(table)[0]
+        key_list = unique_df_type_keys(list_files, "gff")
+        gff_pattern = ref_files_dict.get(table)[1]
 
+        # works because ordered previously
+        for i in range(0, len(list_files)):
+            each_id_dict = {"ref": id_dict.get("ref")[i], "query": id_dict.get("query")[i]}
+            wrapper_gff_to_db(list_files[i],
+                              each_id_dict,
+                              gff_pattern,
+                              comment=args["comment"],
+                              db_file= args["database"],
+                              table_name=table,
+                              all_keys=key_list,
+                              if_exists='append')
 
-    # wrapper_vcf_to_db(vcf_file=vcf_files_dict[key][0], id_dict=id_dict, vcf_pattern=vcf_files_dict[key][1],
-    #                  comment=args["comment"], db_file=args["database"],
-    #                  table_name=key, if_exists='append')
+    ## %% the stat_file to db - no need key list (param on rows)
+    for table in stat_files_dict.keys():
+        list_files = stat_files_dict.get(table)[0]
+        stat_pattern = stat_files_dict.get(table)[1]
 
-
-    # TODO HERE
-
-    ## %% the query_files to db
-   for key in query_files_dict.keys():
-        print(f"key {key}: values: {query_files_dict.get(key)}")
-    #    wrapper_gff_to_db(
-    #        gff_file=query_files_dict[key][0], id_dict=id_dict, gff_pattern=query_files_dict[key][1],
-    #        comment=args["comment"], db_file=args["database"],
-    #        table_name=key, if_exists='append')
-
-    for key in query_files_dict.keys():
-        unique_df_keys()
-
-
-    ref_files_table_keys = []
-    for key in ref_files_dict.keys():
-       #wrapper_gff_to_db(
-       #    gff_file=ref_files_dict[key][0], id_dict=id_dict, gff_pattern=ref_files_dict[key][1],
-       #    comment=args["comment"], db_file=args["database"],
-       #    table_name=key, if_exists='append')
-       
-    # The stat file should not be a problem 
-    #stat_files_table_keys = []
-    #for key in stat_files_dict.keys():
-        #wrapper_stat_to_db(stat_file=stat_files_dict[key][0],
-        #                   id_dict=id_dict, stat_pattern=stat_files_dict[key][1],
-        #                   comment=args["comment"], db_file=args["database"],
-        #                   table_name=key, if_exists='append')
-
-        
-    vcf_files_table_keys = []
-    for key in vcf_files_dict.keys():
-        #wrapper_vcf_to_db(vcf_file=vcf_files_dict[key][0], id_dict=id_dict, vcf_pattern=vcf_files_dict[key][1],
-        #                  comment=args["comment"], db_file=args["database"],
-        #                  table_name=key, if_exists='append')
-                          
-    
-    
-
-    # Adding the results to the respective database tables:
-    ## %% the query_files to db
-    for key in query_files_dict.keys():
-       wrapper_gff_to_db(
-           gff_file=query_files_dict[key][0], id_dict=id_dict, gff_pattern=query_files_dict[key][1],
-           comment=args["comment"], db_file=args["database"],
-           table_name=key, if_exists='append')
-
-   ## %% the ref_files to db
-    for key in ref_files_dict.keys():
-       wrapper_gff_to_db(
-           gff_file=ref_files_dict[key][0], id_dict=id_dict, gff_pattern=ref_files_dict[key][1],
-           comment=args["comment"], db_file=args["database"],
-           table_name=key, if_exists='append')
-
-    ## %% the stat_file to db
-    for key in stat_files_dict.keys():
-        wrapper_stat_to_db(stat_file=stat_files_dict[key][0],
-                           id_dict=id_dict, stat_pattern=stat_files_dict[key][1],
-                           comment=args["comment"], db_file=args["database"],
-                           table_name=key, if_exists='append')
+        for i in range(0, len(list_files)):
+            each_id_dict = {"ref": id_dict.get("ref")[i], "query": id_dict.get("query")[i]}
+            wrapper_stat_to_db(stat_file=list_files[i],
+                               id_dict=each_id_dict,
+                               stat_pattern=stat_pattern,
+                               comment=args["comment"],
+                               db_file=args["database"],
+                               table_name=table,
+                               if_exists='append')
 
     ## %% the annotated_vcf to db
-    for key in vcf_files_dict.keys():
-        wrapper_vcf_to_db(vcf_file=vcf_files_dict[key][0], id_dict=id_dict, vcf_pattern=vcf_files_dict[key][1],
-                          comment=args["comment"], db_file=args["database"],
-                          table_name=key, if_exists='append')
+    for table in vcf_files_dict.keys():
+        list_files = vcf_files_dict.get(table)[0]
+        key_list = unique_df_type_keys(list_files, "vcf")
+        vcf_pattern = vcf_files_dict.get(table)[1]
+
+
+
+        for i in range(0, len(list_files)):
+            each_id_dict = {"ref": id_dict.get("ref")[i], "query": id_dict.get("query")[i]}
+            wrapper_vcf_to_db(vcf_file=list_files[i],
+                              id_dict=each_id_dict,
+                              vcf_pattern=vcf_pattern,
+                              comment=args["comment"],
+                              db_file=args["database"],
+                              table_name=table,
+                              all_keys=key_list,
+                              if_exists='append')
 
 
