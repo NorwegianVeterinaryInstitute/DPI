@@ -10,7 +10,7 @@ params.baktaDB         = "/mnt/blue/DATA/BIOINFO_LOCAL/bakta_database/db" //work
 params.training        = "/mnt/blue/DATA/BIOINFO_LOCAL/Listeria_monocytogenes.trn" //work
 params.genus           = "Listeria"
 params.species         = "monocytogenes"
-params.comment         = "'comments to add to db'" //  
+params.comment         = "'comments to add to db'" //  here problem if separated need to be in ' ' otherwise wont work
 
 
 // temp 
