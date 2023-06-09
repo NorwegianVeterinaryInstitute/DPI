@@ -10,10 +10,5 @@ COPY requirements.txt requirements.txt
 # Python library 
 RUN pip3 install -r requirements.txt
 
-# Copy source code - that did not work but ok
-# ADD $HOME/Documents/onedrive_sync/NEW_WORK/2_Projects/2023/1_2023_Lm_ost_er_ikke_ost/ost_er_ikke_ost/code/python/src src
-# CMD ["python3", "-m" , "run", "--host=0.0.0.0"]
-
-
 # Environments
 ENV PATH="$PATH:/usr/bin:/usr/local/bin"    

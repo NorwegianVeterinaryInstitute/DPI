@@ -1,0 +1,25 @@
+name: py_test
+channels:
+  - conda-forge
+  - bioconda
+  - anaconda
+  - defaults
+dependencies:
+  - biopython==1.81
+  - pip
+  - pip:
+    - gffpandas==1.2.0
+    - greenlet==2.0.2
+    - numpy==1.24.3
+    - pandas==2.0.1
+    - pysam==0.21.0
+    - python-dateutil==2.8.2
+    - pytz==2023.3
+    - six==1.16.0
+    - SQLAlchemy==2.0.12
+    - typing_extensions==4.5.0
+    - tzdata==2023.3
+
+
+prefix: /home/vi2067/.conda/envs/py_test2
+#prefix: /cluster/projects/nn9305k/src/miniconda/envs/py_test
