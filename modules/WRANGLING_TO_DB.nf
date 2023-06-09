@@ -1,21 +1,20 @@
-// adds all the results to database
+// Adds all results to the database (for all pairs)
 process WRANGLING_TO_DB{
-        // for testing
         debug true
-        conda '/home/vi2067/.conda/envs/py_test'
+        label: 'process_long'
         
         input:
-        path(db)
+        val(db)
         val(comment)
-        tuple val(ref_query), val(ref), val(query)
-        tuple path("${ref_query}_ref_snps_annotated.vcf"), path("${ref_query}_query_snps_annotated.vcf") 
-        tuple path (gff), path(out) 
+        path("*")
+        path("*") 
+        
 
         output:
-        path(db)
-        
+        path("*")
         script:
         """
-        python ${params.results_to_db} --database "${db}" --comment "${comment}"
+        python ${params.results_to_db} --version > results_to_db.version
+        python ${params.results_to_db} --database ${db} --comment ${comment}
         """
-}
+} 

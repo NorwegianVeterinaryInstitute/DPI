@@ -2,7 +2,9 @@
 DPI.code-workspace
 .nextflow*
 work
-
+old
+debug
+*.insyncdl
 #####################################
 # Byte-compiled / optimized / DLL files
 __pycache__/
