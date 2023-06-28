@@ -1,8 +1,13 @@
 // Running vcf annotator with the correct sample as reference
 process RUN_VCF_ANNOTATOR{
-        // for testing
-        debug true
+
+        conda (params.enable_conda ? 'bioconda::vcf-annotator=0.7' : null)
+	container 'quay.io/biocontainers/vcf-annotator:0.7--hdfd78af_0'
+
+        debug "$params.debugme"
         tag "$pair"
+
+        label: 'process_short'
 
         input:
         tuple val(pair), val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf),

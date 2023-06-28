@@ -359,6 +359,11 @@ def wrapper_stat_to_db(stat_file, id_dict, stat_pattern, comment, db_file, table
 if __name__ == '__main__':
     args = parse_args(sys.argv[1:])
 
+    #%% Output version file - per default
+    with open('results_to_db.version', 'w', newline='') as file:
+        f.write("results_to_db.py version 0.1")
+    file.close()
+
     # Get the different ref_query patterns
     all_ref_query_patterns = ref_query_patterns(args["resdir"])
 

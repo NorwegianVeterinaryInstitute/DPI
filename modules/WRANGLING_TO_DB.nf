@@ -1,7 +1,10 @@
 // Adds all results to the database (for all pairs)
 process WRANGLING_TO_DB{
-        debug true
-        label: 'process_long'
+        conda (params.enable_conda ? './assets/py_test.yml' : null)
+        container 'evezeyl/py_test:latest'
+        
+        debug "$params.debugme"
+        label: 'process_high'
         
         input:
         val(db)
@@ -14,7 +17,7 @@ process WRANGLING_TO_DB{
         path("*")
         script:
         """
-        python ${params.results_to_db} --version > results_to_db.version
-        python ${params.results_to_db} --database ${db} --comment ${comment}
+        # version output by default by the script
+        python $baseDir/bin/results_to_db.py --database ${db} --comment ${comment}
         """
 } 

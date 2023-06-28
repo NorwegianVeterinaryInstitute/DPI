@@ -1,8 +1,9 @@
 process ANNOTATE {
-        debug true
-        tag "$pair" 
+        conda (params.enable_conda ? 'bioconda::bakta=1.8.1' : null)
+	container 'quay.io/biocontainers/bakta:1.8.1--pyhdfd78af_0'
 
-        label 'process_long'
+        debug "$params.debugme"
+        tag "$pair" 
 
         input:
         tuple val(pair), val(sample1), path(path1), val(sample2), path(path2)

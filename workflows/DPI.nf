@@ -10,6 +10,20 @@ workflow DPI {
         if (!params.input) {
 		exit 1, "Missing input file"
 		}
+        if (!params.baktaDB) {
+		exit 1, "Missing or wrong path for Bakta database"
+		}
+        if (!params.trainingFILE) {
+		exit 1, "missing or wrong path for prodigal training file"
+		}
+        if (!params.genus) {
+		exit 1, "Please indicate genus name in parameters"
+		}
+
+        if (!params.species) {
+		exit 1, "Please indicate species name in parameters"
+		}
+
 	
         // channel: get the sampleID, paths and creates a pair-key (nothing to do with ref used)
 	assembly_pair_ch = Channel
@@ -47,6 +61,5 @@ workflow DPI {
         RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect(),
         RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
                 )
-    
 	
 }

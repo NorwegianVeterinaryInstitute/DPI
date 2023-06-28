@@ -1,8 +1,12 @@
 // corrects fileformat vcf to be able to annotate with vcf-annotator
 process PREPARE_VCF_ANNOTATOR {
+
+        conda (params.enable_conda ? './assets/py_test.yml' : null)
+        container 'evezeyl/py_test:latest'
+
+        label: 'process_short'
         
-        // for testing
-        debug true
+        debug "$params.debugme"
         tag "$pair"
 
         input:
@@ -16,8 +20,8 @@ process PREPARE_VCF_ANNOTATOR {
         
         script:
         """
-        python ${params.prep_vcfannot} --version > prep_vcf_annotator.version
-        python ${params.prep_vcfannot} --vcf ${ref_vcf}
-        python ${params.prep_vcfannot} --vcf ${query_vcf}
+        # version output by default by the script
+        python $baseDir/bin/prep_vcf_annotator.py --vcf ${ref_vcf}
+        python $baseDir/bin/prep_vcf_annotator.py --vcf ${query_vcf}
         """
 }

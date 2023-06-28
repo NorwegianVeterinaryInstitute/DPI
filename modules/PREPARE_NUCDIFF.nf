@@ -1,5 +1,10 @@
 process PREPARE_NUCDIFF {
-        debug true
+        conda (params.enable_conda ? './assets/py_test.yml' : null)
+        container 'evezeyl/py_test:latest'
+
+        label: 'process_short'
+
+        debug "$params.debugme"
         tag "$pair"
 
         input:
@@ -11,8 +16,8 @@ process PREPARE_NUCDIFF {
 
         script:
         """
-        python ${params.prep_nucdiff} --version > prep_nucdiff.version
-        python ${params.prep_nucdiff} --fasta1 $path1 --fasta2 $path2 
+        # version output by default by the script
+        python $baseDir/bin/prep_nucdiff.py --fasta1 $path1 --fasta2 $path2 
         """
 
 }

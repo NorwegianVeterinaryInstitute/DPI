@@ -21,5 +21,5 @@ dependencies:
     - tzdata==2023.3
 
 
-prefix: /home/vi2067/.conda/envs/py_test2
+prefix: /home/vi2067/.conda/envs/py_test
 #prefix: /cluster/projects/nn9305k/src/miniconda/envs/py_test

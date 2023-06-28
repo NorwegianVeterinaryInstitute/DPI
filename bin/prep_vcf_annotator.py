@@ -2,20 +2,23 @@ import argparse
 import os
 import pandas as pd
 
-parser = argparse.ArgumentParser(
-    prog="prep_vcf_annotator.py",
-    description='Prepare annotation with vcf annotator: correct format vcf from nucdiff output. Prepares script launch command for vcf annotator',
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+def parse_args(args):
 
-parser.add_argument("--vcf",
-                    action="store",
-                    required=True,
-                    help="vcf file from nucdiff")
-parser.add_argument("--outdir",
-                    action="store",
-                    default=".",
-                    help="oudir for reformated file")
-args = vars(parser.parse_args())
+    parser = argparse.ArgumentParser(
+        prog="prep_vcf_annotator.py",
+        description='Prepare annotation with vcf annotator: correct format vcf from nucdiff output. Prepares script launch command for vcf annotator',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument("--vcf",
+                        action="store",
+                        required=True,
+                        help="vcf file from nucdiff")
+    parser.add_argument("--outdir",
+                        action="store",
+                        default=".",
+                        help="oudir for reformated file")
+    args = vars(parser.parse_args())
+    return args
 
 # %% functions
 def reformat_vcf(file, outdir = ".", skip_rows = 2):
@@ -50,5 +53,15 @@ def reformat_vcf(file, outdir = ".", skip_rows = 2):
     new.close()
     df.to_csv(new_file, sep="\t", mode="a", index=False)
 
-reformat_vcf(args["vcf"], args["outdir"])
+# %% SCRIPT
+if __name__ == '__main__':
+    args = parse_args(sys.argv[1:])
+
+    #%% Output version file - per default
+    with open('prep_vcf_annotator.version', 'w', newline='') as file:
+        f.write("prep_vcf_annotator.py version 0.1")
+    file.close()
+
+    #%% Action
+    reformat_vcf(args["vcf"], args["outdir"])
 
