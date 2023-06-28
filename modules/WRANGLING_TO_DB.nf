@@ -18,6 +18,6 @@ process WRANGLING_TO_DB{
         script:
         """
         # version output by default by the script
-        python $baseDir/bin/results_to_db.py --database ${db} --comment ${comment}
+        python $projectDir/bin/results_to_db.py --database ${db} --comment ${comment}
         """
 } 

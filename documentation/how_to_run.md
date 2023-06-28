@@ -128,6 +128,19 @@ export APPTAINER_CACHEDIR=${USERWORK}/images
 
 ## Enhancement - Solutions to find
 
+Test local
+cd /home/vi2067/Documents/onedrive_sync/NEW_WORK/2_Projects/2023/1_2023_Lm_ost_er_ikke_ost/DPI/
+
+nextflow run main.nf --track DPI -profile test_work_local,conda --out_dir NFTEST
+
+nextflow run main.nf -c nextflow.config -profile conda \
+--track DPI \
+--input /home/vi2067/Documents/onedrive_sync/onedrive_sync/NEW_WORK/2_Projects/2023/1_2023_Lm_ost_er_ikke_ost/DPI/assets/data/pairsheet_local.csv \
+--baktaDB /mnt/blue/DATA/BIOINFO_LOCAL/bakta_database/db \
+--training /mnt/blue/DATA/BIOINFO_LOCAL/Listeria_monocytogenes.trn \
+--genus Listeria \
+--species monocytogenes --out_dir NFTEST
+
 - [ ] how to make it take relative paths from input ?
 - [ ] avoid doing annotation twice when same sample appear several times. Can also use same procedure for vcf annotator
 - [ ] modify nf pipeline bakta (so it need only to be done once for each sample if several pairs contain same sample)

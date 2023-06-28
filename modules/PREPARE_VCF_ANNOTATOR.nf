@@ -21,7 +21,7 @@ process PREPARE_VCF_ANNOTATOR {
         script:
         """
         # version output by default by the script
-        python $baseDir/bin/prep_vcf_annotator.py --vcf ${ref_vcf}
-        python $baseDir/bin/prep_vcf_annotator.py --vcf ${query_vcf}
+        python $projectDir/bin/prep_vcf_annotator.py --vcf ${ref_vcf}
+        python $projectDir/bin/prep_vcf_annotator.py --vcf ${query_vcf}
         """
 }

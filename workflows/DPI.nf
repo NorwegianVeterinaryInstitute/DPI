@@ -7,22 +7,11 @@ include { WRANGLING_TO_DB  } from "../modules/WRANGLING_TO_DB.nf"
 
 
 workflow DPI {
-        if (!params.input) {
-		exit 1, "Missing input file"
-		}
-        if (!params.baktaDB) {
-		exit 1, "Missing or wrong path for Bakta database"
-		}
-        if (!params.trainingFILE) {
-		exit 1, "missing or wrong path for prodigal training file"
-		}
-        if (!params.genus) {
-		exit 1, "Please indicate genus name in parameters"
-		}
-
-        if (!params.species) {
-		exit 1, "Please indicate species name in parameters"
-		}
+        if (!params.input) {exit 1, "Missing input file"}
+        if (!params.baktaDB) {exit 1, "Missing or wrong path for Bakta database"}
+        if (!params.trainingFILE) {exit 1, "missing or wrong path for prodigal training file"}
+        if (!params.genus) {exit 1, "Please indicate genus name in parameters"}
+        if (!params.species) { exit 1, "Please indicate species name in parameters"}
 
 	
         // channel: get the sampleID, paths and creates a pair-key (nothing to do with ref used)
