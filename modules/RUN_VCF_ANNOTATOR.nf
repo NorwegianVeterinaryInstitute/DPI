@@ -7,7 +7,7 @@ process RUN_VCF_ANNOTATOR{
         debug "$params.debugme"
         tag "$pair"
 
-        label: 'process_short'
+        label 'process_short'
 
         input:
         tuple val(pair), val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf),

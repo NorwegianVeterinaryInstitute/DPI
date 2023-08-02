@@ -4,7 +4,7 @@ process PREPARE_VCF_ANNOTATOR {
         conda (params.enable_conda ? './assets/py_test.yml' : null)
         container 'evezeyl/py_test:latest'
 
-        label: 'process_short'
+        label 'process_short'
         
         debug "$params.debugme"
         tag "$pair"

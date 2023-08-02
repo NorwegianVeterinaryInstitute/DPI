@@ -5,6 +5,7 @@ work
 old
 debug
 *.insyncdl
+NFTEST
 #####################################
 # Byte-compiled / optimized / DLL files
 __pycache__/

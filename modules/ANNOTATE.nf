@@ -22,9 +22,9 @@ process ANNOTATE {
         bakta --version > bakta.version
 
         bakta --db $baktaDB --prodigal-tf $training --prefix $sample1 --locus $sample1 \
-        --genus $genus --species $species $path1
+        --genus $genus --species $species $path1 --force
 
         bakta --db $baktaDB --prodigal-tf $training --prefix $sample2 --locus $sample2 \
-        --genus $genus --species $species $path2
+        --genus $genus --species $species $path2 --force
         """
 }

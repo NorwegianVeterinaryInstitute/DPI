@@ -129,15 +129,15 @@ export APPTAINER_CACHEDIR=${USERWORK}/images
 ## Enhancement - Solutions to find
 
 Test local
-cd /home/vi2067/Documents/onedrive_sync/NEW_WORK/2_Projects/2023/1_2023_Lm_ost_er_ikke_ost/DPI/
+cd /home/evfi/Documents/TEMP_GITS/DPI
 
 nextflow run main.nf --track DPI -profile test_work_local,conda --out_dir NFTEST
 
-nextflow run main.nf -c nextflow.config -profile conda \
+nextflow run main.nf -c nextflow.config -profile singularity \
 --track DPI \
---input /home/vi2067/Documents/onedrive_sync/onedrive_sync/NEW_WORK/2_Projects/2023/1_2023_Lm_ost_er_ikke_ost/DPI/assets/data/pairsheet_local.csv \
---baktaDB /mnt/blue/DATA/BIOINFO_LOCAL/bakta_database/db \
---training /mnt/blue/DATA/BIOINFO_LOCAL/Listeria_monocytogenes.trn \
+--input /home/evfi/Documents/TEMP_GITS/DPI/assets/data/singlepair_local.csv \
+--baktaDB /run/media/evfi/4T/DATABASES/bakta/db \
+--training /run/media/evfi/4T/DATABASES/Listeria_monocytogenes.trn \
 --genus Listeria \
 --species monocytogenes --out_dir NFTEST
 

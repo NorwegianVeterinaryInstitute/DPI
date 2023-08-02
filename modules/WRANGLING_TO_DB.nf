@@ -4,7 +4,7 @@ process WRANGLING_TO_DB{
         container 'evezeyl/py_test:latest'
         
         debug "$params.debugme"
-        label: 'process_high'
+        label 'process_high'
         
         input:
         val(db)
