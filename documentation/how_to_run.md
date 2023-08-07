@@ -141,6 +141,8 @@ nextflow run main.nf -c nextflow.config -profile singularity \
 --genus Listeria \
 --species monocytogenes --out_dir NFTEST
 
+ --resume
+
 - [ ] how to make it take relative paths from input ?
 - [ ] avoid doing annotation twice when same sample appear several times. Can also use same procedure for vcf annotator
 - [ ] modify nf pipeline bakta (so it need only to be done once for each sample if several pairs contain same sample)

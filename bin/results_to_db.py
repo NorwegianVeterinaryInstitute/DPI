@@ -1,6 +1,6 @@
 import argparse
-import os
 import sys
+import os
 import re
 import pandas as pd
 import gffpandas.gffpandas as gffpd
