@@ -1,6 +1,9 @@
 process ANNOTATE {
         conda (params.enable_conda ? 'bioconda::bakta=1.8.1' : null)
-	container 'quay.io/biocontainers/bakta:1.8.1--pyhdfd78af_0'
+	//container 'quay.io/biocontainers/bakta:1.8.1--pyhdfd78af_0'
+        container 'oschwengers/bakta:v1.8.1'
+
+        label 'process_high'
 
         debug "$params.debugme"
         tag "$pair" 
@@ -21,10 +24,11 @@ process ANNOTATE {
         """
         bakta --version > bakta.version
 
-        bakta --db $baktaDB --prodigal-tf $training --prefix $sample1 --locus $sample1 \
-        --genus $genus --species $species $path1 --force
+        bakta --db $baktaDB --prodigal-tf $training --prefix $sample1 --force \
+        --locus $sample1 --genus $genus --species $species $path1 
+        
 
-        bakta --db $baktaDB --prodigal-tf $training --prefix $sample2 --locus $sample2 \
-        --genus $genus --species $species $path2 --force
+        bakta --db $baktaDB --prodigal-tf $training --prefix $sample2 --force \
+        --locus $sample2 --genus $genus --species $species $path2 
         """
 }

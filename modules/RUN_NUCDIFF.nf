@@ -4,6 +4,8 @@ process RUN_NUCDIFF{
 	container 'evezeyl/nucdiff:latest'
         container 'quay.io/biocontainers/nucdiff:2.0.3--pyh864c0ab_1'
 
+        label 'process_high'
+
         debug "$params.debugme"
         tag "$pair"
 
