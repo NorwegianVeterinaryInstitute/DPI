@@ -46,33 +46,16 @@ nextflow run /path/to/DPI/main.nf -c <your_config> --track DPI \
 
 ## Parameter description
 
-```
-
-Input
--- input   Input csv file
-
-Workflow-specific parameters
-DPI
---track DPI
-
-// For annotation
---baktaDB         Path to bakta DB
---training        Path to prodigal training file for backta
---genus           Genus (eg. "Listeria")
---species         Species (eg. "monocytogenes")
---comment         Comment that will be added into results database, to keep information. (If there are spaces within your comment you must have the comment ' '  and the  "" around, otherwise this wont work eg. "'My comment'" )
-
-// Results
---sqlitedb        Name of the sqlite databse containing your results that will be created (eg."out.sqlite")
-
------------------
-General parameters
---debugme         Option to run modules in debug mode (default: false)
------------------
-Time-related parameters
---time_multiplier:    Default value 1. If increased to 2, doubles the time requested by the system for each process
-
-```
+`-- input`   Input csv file
+`--track DPI`
+`--baktaDB`         Path to bakta DB (ends with db)
+`--training`        Path to prodigal training file for bakta
+`--genus`           Genus (eg. "Listeria")
+`--species`         Species (eg. "monocytogenes")
+`--comment`         Comment that will be added into results database. If spaces format as eg. "'My comment'" 
+`--sqlitedb`        Name of the sqlite databse containing your results that will be created (eg."out.sqlite")
+`--debugme`         Option to run modules in debug mode (default: false)
+`--time_multiplier`    (defaut 1). If increased to 2, doubles the time requested by the system for each process
 
 # 4. Configuration
 
@@ -91,19 +74,50 @@ Time-related parameters
 # 7. SAGA Users
 
 DPI is located here on SAGA: `/cluster/projects/nn9305k/vi_src/DPI`
+The principle of running is the same as for [ALPPACA](https://github.com/NorwegianVeterinaryInstitute/ALPPACA), as the design has been calqued to this pipeline 
 
-Configuration file: We use the same configuration that has been done for [ALPPACA](https://github.com/NorwegianVeterinaryInstitute/ALPPACA) : `/cluster/projects/nn9305k/nextflow/configs/saga_new.config`
+To use it you will require: 
+1. Loading Java
+2. Using an appropriate version of nextflow (tested with version 23.04.1) 
+3. Providing the configuration file for saga 
+4. The default nextflow config (NFCONFIG). The parameters you can specify with the command line are mentionned in this file.
+
+
+Example of paths: 
+```bash 
+NEXTFLOW="/cluster/projects/nn9305k/bin/nextflow_23.04.1"
+SAGA_CONFIG="/cluster/projects/nn9305k/nextflow/configs/saga_new.config"
+DPI="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI"
+NFCONFIG="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI/nextflow.config"
+
+INPUT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/TEST_DPI/single_test.csv"
+OUTDIR="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/TEST_DPI/TEST"
+BAKTADB="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/databases/bakta/db"
+PRODIGAL="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/databases/Listeria_monocytogenes.trn"
+
+```
+
+```bash
+module purge
+module load Java/17.0.4
+$NEXTFLOW run $DPI/main.nf -c $SAGA_CONFIG --track DPI -profile apptainer  \
+--input $INPUT --out_dir $OUTDIR -work-dir $USERWORK/DPI \
+--baktaDB $BAKTADB --training $PRODIGAL --genus "Listeria" --species "monocytogenes" --sqlitedb "test.sqlite" -resume
+
+
+```
+
+Or by defining all the parameters that are definied in the nextflow configuration file manually. Here is an example: 
 
 ```bash
 module load Java/17.0.4
 
-SAGA_CONFIG="/cluster/projects/nn9305k/nextflow/configs/saga_new.config"
-DPI="/cluster/projects/nn9305k/vi_src/DPI/main.nf"
 
-nextflow run $DPI -c $SAGA_CONFIG --track DPI --input "/path/to/input.csv" \
--profile apptainer --out_dir  <OUTDIR> -work-dir <dirname>
+
 ```
 
+
+<!--
 Testing purpose only
 
 ```bash
@@ -147,3 +161,4 @@ nextflow run main.nf -c nextflow.config -profile singularity \
 - [ ] avoid doing annotation twice when same sample appear several times. Can also use same procedure for vcf annotator
 - [ ] modify nf pipeline bakta (so it need only to be done once for each sample if several pairs contain same sample)
 - [ ] see issues (enhancement)
+--> 
