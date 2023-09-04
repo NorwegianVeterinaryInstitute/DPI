@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     #%% Output version file - per default
     with open('prep_vcf_annotator.version', 'w', newline='') as file:
-        f.write("prep_vcf_annotator.py version 0.1")
+        file.write("prep_vcf_annotator.py version 0.1")
     file.close()
 
     #%% Action

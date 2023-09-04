@@ -361,7 +361,7 @@ if __name__ == '__main__':
 
     #%% Output version file - per default
     with open('results_to_db.version', 'w', newline='') as file:
-        f.write("results_to_db.py version 0.1")
+        file.write("results_to_db.py version 0.1")
     file.close()
 
     # Get the different ref_query patterns

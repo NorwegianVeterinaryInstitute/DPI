@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     #%% Output version file - per default
     with open('prep_nucdiff.version', 'w', newline='') as file:
-        f.write("pre_nucdiff.py version 0.1")
+        file.write("pre_nucdiff.py version 0.1")
     file.close()
 
     #%% Script the parameters ref or query for nextflow
