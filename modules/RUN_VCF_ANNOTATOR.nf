@@ -16,6 +16,7 @@ process RUN_VCF_ANNOTATOR{
         output:
         tuple path("${ref_query}_ref_snps_annotated.vcf"), 
         path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
+        file("*")
 
         script:
         if (ref == sample1 && query == sample2)

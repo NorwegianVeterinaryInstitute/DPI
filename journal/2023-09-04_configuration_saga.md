@@ -23,7 +23,7 @@ module load Java/17.0.4
 
 ```bash 
 NEXTFLOW="/cluster/projects/nn9305k/bin/nextflow_23.04.1"
-SAGA_CONFIG="/cluster/projects/nn9305k/nextflow/configs"
+SAGA_CONFIG="/cluster/projects/nn9305k/nextflow/configs/saga_DPI.config"
 DPI="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI"
 INPUT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/TEST_DPI/single_test.csv"
 OUTDIR="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/TEST_DPI/TEST"
@@ -67,4 +67,7 @@ apptainer shell $IMAGE
 
 ```
 
+Rerun on the 3 samples to see if it works.
 
+Checking if all results files are in. 
+- missing in NucDiff - I will just make output all the results for now - then we can check if we do not want 

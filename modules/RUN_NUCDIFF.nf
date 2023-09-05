@@ -16,6 +16,7 @@ process RUN_NUCDIFF{
         output: 
         tuple val(pair), val(ref_query), val(ref), val(query), path("results/${ref_query}_ref_snps.vcf"), path("results/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
         tuple path ("results/*.gff"), path("results/*.out"), emit: nucdiff_res_ch
+        file("*")
 
         script: 
         if (ref == sample1)

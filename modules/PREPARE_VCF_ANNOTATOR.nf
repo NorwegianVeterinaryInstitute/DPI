@@ -16,6 +16,7 @@ process PREPARE_VCF_ANNOTATOR {
         tuple val(pair), val(ref_query), val(ref), val(query), 
         path("${ref_query}_ref_snps_reformated.vcf"), 
         path("${ref_query}_query_snps_reformated.vcf"), emit: prep_vcf_ch
+        file("*")
 
         
         script:
