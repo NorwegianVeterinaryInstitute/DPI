@@ -1,6 +1,6 @@
 process ANNOTATE {
-        conda (params.enable_conda ? 'bioconda::bakta=1.8.1' : null)
-	//container 'quay.io/biocontainers/bakta:1.8.1--pyhdfd78af_0'
+        conda (params.enable_conda ? 'bioconda::bakta=1.8.2' : null)
+	//container 'quay.io/biocontainers/bakta:1.8.2--pyhdfd78af_0'
         container 'oschwengers/bakta:v1.8.1'
 
         label 'process_high'
