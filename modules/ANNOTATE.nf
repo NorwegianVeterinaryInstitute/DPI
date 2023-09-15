@@ -3,7 +3,7 @@ process ANNOTATE {
 	//container 'quay.io/biocontainers/bakta:1.8.2--pyhdfd78af_0'
         container 'oschwengers/bakta:v1.8.1'
 
-        label 'process_high'
+        label 'process_high_memory'
 
         debug "$params.debugme"
         tag "$pair" 
