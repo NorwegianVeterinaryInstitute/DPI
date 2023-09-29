@@ -1,4 +1,3 @@
-#!/usr/bin/env Rscript
 # Description : Check input file, controls that no duplicates and organize single pairs for running efficiently.
 # Author : Eve Zeyl Fiskebeck
 # Version: 2023-09-29
@@ -15,6 +14,8 @@ if (!require("logr")) {
   install.packages("logr", dependencies = T) 
 }
 
+library(tidyverse)
+library(logr)
 
 # Command ----
 
