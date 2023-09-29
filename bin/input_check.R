@@ -20,12 +20,13 @@ if (!require("logr")) {
 
 option_list = list(
   make_option("--input", action="store", 
+              default="",
               type='character',
               help="The csv input file"),
   make_option("--version", action="store", 
               default= FALSE,
               type='logical',
-              help="output version and quit"),
+              help="output version and quit")
 )
 
 opt = parse_args(OptionParser(option_list=option_list))
@@ -44,7 +45,21 @@ opt = parse_args(OptionParser(option_list=option_list))
 log_file <- "input_check.log"
 logr::log_open(log_file, logdir = FALSE, autolog = TRUE)
 
-if (opt$input != "") {
+if (opt$input == ""){
+  
+  # exmpty input
+  # exporting session info
+  if (opt$version) {
+    # creating version dump
+    version_file <- "input_check.version"
+    sink(version_file, append = TRUE)
+    cat("input_check.R version 1. date: 2023-09-29\n\n")
+    cat("Session Info:\n\n")
+    print(sessionInfo())
+    sink()
+  }
+  else { logr::log_print("Cannot read your input file. Please recheck the format")}
+  } else {
 
   input <- readr::read_csv(opt$input)
   
@@ -72,20 +87,9 @@ if (opt$input != "") {
   
   logr::log_print("Exporting session info into input_check.version")  
 
-} else {
-  logr::log_print("Cannot read your input file. Please recheck the format")
 }
 logr::log_close()
 
 
-# exporting session info
-if (opt$version) {
-  # creating version dump
-  version_file <- "input_check.version"
-  sink(version_file, append = TRUE)
-  cat("input_check.R version 1. date: 2023-09-29\n\n")
-  cat("Session Info:\n\n")
-  print(sessionInfo())
-  sink()
-}
+
 

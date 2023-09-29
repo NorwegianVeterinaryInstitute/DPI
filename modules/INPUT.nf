@@ -32,6 +32,6 @@ process INPUT_VERSION {
         script:
         """
         # creates the version file
-        Rscript  $projectDir/bin/input_check.R --version
+        Rscript  $projectDir/bin/input_check.R --version TRUE
         """
 }

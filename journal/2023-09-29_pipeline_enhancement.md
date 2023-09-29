@@ -14,7 +14,7 @@ Test dataset - running command
 
 ```shell 
 NEXTFLOW="/cluster/projects/nn9305k/bin/nextflow_23.04.1"
-SAGA_CONFIG="/cluster/projects/nn9305k/nextflow/configs/saga_new.config"
+SAGA_CONFIG="/cluster/projects/nn9305k/nextflow/configs/saga_DPI.config"
 DPI="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI"
 NFCONFIG="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/nextflow.config"
 

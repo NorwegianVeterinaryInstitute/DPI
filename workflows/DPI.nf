@@ -13,40 +13,33 @@ workflow DPI {
         if (!params.genus) {exit 1, "Please indicate genus name in parameters"}
         if (!params.species) { exit 1, "Please indicate species name in parameters"}
 
-	//OUPUT VERSIONS THAT MUST BE RUN
-        //INPUT_VERSION()
-        //ANNOTATE_VERSION()
-        //PREPARE_NUCDIF_VERSION()
-        //RUN_NUCDIFF_VERSION()
-        //PREPARE_VCF_ANNOTATOR_VERSION()
-        //RUN_VCF_ANNOTATOR_VERSION()
-        //WRANGLING_TO_DB_VERSION()
-
-
-        // channel: get the sampleID, paths and creates a pair-key (nothing to do with ref used)
-	// assembly_pair_ch = Channel
-        // .fromPath(params.input, checkIfExists: true)
-        // .splitCsv(header:['sample1', 'path1', 'sample2', 'path2'], skip: 1, sep:",", strip:true)
-        // .map { row -> (pair, sample1, path1, sample2, path2) =  [ 
-        //         [row.sample1, row.sample2].sort().join("_"),
-        //         row.sample1, row.path1, row.sample2, row.path2 ]}
-
-        // INPUT 
+        // get the pairs file, check and restructure
         input_channel = Channel.fromPath(params.input, checkIfExists: true)
-
         INPUT(input_channel)
 
+        // creating pairs from csv files
+        input_samples_ch = INPUT.out.unique_samples_ch
+                .splitCsv(header:['sample', 'path'], skip: 1, sep:",", strip:true)
+                .map { row -> (sample, path) =  [ row.sample, row.path ]}
+                .view()
+
         // ANNOTATION for all samples individually 
-        // ANNOTATE(INPUT.out.unique_samples_ch, params.baktaDB, params.training, params.genus, params.species)
+        // ANNOTATE(input_samples_ch, params.baktaDB, params.training, params.genus, params.species)
 
-        // Reconstitution of pairs info      
-        assembly_pair_ch =  INPUT.out.pairs_ch
-                .splitCsv(header:['sample1', 'path1', 'sample2', 'path2', 'pair'], skip: 1, sep:",", strip:true)
-                .map { row -> (pair, sample1, sample2) =  [[row.pair, row.sample1, row.sample2]}
-
-        assembly_pair_ch.view()
-
-        // Reconstitution of pairs of annotated samples 
+        // recreating pairs from sample tags - sorting so its get ordered
+        /*input_unique_pairs_ch = INPUT.out.pairs_ch
+                .splitCsv(header:['sample1', 'path1', 'sample2', 'path2'], skip: 1, sep:",", strip:true)
+                .map { row -> (pair, sample1, sample2) =  [[row.sample1, row.sample2].sort().join("_"), row.sample1, row.sample2]}
+                .view()
+        
+        // Combining channels to form pairs 
+        fna_pairs_ch = 
+                input_unique_pairs_ch
+                        .combine(ANNOTATE.out.bakta_fna_ch, by: 1,0)
+                        .combine(ANNOTATE.out.bakta_fna_ch, by: 2,0)
+                        view(.)
+        ANNOTATE.out.bakta_gbff_ch
+        */
 
         /* Pipeline running       
         PREPARE_NUCDIFF(ANNOTATE.out.bakta_fna_ch)
@@ -75,5 +68,23 @@ workflow DPI {
         RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
                 )
         */
-	
+		
+        //Final: output sofware versions 
+        /*INPUT_VERSION()
+        ANNOTATE_VERSION()
+        PREPARE_NUCDIF_VERSION()
+        RUN_NUCDIFF_VERSION()
+        PREPARE_VCF_ANNOTATOR_VERSION()
+        RUN_VCF_ANNOTATOR_VERSION()
+        WRANGLING_TO_DB_VERSION()
+        /*
 }
+
+        // channel: get the sampleID, paths and creates a pair-key (nothing to do with ref used)
+	// assembly_pair_ch = Channel
+        // .fromPath(params.input, checkIfExists: true)
+        // .splitCsv(header:['sample1', 'path1', 'sample2', 'path2'], skip: 1, sep:",", strip:true)
+        // lef map the row to values to values on the right [pair with the join, the other variables ]
+        // .map { row -> (pair, sample1, path1, sample2, path2) =  [ 
+        //         [row.sample1, row.sample2].sort().join("_"),
+        //         row.sample1, row.path1, row.sample2, row.path2 ]}
