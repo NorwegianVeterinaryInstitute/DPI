@@ -26,3 +26,21 @@ process PREPARE_VCF_ANNOTATOR {
         python $projectDir/bin/prep_vcf_annotator.py --vcf ${query_vcf}
         """
 }
+
+
+process PREPARE_VCF_ANNOTATOR_VERSION {
+
+        conda (params.enable_conda ? './assets/py_test.yml' : null)
+        container 'evezeyl/py_test:latest'
+
+        label 'process_short'
+        
+        output:
+        file("*")
+
+        
+        script:
+        """
+        python $projectDir/bin/prep_vcf_annotator.py --version > prep_vcf_annotator.version
+        """
+}

@@ -21,14 +21,12 @@ process RUN_VCF_ANNOTATOR{
         script:
         if (ref == sample1 && query == sample2)
         """
-        vcf-annotator --version > vcf-annotator.version
         vcf-annotator ${ref_vcf} ${path1_gbff} --output ${ref_query}_ref_snps_annotated.vcf
         vcf-annotator ${query_vcf} ${path2_gbff} --output ${ref_query}_query_snps_annotated.vcf
         """
 
         else if (ref == sample2 && query == sample1)       
         """
-        vcf-annotator --version > vcf-annotator.version
         vcf-annotator ${ref_vcf} ${path2_gbff} --output ${ref_query}_ref_snps_annotated.vcf
         vcf-annotator ${query_vcf} ${path1_gbff} --output ${ref_query}_query_snps_annotated.vcf
         """
@@ -37,5 +35,22 @@ process RUN_VCF_ANNOTATOR{
 
 }
 
+
+process RUN_VCF_ANNOTATOR_VERSION{
+
+        conda (params.enable_conda ? 'bioconda::vcf-annotator=0.7' : null)
+	container 'quay.io/biocontainers/vcf-annotator:0.7--hdfd78af_0'
+
+        label 'process_short'
+        
+        output:
+        file("*")
+
+        script:
+        """
+        vcf-annotator --version > vcf-annotator.version
+        """
+
+}
 
 

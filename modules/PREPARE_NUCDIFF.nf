@@ -22,3 +22,19 @@ process PREPARE_NUCDIFF {
         """
 
 }
+
+
+process PREPARE_NUCDIF_VERSION {
+                conda (params.enable_conda ? './assets/py_test.yml' : null)
+        container 'evezeyl/py_test:latest'
+
+        label 'process_short'
+        output:
+        file("*") 
+
+        script:
+        """
+        python $projectDir/bin/prep_nucdiff.py --version > prep_nucdiff.version 
+        """
+
+}

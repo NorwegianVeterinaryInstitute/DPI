@@ -1,0 +1,36 @@
+process INPUT {
+        //conda (params.enable_conda ? 'bioconda::bakta=1.8.2' : null)
+        container 'evezeyl/checkr'
+
+        label 'process_high_memory'
+
+        debug "$params.debugme"
+
+        input:
+        path(input)
+
+        output:
+        path("unique_pairs.csv"), emit: pairs_ch 
+        path("unique_samples.csv"), emit: unique_samples_ch
+        file("*") 
+
+        script:
+        """
+        Rscript $input
+        """
+}
+
+process INPUT_VERSION {
+        //conda (params.enable_conda ? 'bioconda::bakta=1.8.2' : null)
+        container 'evezeyl/checkr'
+
+         label 'process_short'   
+
+        output:
+        file("*") 
+
+        script:
+        """
+        Rscript $input --version > input_check.version
+        """
+}
