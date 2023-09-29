@@ -16,7 +16,7 @@ process INPUT {
 
         script:
         """
-        Rscript $input
+        Rscript $projectDir/bin/input_check.R --input $input
         """
 }
 
@@ -31,6 +31,7 @@ process INPUT_VERSION {
 
         script:
         """
-        Rscript $input --version > input_check.version
+        # creates the version file
+        Rscript  $projectDir/bin/input_check.R --version
         """
 }

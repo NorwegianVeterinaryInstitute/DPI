@@ -46,8 +46,8 @@ $NEXTFLOW run $DPI/main.nf -c $SAGA_CONFIG --track DPI -profile apptainer  \
     - [ ] change python scripts to be able to output version
     pythonscript --version must output the version to screen -> to a fileversion of 
     eg. python $projectDir/bin/prep_nucdiff.py --version > prep_nucdiff.version
-    - [ ] change Rscript also for that 
-    Rscript $input --version > input_check.version
+    - [x] change Rscript also for that Rscript $input --version > input_check.version
+    - [ ] add optparse / check image 
     - [ ] eventually make the conda version for container R
 - [ ] make config for containers and conda parameters ? 
 - [ ] adjust what output file we want AND make the documentation with the description of those output files
