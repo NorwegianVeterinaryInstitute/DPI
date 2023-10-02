@@ -1,19 +1,12 @@
+#!/usr/bin/env Rscript
+
 # Description : Check input file, controls that no duplicates and organize single pairs for running efficiently.
 # Author : Eve Zeyl Fiskebeck
 # Version: 2023-09-29
 # Usage:  Rscript <script_name> --input <input> | --version <TRUE/FALSE[Default]>
 
 # Packages ----
-if (!require("optparse")) {
-  install.packages("optparse", dependencies = T) 
-}
-if (!require("tidyverse")) {
-  install.packages("tidyverse", dependencies = T) 
-}
-if (!require("logr")) {
-  install.packages("logr", dependencies = T) 
-}
-
+library(optparse)
 library(tidyverse)
 library(logr)
 

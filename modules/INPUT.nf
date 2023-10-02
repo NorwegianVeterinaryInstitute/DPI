@@ -1,6 +1,6 @@
 process INPUT {
         //conda (params.enable_conda ? 'bioconda::bakta=1.8.2' : null)
-        container 'evezeyl/checkr'
+        container 'evezeyl/checkr:latest'
 
         label 'process_short'
 

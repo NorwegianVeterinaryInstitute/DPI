@@ -13,7 +13,7 @@ What needs to be done :
 Test dataset - running command 
 
 ```shell 
-NEXTFLOW="/cluster/projects/nn9305k/bin/nextflow_23.04.1"
+NEXTFLOW="/cluster/projects/nn9305k/bin/nextflow_23.04.4"
 SAGA_CONFIG="/cluster/projects/nn9305k/nextflow/configs/saga_DPI.config"
 DPI="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI"
 NFCONFIG="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/nextflow.config"
@@ -43,11 +43,44 @@ MYPATH="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI/assets/da
 MYBIN="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin"
 apptainer shell --bind $MYPATH:/data,$MYBIN:/data/bin $IMGS/evezeyl-checkr.img 
 
-cd data 
-Rscript input_check.R --input $INPOUT
+cd /data 
+Rscript bin/input_check.R --input $INPOUT
 ```
 So this works this is not the R script Nor the image 
+- it can be a problem of bind ? at redirect to path ? 
 
+Testing in one of the pipeline dir 
+
+```bash 
+
+MYPATH=$(pwd)
+MYBIN="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin"
+IMGS="/cluster/work/users/evezeyl/images"
+apptainer shell --bind $MYPATH:/data,$MYBIN:/data/bin $IMGS/evezeyl-checkr-latest.img 
+
+cd /data 
+Rscript bin/input_check.R --input saga_test.csv
+```
+ok, its because of the bind - it cant follow the path 
+Needed to add environment variable for .bashrc and testing
+
+Well I added the bind and this still does not work 
+trying to see if the exec command is working
+
+```bash 
+
+IMGS="/cluster/work/users/evezeyl/images"
+apptainer exec $IMGS/evezeyl-checkr-latest.img Rscript /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/input_check.R --input saga_test.csv
+```
+
+This works so WHY ? 
+
+- trying to copy the file so it bypass the mount using in process `  stageInMode 'copy'` that copy the file but still not working
+- trying to use latest nf version nextflow_23.04.4 (should not do huge doiff)
+
+ok, was interaction with Rprofiles ... 
+
+ nextflow config workflow_02.nf -profile test
 
 ## What needs to be modified 
 ### Most important 
@@ -67,3 +100,7 @@ So this works this is not the R script Nor the image
     - [ ] eventually make the conda version for container R
 - [ ] make config for containers and conda parameters ? 
 - [ ] adjust what output file we want AND make the documentation with the description of those output files
+
+
+# Ressources
+- nf carpentry https://carpentries-incubator.github.io/workflows-nextflow/08-configuration/index.html 
