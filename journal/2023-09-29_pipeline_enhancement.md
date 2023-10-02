@@ -80,27 +80,9 @@ This works so WHY ?
 
 ok, was interaction with Rprofiles ... 
 
- nextflow config workflow_02.nf -profile test
-
-## What needs to be modified 
-### Most important 
-
-
-- annotate per sample - ok 
-    - [  ] how to use the tag to recover
-
-
-### other nice enhancements
-- [ ] versions per module to avoid duplicates
-    - [ ] change python scripts to be able to output version
-    pythonscript --version must output the version to screen -> to a fileversion of 
-    eg. python $projectDir/bin/prep_nucdiff.py --version > prep_nucdiff.version
-    - [x] change Rscript also for that Rscript $input --version > input_check.version
-    - [ ] add optparse / check image 
-    - [ ] eventually make the conda version for container R
-- [ ] make config for containers and conda parameters ? 
-- [ ] adjust what output file we want AND make the documentation with the description of those output files
+--- 2023-10-02 worflow and modules reformated --- last testing to see if works :) 
 
 
 # Ressources
 - nf carpentry https://carpentries-incubator.github.io/workflows-nextflow/08-configuration/index.html 
+nextflow config workflow_02.nf -profile test
