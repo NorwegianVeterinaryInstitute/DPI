@@ -8,7 +8,7 @@ process PREPARE_NUCDIFF {
         tag "$pair"
 
         input:
-        tuple val(pair), val(sample1), path(path1), val(sample2), path(path2)
+        tuple val(pair), val(sample1), val(sample2), path(path1), path(path2)
         
         output: 
         path("ref_query_params.csv"), emit: longest_param_ch
@@ -23,9 +23,8 @@ process PREPARE_NUCDIFF {
 
 }
 
-
-process PREPARE_NUCDIF_VERSION {
-                conda (params.enable_conda ? './assets/py_test.yml' : null)
+process PREPARE_NUCDIFF_VERSION {
+        conda (params.enable_conda ? './assets/py_test.yml' : null)
         container 'evezeyl/py_test:latest'
 
         label 'process_short'
