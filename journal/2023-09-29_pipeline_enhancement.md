@@ -83,6 +83,35 @@ ok, was interaction with Rprofiles ...
 --- 2023-10-02 worflow and modules reformated --- last testing to see if works :) 
 
 
-# Ressources
+æ7# Ressources
 - nf carpentry https://carpentries-incubator.github.io/workflows-nextflow/08-configuration/index.html 
 nextflow config workflow_02.nf -profile test
+
+# Testing now with fagerlund data and says inputfile is missing .... 
+but when I echo the path of the file and I launch in the directory this works 
+when I test with the small input file this works ... 
+but I was in a tmux session ... try tmux session with testdata 
+test working with tmux 
+
+
+
+checking file format 
+
+```shell
+NEXTFLOW="/cluster/projects/nn9305k/bin/nextflow_23.04.4"
+SAGA_CONFIG="/cluster/projects/nn9305k/nextflow/configs/saga_DPI.config"
+DPI="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI"
+NFCONFIG="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/nextflow.config"
+
+# we can use the test data for a start
+INPUT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/Fagerlund_data/DPI/input_twentysnps.csv"
+OUTDIR="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/Fagerlund_data/DPI/output_20231002"
+# this does not need to be changed
+BAKTADB="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/databases/bakta/db"
+PRODIGAL="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/databases/Listeria_monocytogenes.trn"
+
+module purge
+module load Java/17.0.4
+
+$NEXTFLOW run $DPI/main.nf -c $SAGA_CONFIG --track DPI -profile apptainer --input $INPUT --out_dir $OUTDIR -work-dir $USERWORK/DPI --baktaDB $BAKTADB --training $PRODIGAL --genus "Listeria" --species "monocytogenes" --sqlitedb "DPI_commit_351b806_Fagerlund_20231002.sqlite" --comment "'20231002_Fagerlund_max_20_SNPs_DPI;commit_351b806'" -resume
+```

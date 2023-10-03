@@ -22,7 +22,7 @@ process ANNOTATE {
         script:
         """
         bakta --db $baktaDB --prodigal-tf $training --prefix $sample --force \
-        --locus $sample --genus $genus --species $species $path 
+        --locus $sample --genus $genus --species $species $path 2>&1 | tee $sample"_sdout"
         """
 }
 
