@@ -31,7 +31,7 @@ process RUN_NUCDIFF{
         rm -r results
         # removing the paths in file for further work (hardcoded)
         sed -i "s#.*/${ref}.fna#${ref}.fna#g" $ref_query/$ref_query".delta"
-        sed -i "s# .*/${query}.fna# ${query}#g" $ref_query/$ref_query".delta"
+        sed -i "s# .*/${query}.fna# ${query}.fna#g" $ref_query/$ref_query".delta"
 
 
         """
