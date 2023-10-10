@@ -115,3 +115,7 @@ module load Java/17.0.4
 
 $NEXTFLOW run $DPI/main.nf -c $SAGA_CONFIG --track DPI -profile apptainer --input $INPUT --out_dir $OUTDIR -work-dir $USERWORK/DPI --baktaDB $BAKTADB --training $PRODIGAL --genus "Listeria" --species "monocytogenes" --sqlitedb "DPI_commit_351b806_Fagerlund_20231002.sqlite" --comment "'20231002_Fagerlund_max_20_SNPs_DPI;commit_351b806'" -resume
 ```
+
+login4
+
+/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/Fagerlund_data/DPI

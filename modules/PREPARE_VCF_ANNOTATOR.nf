@@ -6,7 +6,7 @@ process PREPARE_VCF_ANNOTATOR {
 
         label 'process_short'
         
-        debug "$params.debugme"
+        debug "$params.debug"
         tag "$pair"
 
         input:

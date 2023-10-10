@@ -3,7 +3,7 @@ process WRANGLING_TO_DB{
         conda (params.enable_conda ? './assets/py_test.yml' : null)
         container 'evezeyl/py_test:latest'
         
-        debug "$params.debugme"
+        debug "$params.debug"
         label 'process_high'
         
         input:

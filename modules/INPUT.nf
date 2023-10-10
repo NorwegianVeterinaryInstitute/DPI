@@ -4,7 +4,7 @@ process INPUT {
 
         label 'process_short'
 
-        debug "$params.debugme"
+        debug "$params.debug"
 
         input:
         path input

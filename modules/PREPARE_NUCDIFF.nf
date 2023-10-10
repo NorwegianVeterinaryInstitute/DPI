@@ -4,7 +4,7 @@ process PREPARE_NUCDIFF {
 
         label 'process_short'
 
-        debug "$params.debugme"
+        debug "$params.debug"
         tag "$pair"
 
         input:
@@ -18,7 +18,7 @@ process PREPARE_NUCDIFF {
         script:
         """
         # version output by default by the script
-        python $projectDir/bin/prep_nucdiff.py --fasta1 $path1 --fasta2 $path2 
+        python $projectDir/bin/prep_nucdiff.py --fasta1 $path1 --fasta2 $path2 > $pair".sdout" 2>&1 
         """
 
 }
