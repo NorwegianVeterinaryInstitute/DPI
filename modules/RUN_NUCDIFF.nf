@@ -18,6 +18,8 @@ process RUN_NUCDIFF{
         tuple path ("${ref_query}/*.gff"), path("${ref_query}/*.out"), emit: nucdiff_res_ch
         file("*")
 
+        // would be nice with finnally  ... 
+
 
         script: 
         if (ref == sample1)
@@ -27,6 +29,11 @@ process RUN_NUCDIFF{
         mv *.* $ref_query
         mv results/*.* $ref_query
         rm -r results
+        # removing the paths in file for further work (hardcoded)
+        sed -i "s#.*/${ref}.fna#${ref}.fna#g" $ref_query/$ref_query".delta"
+        sed -i "s# .*/${query}.fna# ${query}#g" $ref_query/$ref_query".delta"
+
+
         """
         else if (ref == sample2)
         """
@@ -35,9 +42,12 @@ process RUN_NUCDIFF{
         mv *.* $ref_query
         mv results/*.* $ref_query
         rm -r results
+        # removing the paths in file for further work (hardcoded)
+        sed -i "s#.*/${ref}.fna#${ref}.fna#g" $ref_query/$ref_query".delta"
+        sed -i "s# .*/${query}.fna# ${query}.fna#g" $ref_query/$ref_query".delta"
         """
         else
-        error "Correct ref-query not found"
+        error "Correct ref-query not found"  
 }
 
 process RUN_NUCDIFF_VERSION{

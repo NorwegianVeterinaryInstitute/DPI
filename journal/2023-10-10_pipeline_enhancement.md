@@ -1,4 +1,13 @@
-# 2023-10-10 Pipeline enhancement
+
+# 2023-10-10 Pipeline enhancement part 2
+rerun pairs selection alignment to see if we can output output unaligned sequences 
+
+```shell
+
+
+```
+
+# 2023-10-10 Pipeline enhancement part 1
 - output and small config enhancement
 
 
@@ -9,7 +18,7 @@
 
 3. Modifying output paths, so its easier to look at all the files in results in output  (including nucdiff)
 
-4. Modifying nucdiff (mummer) output options
+4. Modifying nucdiff (mummer) output options check ... not modifiable directly - needs postanalysis
 
 ```shell
 IMG="/cluster/work/users/evezeyl/images/quay.io-biocontainers-nucdiff-2.0.3--pyh864c0ab_1.img"
@@ -26,6 +35,23 @@ nucdiff  --vcf yes $path1 $path2 $ref_query $ref_query
   --query_name_full [{yes,no}]
 ```
  hum, there is no really options that I want to change in nucmer ...
+trying to obtain one alignment out 
+ ```shell 
+ /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/TEST_DPI/2023-10-10/results/NUCDIFF/SRR11262179_SRR11262033
+ show-aligns SRR11262179_SRR11262033.delta "SRR11262033_7" "SRR11262033_7"
+ ```
+- the coordinates of alignments with tags (sample_ID) are in the coords file
+- so the path of input files is hardcoded in the delta file ! we need to fix that 
+- if the file is in the same directory there is no problem of running show align, and this ouput will be given - so we just remove the path before the sample name with seed  (maybe its the given option but there is no space )
+
+
+cat SRR11262179_SRR13588387.delta | sed -e "s#.*/SRR11262179.fna#SRR11262179.fna#g" |sed -e "s# .*/SRR13588387.fna# SRR13588387.fna#g"| head
+The space is important here in the second otherwise removes all
+
+Not sure though how to export unaligned ... what is the tag. We need a good example for that
+
+> see rerun pipeline for pairs of differences (selected pairs analysis )
+
 
 ```shell
 NEXTFLOW="/cluster/projects/nn9305k/bin/nextflow_23.04.4"
