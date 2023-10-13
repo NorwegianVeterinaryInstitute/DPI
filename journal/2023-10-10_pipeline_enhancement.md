@@ -85,16 +85,17 @@ Not sure though how to export unaligned ... what is the tag. We need a good exam
 debugging script - no idea why it does not work now ... as it works on pc
  > 'DataFrame' object has no attribute 'map'. Did you mean: 'max'?
  ok I think I need to update the version of pytest new pandas 
- 
+
 
   ```shell 
+cp /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/json_annot_import.py .
  srun --account=nn9305k --mem-per-cpu=8G --cpus-per-task=1 --qos=devel --time=0:30:00 --pty bash -i
+
 IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
-/cluster/work/users/evezeyl/DPI/c8/90062ca28a04b2f666536573c11a63
+BIND="/cluster/work/users/evezeyl/DPI/63/13d70d207316a9b8ea751b78cf4ee6"
+apptainer shell --bind $BIND $IMG
 
-apptainer shell --bind /cluster/work/users/evezeyl/DPI/c8/90062ca28a04b2f666536573c11a63 $IMG
-
-python /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/json_annot_import.py --json VI55779.json --database 20231013.sqlite --sample_id VI55779
+python json_annot_import.py --json VI55586.json --database 20231013.sqlite --sample_id  VI55586
 
 json_path = "VI55779.json"
 sql_path = "20231013.sqlite" 
