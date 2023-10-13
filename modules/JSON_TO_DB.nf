@@ -5,7 +5,7 @@ process JSON_TO_DB{
         
         debug "$params.debug"
         tag "$sample" 
-        label 'process_high'
+        label 'process_short'
         
         input:
         path(db)

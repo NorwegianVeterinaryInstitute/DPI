@@ -14,7 +14,7 @@ process WRANGLING_TO_DB{
         
 
         output:
-        path("${db}.sqlite"), emit : db_path_ch
+        path(db), emit : db_path_ch
         path("*")
         script:
         """

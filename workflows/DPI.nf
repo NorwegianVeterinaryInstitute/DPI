@@ -95,7 +95,7 @@ workflow DPI {
                 )
 
         // JSON annotation to DB
-        //JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch)
+        JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch)
 
         //Final: output sofware versions 
         // need to modify python files for version dump - keep old way for now
