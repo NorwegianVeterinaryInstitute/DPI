@@ -5,6 +5,7 @@ include { RUN_NUCDIFF; RUN_NUCDIFF_VERSION } from "../modules/RUN_NUCDIFF.nf"
 include { PREPARE_VCF_ANNOTATOR; PREPARE_VCF_ANNOTATOR_VERSION } from "../modules/PREPARE_VCF_ANNOTATOR.nf"
 include { RUN_VCF_ANNOTATOR; RUN_VCF_ANNOTATOR_VERSION } from "../modules/RUN_VCF_ANNOTATOR.nf"
 include { WRANGLING_TO_DB; WRANGLING_TO_DB_VERSION  } from "../modules/WRANGLING_TO_DB.nf"
+include { JSON_TO_DB; JSON_TO_DB_VERSION  } from "../modules/JSON_TO_DB.nf"
 
 workflow DPI {
         if (!params.input) {exit 1, "Missing input file"}
@@ -93,16 +94,19 @@ workflow DPI {
         RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
                 )
 
+        // JSON annotation to DB
+        //JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch)
+
         //Final: output sofware versions 
         // need to modify python files for version dump - keep old way for now
         INPUT_VERSION()
         ANNOTATE_VERSION()
-        //PREPARE_NUCDIF_VERSION()
+        PREPARE_NUCDIFF_VERSION()
         RUN_NUCDIFF_VERSION()
-        //PREPARE_VCF_ANNOTATOR_VERSION()
+        PREPARE_VCF_ANNOTATOR_VERSION()
         RUN_VCF_ANNOTATOR_VERSION()
-        //WRANGLING_TO_DB_VERSION()
-        
+        WRANGLING_TO_DB_VERSION()
+        JSON_TO_DB_VERSION()
 
 
 }

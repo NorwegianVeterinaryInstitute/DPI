@@ -10,8 +10,10 @@ def parse_args(args):
 
     parser = argparse.ArgumentParser(
         prog="prep_nucdiff.py",
+        usage=None,
         description="Step1. Prepare run nucdiff. Find longest assembly in the pair, write file with parameters for nf",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        add_help=True)
 
     parser.add_argument("--fasta1",
                         action="store",
@@ -26,6 +28,10 @@ def parse_args(args):
                         required=False,
                         default=".fna",
                         help="Suffix of fasta1 and fasta2 files")
+    parser.add_argument("--version",
+                        action="version",
+                        version = "%(prog)s 0.0.1",
+                        help="print the version of the script")
 
     args = vars(parser.parse_args())
     return args
@@ -57,11 +63,6 @@ def chose_ref_query(file1, file2, suffix) :
 # %% SCRIPT
 if __name__ == '__main__':
     args = parse_args(sys.argv[1:])
-
-    #%% Output version file - per default
-    with open('prep_nucdiff.version', 'w', newline='') as file:
-        file.write("pre_nucdiff.py version 0.1")
-    file.close()
 
     #%% Script the parameters ref or query for nextflow
     with open('ref_query_params.csv', 'w', newline='') as file:

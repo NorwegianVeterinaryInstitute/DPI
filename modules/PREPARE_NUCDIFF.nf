@@ -17,7 +17,6 @@ process PREPARE_NUCDIFF {
 
         script:
         """
-        # version output by default by the script
         python $projectDir/bin/prep_nucdiff.py --fasta1 $path1 --fasta2 $path2 > $pair".sdout" 2>&1 
         """
 

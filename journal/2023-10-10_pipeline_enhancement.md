@@ -80,6 +80,7 @@ Not sure though how to export unaligned ... what is the tag. We need a good exam
 
 > see rerun pipeline for pairs of differences (selected pairs analysis )
 
+2023-10-13 Added json wrangling to pipeline (python script developped the 12)
 
 ```shell
 NEXTFLOW="/cluster/projects/nn9305k/bin/nextflow_23.04.4"
