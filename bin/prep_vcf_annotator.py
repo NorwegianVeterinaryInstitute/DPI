@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import sys
 import os
@@ -7,8 +9,10 @@ def parse_args(args):
 
     parser = argparse.ArgumentParser(
         prog="prep_vcf_annotator.py",
+        usage=None, 
         description='Prepare annotation with vcf annotator: correct format vcf from nucdiff output. Prepares script launch command for vcf annotator',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        add_help=True)
 
     parser.add_argument("--vcf",
                         action="store",
@@ -18,6 +22,10 @@ def parse_args(args):
                         action="store",
                         default=".",
                         help="oudir for reformated file")
+    parser.add_argument("--version",
+                        action="version",
+                        version = "%(prog)s 0.0.1",
+                        help="print the version of the script")
     args = vars(parser.parse_args())
     return args
 
@@ -57,11 +65,6 @@ def reformat_vcf(file, outdir = ".", skip_rows = 2):
 # %% SCRIPT
 if __name__ == '__main__':
     args = parse_args(sys.argv[1:])
-
-    #%% Output version file - per default
-    with open('prep_vcf_annotator.version', 'w', newline='') as file:
-        file.write("prep_vcf_annotator.py version 0.1")
-    file.close()
 
     #%% Action
     reformat_vcf(args["vcf"], args["outdir"])
