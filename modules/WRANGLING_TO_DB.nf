@@ -5,6 +5,7 @@ process WRANGLING_TO_DB{
         
         debug "$params.debug"
         label 'process_high'
+        cache 'lenient'
         
         input:
         val(db)
@@ -14,8 +15,8 @@ process WRANGLING_TO_DB{
         
 
         output:
-        path(db), emit : db_path_ch
-        path("*")
+        path("${db}"), emit : db_path_ch
+
         script:
         """
         python $projectDir/bin/results_to_db.py --database ${db} --comment ${comment}

@@ -2,6 +2,9 @@
 process JSON_TO_DB{
         conda (params.enable_conda ? './assets/py_test.yml' : null)
         container 'evezeyl/py_test:latest'
+        //fair true
+        // allows to run sequentially
+        maxForks 1
         
         debug "$params.debug"
         tag "$sample" 
@@ -12,7 +15,7 @@ process JSON_TO_DB{
         tuple val(sample), path(json_path)
 
         output:
-        path("*")
+        path(db)
         
         script:
         """

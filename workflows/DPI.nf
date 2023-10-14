@@ -89,13 +89,22 @@ workflow DPI {
         comment_ch=Channel.value(params.comment) 
 
         // create database - is run on all using selectors of files pattern
-        WRANGLING_TO_DB(db_path_ch, comment_ch,
-        RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect(),
-        RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
+        // This process is restarted at each resume - might be because non deterministic order ?                        
+
+        WRANGLING_TO_DB(
+                db_path_ch,
+                comment_ch, 
+                RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect(),
+                RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
                 )
 
         // JSON annotation to DB
+        // This process I think should be run only once - otherwise many access to DB can be problematic
+        // we can think we can modify - there is nf module comming out for sql
+
+
         JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch)
+
 
         //Final: output sofware versions 
         // need to modify python files for version dump - keep old way for now
