@@ -6,7 +6,7 @@ process PREPARE_VCF_ANNOTATOR {
 
         label 'process_short'
         
-        debug "$params.debugme"
+        debug "$params.debug"
         tag "$pair"
 
         input:
@@ -21,8 +21,25 @@ process PREPARE_VCF_ANNOTATOR {
         
         script:
         """
-        # version output by default by the script
         python $projectDir/bin/prep_vcf_annotator.py --vcf ${ref_vcf}
         python $projectDir/bin/prep_vcf_annotator.py --vcf ${query_vcf}
+        """
+}
+
+
+process PREPARE_VCF_ANNOTATOR_VERSION {
+
+        conda (params.enable_conda ? './assets/py_test.yml' : null)
+        container 'evezeyl/py_test:latest'
+
+        label 'process_short'
+        
+        output:
+        file("*")
+
+        
+        script:
+        """
+        python $projectDir/bin/prep_vcf_annotator.py --version > prep_vcf_annotator.version
         """
 }

@@ -1,28 +1,26 @@
 // Adds all results to the database (for all pairs)
-process WRANGLING_TO_DB{
+process JSON_TO_DB{
         conda (params.enable_conda ? './assets/py_test.yml' : null)
         container 'evezeyl/py_test:latest'
         
         debug "$params.debug"
-        label 'process_high'
+        tag "$sample" 
+        label 'process_short'
         
         input:
-        val(db)
-        val(comment)
-        path("*")
-        path("*") 
-        
+        path(db)
+        tuple val(sample), path(json_path)
 
         output:
-        path(db), emit : db_path_ch
         path("*")
+        
         script:
         """
-        python $projectDir/bin/results_to_db.py --database ${db} --comment ${comment}
+        python $projectDir/bin/json_annot_import.py --json $json_path --database $db --sample_id $sample 
         """
 } 
 
-process WRANGLING_TO_DB_VERSION{
+process JSON_TO_DB_VERSION{
         conda (params.enable_conda ? './assets/py_test.yml' : null)
         container 'evezeyl/py_test:latest'
         
@@ -33,6 +31,6 @@ process WRANGLING_TO_DB_VERSION{
 
         script:
         """
-        python $projectDir/bin/results_to_db.py --version > results_to_db.version
+        python $projectDir/bin/json_annot_import.py --version > json_annot_import.version
         """
 } 

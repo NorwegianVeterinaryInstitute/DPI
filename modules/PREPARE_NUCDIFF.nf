@@ -4,11 +4,11 @@ process PREPARE_NUCDIFF {
 
         label 'process_short'
 
-        debug "$params.debugme"
+        debug "$params.debug"
         tag "$pair"
 
         input:
-        tuple val(pair), val(sample1), path(path1), val(sample2), path(path2)
+        tuple val(pair), val(sample1), val(sample2), path(path1), path(path2)
         
         output: 
         path("ref_query_params.csv"), emit: longest_param_ch
@@ -17,8 +17,22 @@ process PREPARE_NUCDIFF {
 
         script:
         """
-        # version output by default by the script
-        python $projectDir/bin/prep_nucdiff.py --fasta1 $path1 --fasta2 $path2 
+        python $projectDir/bin/prep_nucdiff.py --fasta1 $path1 --fasta2 $path2 > $pair".sdout" 2>&1 
+        """
+
+}
+
+process PREPARE_NUCDIFF_VERSION {
+        conda (params.enable_conda ? './assets/py_test.yml' : null)
+        container 'evezeyl/py_test:latest'
+
+        label 'process_short'
+        output:
+        file("*") 
+
+        script:
+        """
+        python $projectDir/bin/prep_nucdiff.py --version > prep_nucdiff.version 
         """
 
 }
