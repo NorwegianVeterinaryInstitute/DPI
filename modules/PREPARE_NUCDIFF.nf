@@ -13,7 +13,6 @@ process PREPARE_NUCDIFF {
         output: 
         path("ref_query_params.csv"), emit: longest_param_ch
         tuple val(pair), val(sample1), path(path1), val(sample2), path(path2), emit: fna_ch
-        //file("*")
 
         script:
         """

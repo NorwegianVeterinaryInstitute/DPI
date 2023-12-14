@@ -94,7 +94,11 @@ debugging script - no idea why it does not work now ... as it works on pc
 2023-10-14 So I think the db json process should not run in paralell , should not access the db at the same time 
 So need to run as single process 
 
-
+Fagerlund - this one is failing and I do not knwo why ... cannot find anything bad in input files
+  vcf-annotator SRR11262063_SRR11262034_ref_snps_reformated.vcf SRR11262063.gbff --output SRR11262063_SRR11262034_ref_snps_annotated.vcf >  SRR11262063".sdout" 2>&1 
+  vcf-annotator SRR11262063_SRR11262034_query_snps_reformated.vcf SRR11262034.gbff --output SRR11262063_SRR11262034_query_snps_annotated.vcf > SRR11262034".sdout" 2>&1
+SRR11262034_SRR11262063
+I do not why it fails repetitively - remove this pair from input tweny spns
 
 
 
