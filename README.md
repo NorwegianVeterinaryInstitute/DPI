@@ -17,8 +17,5 @@ Workflow:
 
 # Warning:
 
-Under development. Can still require adjustments.
-
-<!-- outdated 
-![Pipeline thoughts - workflow and possible development](./documentation/development_modular_OEIO.svg)
--->
+Under development. Can still require adjustments, and might be developped further. 
+Post pipeline analysis workflow under development.
