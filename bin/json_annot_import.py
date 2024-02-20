@@ -1,9 +1,12 @@
+#!/usr/bin/env python
+
 import argparse
 import sys
 import os
 import pandas as pd
 import json
 import sqlalchemy 
+import numpy as np
 
 # https://realpython.com/command-line-interfaces-python-argparse/ is good start
 def parse_args(args):
@@ -117,7 +120,7 @@ def prep_features_df(json_object, sample_id):
         json_object (_dict_): _annotation json from bakta_
         sample_id (_str_): _sample id to add to the table_
     """
-    features = pd.json_normalize(data['features'])
+    features = pd.json_normalize(json_object['features'])
     features.insert(0, "sample_id", sample_id)
     # need to change list types to string
     # we do not want to split those for now
@@ -133,14 +136,24 @@ def prep_sequences_df(json_object, sample_id):
         json_object (_dict_): _annotation json from bakta_
         sample_id (_str_): _sample id to add to the table_
     """
-    sequences = pd.json_normalize(data['sequences'])
+    sequences = pd.json_normalize(json_object['sequences'])
     sequences.insert(0, "sample_id", sample_id)
     
     # cleaning the sequences table
-    sequences[["len", "cov", "corr", "origname", "sw", "date"]] = sequences["orig_description"].str.split(" ", expand=True)
+    ## orig_description is not always complete - we cant fix in those cases
+    try: 
+        sequences[["len", "cov", "corr", "origname", "sw", "date"]] = sequences["orig_description"].str.split(" ", expand=True)
+    except: 
+        # if it does not work we only report as empty - neabs the description is not complete
+        sequences[["len", "cov", "corr", "origname", "sw", "date"]] = pd.DataFrame(
+                np.nan, 
+                columns = ["len", "cov", "corr", "origname", "sw", "date"], 
+                index = np.arange(len(sequences["orig_description"]))
+                                )
+    ## The rest should be ok
     sequences[["genus", "species", "gcode", "topology"]] = sequences["description"].str.split(" ", expand=True)
     sequences.drop(labels= ["orig_description", "description"], axis = 1)
-    sequences.replace(["^.*=","]"], "", inplace = True, regex = True)
+    sequences.replace(["^.*=","]", "NaN"], "", inplace = True, regex = True)
     return sequences
 
 
@@ -156,8 +169,8 @@ if __name__ == '__main__':
     info = prep_info_df(data, args["sample_id"])
     df_to_database(info,args["database"], "annotation_info",if_exists='append')
     
-    features= prep_features_df(data, args["sample_id"])
+    features = prep_features_df(data, args["sample_id"])
     df_to_database(features,args["database"], "annotation_features",if_exists='append')
     
-    sequences=prep_sequences_df(data, args["sample_id"])
+    sequences = prep_sequences_df(data, args["sample_id"])
     df_to_database(sequences,args["database"], "annotation_sequences",if_exists='append')
