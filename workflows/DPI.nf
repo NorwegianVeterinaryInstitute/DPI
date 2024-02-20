@@ -103,7 +103,7 @@ workflow DPI {
         // we can think we can modify - there is nf module comming out for sql
 
 
-        JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch)
+        JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) 
 
 
         //Final: output sofware versions 
@@ -116,6 +116,5 @@ workflow DPI {
         RUN_VCF_ANNOTATOR_VERSION()
         WRANGLING_TO_DB_VERSION()
         JSON_TO_DB_VERSION()
-
 
 }
