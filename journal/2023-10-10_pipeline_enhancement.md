@@ -85,16 +85,32 @@ Not sure though how to export unaligned ... what is the tag. We need a good exam
 debugging script - no idea why it does not work now ... as it works on pc
  > 'DataFrame' object has no attribute 'map'. Did you mean: 'max'?
  ok I think I need to update the version of pytest new pandas 
- 
+ - ok, and then I needed to find a way to add columns
+
+
+ - now its nf that needs more debugging 
+ - [  ] we might need to make chanels work one at the time for the last part ...
+  - [ ]  - Failed to publish file: /cluster/work/users/evezeyl/DPI/ef/a204752362a32a71dc2c1c9b12a9c6/VI56264.fna; to: /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/pairs_preselection/DPI/output_20231010/results/PREP_NUCDIFF/VI56264.fna [copy] -- See log file for details
+2023-10-14 So I think the db json process should not run in paralell , should not access the db at the same time 
+So need to run as single process 
+
+Fagerlund - this one is failing and I do not knwo why ... cannot find anything bad in input files
+  vcf-annotator SRR11262063_SRR11262034_ref_snps_reformated.vcf SRR11262063.gbff --output SRR11262063_SRR11262034_ref_snps_annotated.vcf >  SRR11262063".sdout" 2>&1 
+  vcf-annotator SRR11262063_SRR11262034_query_snps_reformated.vcf SRR11262034.gbff --output SRR11262063_SRR11262034_query_snps_annotated.vcf > SRR11262034".sdout" 2>&1
+SRR11262034_SRR11262063
+I do not why it fails repetitively - remove this pair from input tweny spns
+
+
 
   ```shell 
- srun --account=nn9305k --mem-per-cpu=8G --cpus-per-task=1 --qos=devel --time=0:30:00 --pty bash -i
+srun --account=nn9305k --mem-per-cpu=8G --cpus-per-task=1 --qos=devel --time=0:30:00 --pty bash -i
+
 IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
-/cluster/work/users/evezeyl/DPI/c8/90062ca28a04b2f666536573c11a63
-
-apptainer shell --bind /cluster/work/users/evezeyl/DPI/c8/90062ca28a04b2f666536573c11a63 $IMG
-
-python /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/json_annot_import.py --json VI55779.json --database 20231013.sqlite --sample_id VI55779
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/json_annot_import.py"
+#BIND="/cluster/work/users/evezeyl/DPI/63/13d70d207316a9b8ea751b78cf4ee6"
+#apptainer shell --bind $BIND $IMG
+apptainer shell --bind $BIND $IMG
+python json_annot_import.py --json VI55586.json --database 20231013.sqlite --sample_id  VI55586
 
 json_path = "VI55779.json"
 sql_path = "20231013.sqlite" 

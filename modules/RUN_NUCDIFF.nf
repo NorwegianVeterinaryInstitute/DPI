@@ -6,8 +6,8 @@ process RUN_NUCDIFF{
 
         label 'process_high'
 
-        debug "$params.debug"
-        tag "$pair"
+        debug "${params.debug}"
+        tag "${pair}"
 
         input:
         tuple val(pair), val(ref_query), val(ref), val(query), 
@@ -24,27 +24,27 @@ process RUN_NUCDIFF{
         script: 
         if (ref == sample1)
         """
-        nucdiff  --vcf yes $path1 $path2 . $ref_query > $ref_query".sdout" 2>&1 
-        mkdir $ref_query
-        mv *.* $ref_query
-        mv results/*.* $ref_query
+        nucdiff  --vcf yes ${path1} ${path2} . ${ref_query} > ${ref_query}.sdout 2>&1 
+        mkdir ${ref_query}
+        mv *.* ${ref_query}
+        mv results/*.* ${ref_query}
         rm -r results
         # removing the paths in file for further work (hardcoded)
-        sed -i "s#.*/${ref}.fna#${ref}.fna#g" $ref_query/$ref_query".delta"
-        sed -i "s# .*/${query}.fna# ${query}.fna#g" $ref_query/$ref_query".delta"
+        sed -i "s#.*/${ref}.fna#${ref}.fna#g" ${ref_query}/${ref_query}.delta
+        sed -i "s# .*/${query}.fna# ${query}.fna#g" ${ref_query}/${ref_query}.delta
 
 
         """
         else if (ref == sample2)
         """
-        nucdiff  --vcf yes $path2 $path1 . $ref_query > $ref_query".sdout" 2>&1
-        mkdir $ref_query
-        mv *.* $ref_query
-        mv results/*.* $ref_query
+        nucdiff  --vcf yes ${path2} ${path1} . ${ref_query} > ${ref_query}.sdout 2>&1
+        mkdir ${ref_query}
+        mv *.* ${ref_query}
+        mv results/*.* ${ref_query}
         rm -r results
         # removing the paths in file for further work (hardcoded)
-        sed -i "s#.*/${ref}.fna#${ref}.fna#g" $ref_query/$ref_query".delta"
-        sed -i "s# .*/${query}.fna# ${query}.fna#g" $ref_query/$ref_query".delta"
+        sed -i "s#.*/${ref}.fna#${ref}.fna#g" ${ref_query}/${ref_query}.delta
+        sed -i "s# .*/${query}.fna# ${query}.fna#g" ${ref_query}/${ref_query}.delta
         """
         else
         error "Correct ref-query not found"  

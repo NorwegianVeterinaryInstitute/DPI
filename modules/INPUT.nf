@@ -4,7 +4,7 @@ process INPUT {
 
         label 'process_short'
 
-        debug "$params.debug"
+        debug "${params.debug}"
 
         input:
         path input
@@ -16,7 +16,7 @@ process INPUT {
 
         script:
         """
-        Rscript $projectDir/bin/input_check.R --input $input
+        Rscript ${projectDir}/bin/input_check.R --input ${input}
         """
 }
 
@@ -32,6 +32,6 @@ process INPUT_VERSION {
         script:
         """
         # creates the version file
-        Rscript  $projectDir/bin/input_check.R --version TRUE
+        Rscript  ${projectDir}/bin/input_check.R --version TRUE
         """
 }

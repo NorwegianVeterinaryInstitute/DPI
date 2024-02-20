@@ -3,8 +3,9 @@ process WRANGLING_TO_DB{
         conda (params.enable_conda ? './assets/py_test.yml' : null)
         container 'evezeyl/py_test:latest'
         
-        debug "$params.debug"
+        debug "${params.debug}"
         label 'process_high'
+        cache 'lenient'
         
         input:
         val(db)
@@ -15,10 +16,10 @@ process WRANGLING_TO_DB{
 
         output:
         path(db), emit : db_path_ch
-        path("*")
+
         script:
         """
-        python $projectDir/bin/results_to_db.py --database ${db} --comment ${comment}
+        python ${projectDir}/bin/results_to_db.py --database ${db} --comment ${comment}
         """
 } 
 
@@ -33,6 +34,6 @@ process WRANGLING_TO_DB_VERSION{
 
         script:
         """
-        python $projectDir/bin/results_to_db.py --version > results_to_db.version
+        python ${projectDir}/bin/results_to_db.py --version > results_to_db.version
         """
 } 

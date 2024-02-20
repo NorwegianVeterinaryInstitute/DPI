@@ -2,9 +2,12 @@
 process JSON_TO_DB{
         conda (params.enable_conda ? './assets/py_test.yml' : null)
         container 'evezeyl/py_test:latest'
+
+        // only one process at time - avoid collision writing DB
+        maxForks 1
         
-        debug "$params.debug"
-        tag "$sample" 
+        debug "${params.debug}"
+        tag "${sample}" 
         label 'process_short'
         
         input:
@@ -12,11 +15,11 @@ process JSON_TO_DB{
         tuple val(sample), path(json_path)
 
         output:
-        path("*")
+        path(db)
         
         script:
         """
-        python $projectDir/bin/json_annot_import.py --json $json_path --database $db --sample_id $sample 
+        python ${projectDir}/bin/json_annot_import.py --json ${json_path} --database ${db} --sample_id ${sample}
         """
 } 
 
@@ -27,10 +30,10 @@ process JSON_TO_DB_VERSION{
         label 'process_short'        
 
         output:
-        file("*") 
+        path("*") 
 
         script:
         """
-        python $projectDir/bin/json_annot_import.py --version > json_annot_import.version
+        python ${projectDir}/bin/json_annot_import.py --version > json_annot_import.version
         """
 } 
