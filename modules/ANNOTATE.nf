@@ -4,15 +4,15 @@ process ANNOTATE {
 
         label 'process_high_memory'
 
-        debug "$params.debug"
-        tag "$sample" 
+        debug "${params.debug}"
+        tag "${sample}" 
 
         input:
-        tuple val(sample), path(path)
-        path baktaDB
-        path training
-        val genus
-        val species
+        tuple val(sample), path(pathx)
+        path(baktaDB)
+        path(training)
+        val(genus)
+        val(species)
 
         output:
         tuple val(sample), path("${sample}/${sample}.fna"), emit: bakta_fna_ch
@@ -22,10 +22,10 @@ process ANNOTATE {
 
         script:
         """
-        mkdir $sample
-        bakta --db $baktaDB --prodigal-tf $training --prefix $sample --force \
-        --locus $sample --genus $genus --species $species $path > $sample/$sample".sdout" 2>&1 
-        mv *.* $sample
+        mkdir ${sample}
+        bakta --db ${baktaDB} --prodigal-tf ${training} --prefix ${sample} --force \
+        --locus ${sample} --genus ${genus} --species ${species} ${pathx} > ${sample}/${sample}.sdout 2>&1 
+        mv *.* ${sample}
         """
 }
 

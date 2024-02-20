@@ -6,8 +6,8 @@ process PREPARE_VCF_ANNOTATOR {
 
         label 'process_short'
         
-        debug "$params.debug"
-        tag "$pair"
+        debug "${params.debug}"
+        tag "${pair}"
 
         input:
         tuple val(pair), val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf)
@@ -20,8 +20,8 @@ process PREPARE_VCF_ANNOTATOR {
         
         script:
         """
-        python $projectDir/bin/prep_vcf_annotator.py --vcf ${ref_vcf}
-        python $projectDir/bin/prep_vcf_annotator.py --vcf ${query_vcf}
+        python ${projectDir}/bin/prep_vcf_annotator.py --vcf ${ref_vcf}
+        python ${projectDir}/bin/prep_vcf_annotator.py --vcf ${query_vcf}
         """
 }
 

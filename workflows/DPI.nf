@@ -19,8 +19,6 @@ workflow DPI {
 
         INPUT(input_channel)
 
-        //INPUT.out.pairs_ch.view()
-        //INPUT.out.unique_samples_ch.view()
         
         // creating unique samples list from csv files
         input_samples_ch = INPUT.out.unique_samples_ch
@@ -48,8 +46,6 @@ workflow DPI {
                 .combine(ANNOTATE.out.bakta_fna_ch, by: 0)
                 .map{it.swap(0,1)} 
                 .map{it.swap(1,2)}
-
-        //fna_pairs_ch.view()
 
         PREPARE_NUCDIFF(fna_pairs_ch)
 
@@ -98,16 +94,11 @@ workflow DPI {
                 RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
                 )
 
-        // JSON annotation to DB
-        // This process I think should be run only once - otherwise many access to DB can be problematic
-        // we can think we can modify - there is nf module comming out for sql
-
-
+        // This is run only once at the time to avoid many access to same DB which could be a problem
         JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) 
 
 
         //Final: output sofware versions 
-        // need to modify python files for version dump - keep old way for now
         INPUT_VERSION()
         ANNOTATE_VERSION()
         PREPARE_NUCDIFF_VERSION()

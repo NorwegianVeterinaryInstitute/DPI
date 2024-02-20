@@ -2,12 +2,12 @@
 process JSON_TO_DB{
         conda (params.enable_conda ? './assets/py_test.yml' : null)
         container 'evezeyl/py_test:latest'
-        //fair true
-        // allows to run sequentially
+
+        // only one process at time - avoid collision writing DB
         maxForks 1
         
-        debug "$params.debug"
-        tag "$sample" 
+        debug "${params.debug}"
+        tag "${sample}" 
         label 'process_short'
         
         input:
@@ -15,7 +15,7 @@ process JSON_TO_DB{
         tuple val(sample), path(json_path)
 
         output:
-        path("*.sqlite")
+        path(db)
         
         script:
         """
@@ -30,7 +30,7 @@ process JSON_TO_DB_VERSION{
         label 'process_short'        
 
         output:
-        file("*") 
+        path("*") 
 
         script:
         """

@@ -4,8 +4,8 @@ process RUN_VCF_ANNOTATOR{
         conda (params.enable_conda ? 'bioconda::vcf-annotator=0.7' : null)
 	container 'quay.io/biocontainers/vcf-annotator:0.7--hdfd78af_0'
 
-        debug "$params.debug"
-        tag "$pair"
+        debug "${params.debug}"
+        tag "${pair}"
 
         label 'process_short'
 
@@ -19,8 +19,8 @@ process RUN_VCF_ANNOTATOR{
 
         script:
         """
-        vcf-annotator ${ref_vcf} ${ref_gbff} --output ${ref_query}_ref_snps_annotated.vcf >  $ref".sdout" 2>&1 
-        vcf-annotator ${query_vcf} ${query_gbff} --output ${ref_query}_query_snps_annotated.vcf > $query".sdout" 2>&1 
+        vcf-annotator ${ref_vcf} ${ref_gbff} --output ${ref_query}_ref_snps_annotated.vcf >  ${ref}.sdout 2>&1 
+        vcf-annotator ${query_vcf} ${query_gbff} --output ${ref_query}_query_snps_annotated.vcf > ${query}.sdout 2>&1 
         """
 }
 
