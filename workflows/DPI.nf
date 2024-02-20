@@ -98,6 +98,7 @@ workflow DPI {
         JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) 
 
 
+
         //Final: output sofware versions 
         INPUT_VERSION()
         ANNOTATE_VERSION()
