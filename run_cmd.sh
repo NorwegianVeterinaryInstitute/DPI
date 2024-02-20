@@ -14,12 +14,6 @@ TEST="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/con
 ## with container and slurm 
 $NF run $MAIN -c $CONFIG -c $TEST --out_dir . -work-dir $USERWORK/dpi_test  --track DPI -profile apptainer -resume 
 # OR 
-$NF run $MAIN -c $CONFIG --out_dir . -work-dir $USERWORK/dpi_test  --track DPI -profile apptainer,test_DPI -resume 
+$NF run $MAIN -c $CONFIG --out_dir . -work-dir $USERWORK/dpi_test -profile apptainer,test_DPI -resume 
 
 
-# Debug 
-srun --account=nn9305k --mem-per-cpu=16G --cpus-per-task=4 --qos=devel --time=0:59:00 --pty bash -i
-cd ... 
-
-IMG="/cluster/work/users/evezeyl/images/"
-apptainer shell $IMG 

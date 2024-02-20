@@ -15,11 +15,11 @@ process JSON_TO_DB{
         tuple val(sample), path(json_path)
 
         output:
-        path(db)
+        path("*.sqlite")
         
         script:
         """
-        python $projectDir/bin/json_annot_import.py --json $json_path --database $db --sample_id $sample 
+        python ${projectDir}/bin/json_annot_import.py --json ${json_path} --database ${db} --sample_id ${sample}
         """
 } 
 
@@ -34,6 +34,6 @@ process JSON_TO_DB_VERSION{
 
         script:
         """
-        python $projectDir/bin/json_annot_import.py --version > json_annot_import.version
+        python ${projectDir}/bin/json_annot_import.py --version > json_annot_import.version
         """
 } 
