@@ -4,6 +4,7 @@ import argparse
 import sys
 import os
 import pandas as pd
+import numpy as np
 
 def parse_args(args):
 
@@ -47,7 +48,13 @@ def reformat_vcf(file, outdir = ".", skip_rows = 2):
     # get the body
     df = pd.read_table(file, sep="\t", skiprows= skip_rows, skip_blank_lines=True, index_col=None)
     df = df.assign(INFO = ".")
-
+    
+    # need to replace eventual missing values - by . so we can recover (eg gets a N  and . in ALT) 
+    # Treats the case of deletions that are not correctly formated
+    df = df.replace(np.nan, ".")
+    # Those results should be filtered out I think from the annotation of vcf files. 
+    # Makes vcf-annotator bug
+        
     # write new vcf file
     new_file = file.replace(".vcf", "_reformated.vcf")
 
