@@ -81,18 +81,19 @@ workflow DPI {
         RUN_VCF_ANNOTATOR(vcf_annot_ch)
 
         // get path for database and comments 
+        // not a path because it needs to be created - does not exists yet
         db_path_ch=Channel.value(params.sqlitedb)
         comment_ch=Channel.value(params.comment) 
 
         // create database - is run on all using selectors of files pattern
         // This process is restarted at each resume - might be because non deterministic order ?                        
 
-        WRANGLING_TO_DB(
-                db_path_ch,
-                comment_ch, 
-                RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect(),
-                RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
-                )
+        vcf_ann_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect()
+        nucdiff_ch = RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
+
+        // should probably filter to get only paths but it works for short demo
+
+        WRANGLING_TO_DB(db_path_ch, comment_ch, vcf_ann_ch, nucdiff_ch)
 
         // This is run only once at the time to avoid many access to same DB which could be a problem
         JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) 
