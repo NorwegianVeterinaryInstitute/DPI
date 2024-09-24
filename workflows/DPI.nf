@@ -8,6 +8,18 @@ include { WRANGLING_TO_DB; WRANGLING_TO_DB_VERSION  } from "../modules/WRANGLING
 include { JSON_TO_DB; JSON_TO_DB_VERSION  } from "../modules/JSON_TO_DB.nf"
 
 workflow DPI {
+     
+        // output sofware versions 
+        INPUT_VERSION()
+        ANNOTATE_VERSION()
+        PREPARE_NUCDIFF_VERSION()
+        RUN_NUCDIFF_VERSION()
+        PREPARE_VCF_ANNOTATOR_VERSION()
+        RUN_VCF_ANNOTATOR_VERSION()
+        WRANGLING_TO_DB_VERSION()
+        JSON_TO_DB_VERSION()
+
+        // Workflow 
         if (!params.input) {exit 1, "Missing input file"}
         if (!params.baktaDB) {exit 1, "Missing or wrong path for Bakta database"}
         if (!params.training) {exit 1, "missing or wrong path for prodigal training file"}
@@ -80,6 +92,7 @@ workflow DPI {
         
         RUN_VCF_ANNOTATOR(vcf_annot_ch)
 
+        // Run at the end - in case need manual run (debug issues nb files)
         // get path for database and comments 
         // not a path because it needs to be created - does not exists yet
         db_path_ch=Channel.value(params.sqlitedb)
@@ -87,27 +100,40 @@ workflow DPI {
 
         // create database - is run on all using selectors of files pattern
         // This process is restarted at each resume - might be because non deterministic order ?                        
+        
+        // Need a find to reduce amount of simlink files otherwise nf pipeline bugs
+        // see: :https://github.com/nextflow-io/nextflow/issues/2852 "plaquette" solution
+        //vcf_ann_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect()
+        //nucdiff_ch = RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
 
-        vcf_ann_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect()
-        nucdiff_ch = RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
+        vcf_ann_file_ch = 
+                RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
+                .collect()
+                .flatten()
+                .map{it -> "ln -s " + it.toString() + " ." }
+                .collectFile(name: 'vcf_ann_paths.sh', newLine: true)
 
-        // should probably filter to get only paths but it works for short demo
+        
+        nucdiff_file_ch = 
+                RUN_NUCDIFF.out.nucdiff_res_ch
+                .collect()
+                .flatten()
+                .map{it -> "ln -s " + it.toString() + " ." }
+                .collectFile(name: 'nucdiff_file_paths.sh', newLine: true)        
 
-        WRANGLING_TO_DB(db_path_ch, comment_ch, vcf_ann_ch, nucdiff_ch)
+        //nucdiff_file_ch.view()
+
+        //WRANGLING_TO_DB(db_path_ch, comment_ch, vcf_ann_ch, nucdiff_ch)
+        WRANGLING_TO_DB(db_path_ch, comment_ch, vcf_ann_file_ch, nucdiff_file_ch)
 
         // This is run only once at the time to avoid many access to same DB which could be a problem
         JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) 
 
 
 
-        //Final: output sofware versions 
-        INPUT_VERSION()
-        ANNOTATE_VERSION()
-        PREPARE_NUCDIFF_VERSION()
-        RUN_NUCDIFF_VERSION()
-        PREPARE_VCF_ANNOTATOR_VERSION()
-        RUN_VCF_ANNOTATOR_VERSION()
-        WRANGLING_TO_DB_VERSION()
-        JSON_TO_DB_VERSION()
+
+
+
+
 
 }
