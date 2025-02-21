@@ -14,7 +14,7 @@ process RUN_VCF_ANNOTATOR{
         path(ref_gbff), path(query_gbff)
         
         output:
-        tuple path("${ref_query}_ref_snps_annotated.vcf"), 
+        tuple val(pair), path("${ref_query}_ref_snps_annotated.vcf"), 
         path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
 
         script:

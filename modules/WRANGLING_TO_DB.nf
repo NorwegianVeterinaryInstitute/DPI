@@ -24,12 +24,13 @@
 }  
 */
 
-// Trial with file paths
-
+// Adds all results to the database (for all pairs)
 process WRANGLING_TO_DB{
         conda (params.enable_conda ? './assets/py_test.yml' : null)
         container 'evezeyl/py_test:latest'
         
+        //tag "${pair}"
+        maxForks 1
         debug "${params.debug}"
         label 'process_high'
         cache 'lenient'
@@ -37,24 +38,17 @@ process WRANGLING_TO_DB{
         input:
         val(db)
         val(comment)
-        path(vcf_ann_paths)
-        path(nucdiff_file_paths) 
-        
+        tuple val(pair), path(set_files)
 
         output:
         path(db), emit : db_path_ch
 
         script:
         """
-        # creates the simlink for files to wrap  
-        bash ${vcf_ann_paths}
-        bash ${nucdiff_file_paths}
-
-        # results to db
         python ${projectDir}/bin/results_to_db.py --database ${db} --comment ${comment}
         """
-        
-} 
+}  
+
 
 process WRANGLING_TO_DB_VERSION{
         conda (params.enable_conda ? './assets/py_test.yml' : null)

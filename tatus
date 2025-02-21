@@ -1,0 +1,131 @@
+[1mdiff --git a/conf/saga_DPI.config b/conf/saga_DPI.config[m
+[1mindex 554799e..c8282e5 100644[m
+[1m--- a/conf/saga_DPI.config[m
+[1m+++ b/conf/saga_DPI.config[m
+[36m@@ -36,7 +36,7 @@[m [mprocess {[m
+ 	withLabel: process_high_memory_time {[m
+         clusterOptions  = '--job-name=Saga_nxf --account=nn9305k --partition=bigmem'[m
+ 		memory          = 200.GB[m
+[31m-		time			= { params.time_multiplier * 48.h * task.attempt }[m
+[32m+[m		[32mtime			= { params.time_multiplier * 8.h * task.attempt }[m
+         }[m
+ 	withLabel: process_high_memory_cpu_time {[m
+         clusterOptions  = '--job-name=Saga_nxf --account=nn9305k --partition=bigmem'[m
+[1mdiff --git a/modules/RUN_NUCDIFF.nf b/modules/RUN_NUCDIFF.nf[m
+[1mindex a789830..af8016d 100644[m
+[1m--- a/modules/RUN_NUCDIFF.nf[m
+[1m+++ b/modules/RUN_NUCDIFF.nf[m
+[36m@@ -15,7 +15,7 @@[m [mprocess RUN_NUCDIFF{[m
+ [m
+         output: [m
+         tuple val(pair), val(ref_query), val(ref), val(query), path("${ref_query}/${ref_query}_ref_snps.vcf"), path("${ref_query}/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch [m
+[31m-        tuple path ("${ref_query}/*.gff"), path("${ref_query}/*.out"), emit: nucdiff_res_ch[m
+[32m+[m[32m        tuple val(pair), path ("${ref_query}/*.gff"), path("${ref_query}/*.out"), emit: nucdiff_res_ch[m
+         file("*")[m
+ [m
+         // would be nice with finnally  ... [m
+[1mdiff --git a/modules/RUN_VCF_ANNOTATOR.nf b/modules/RUN_VCF_ANNOTATOR.nf[m
+[1mindex 11853b8..d305dec 100644[m
+[1m--- a/modules/RUN_VCF_ANNOTATOR.nf[m
+[1m+++ b/modules/RUN_VCF_ANNOTATOR.nf[m
+[36m@@ -14,7 +14,7 @@[m [mprocess RUN_VCF_ANNOTATOR{[m
+         path(ref_gbff), path(query_gbff)[m
+         [m
+         output:[m
+[31m-        tuple path("${ref_query}_ref_snps_annotated.vcf"), [m
+[32m+[m[32m        tuple val(pair), path("${ref_query}_ref_snps_annotated.vcf"),[m[41m [m
+         path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch[m
+ [m
+         script:[m
+[1mdiff --git a/modules/WRANGLING_TO_DB.nf b/modules/WRANGLING_TO_DB.nf[m
+[1mindex 1f2ebfd..e483309 100644[m
+[1m--- a/modules/WRANGLING_TO_DB.nf[m
+[1m+++ b/modules/WRANGLING_TO_DB.nf[m
+[36m@@ -24,12 +24,13 @@[m
+ }  [m
+ */[m
+ [m
+[31m-// Trial with file paths[m
+[31m-[m
+[32m+[m[32m// Adds all results to the database (for all pairs)[m
+ process WRANGLING_TO_DB{[m
+         conda (params.enable_conda ? './assets/py_test.yml' : null)[m
+         container 'evezeyl/py_test:latest'[m
+         [m
+[32m+[m[32m        //tag "${pair}"[m
+[32m+[m[32m        maxForks 1[m
+         debug "${params.debug}"[m
+         label 'process_high'[m
+         cache 'lenient'[m
+[36m@@ -37,24 +38,17 @@[m [mprocess WRANGLING_TO_DB{[m
+         input:[m
+         val(db)[m
+         val(comment)[m
+[31m-        path(vcf_ann_paths)[m
+[31m-        path(nucdiff_file_paths) [m
+[31m-        [m
+[32m+[m[32m        tuple val(pair), path(set_files)[m
+ [m
+         output:[m
+         path(db), emit : db_path_ch[m
+ [m
+         script:[m
+         """[m
+[31m-        # creates the simlink for files to wrap  [m
+[31m-        bash ${vcf_ann_paths}[m
+[31m-        bash ${nucdiff_file_paths}[m
+[31m-[m
+[31m-        # results to db[m
+         python ${projectDir}/bin/results_to_db.py --database ${db} --comment ${comment}[m
+         """[m
+[31m-        [m
+[31m-} [m
+[32m+[m[32m}[m[41m  [m
+[32m+[m
+ [m
+ process WRANGLING_TO_DB_VERSION{[m
+         conda (params.enable_conda ? './assets/py_test.yml' : null)[m
+[1mdiff --git a/workflows/DPI.nf b/workflows/DPI.nf[m
+[1mindex 755cbfe..bc5947b 100644[m
+[1m--- a/workflows/DPI.nf[m
+[1m+++ b/workflows/DPI.nf[m
+[36m@@ -106,28 +106,23 @@[m [mworkflow DPI {[m
+         //vcf_ann_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect()[m
+         //nucdiff_ch = RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()[m
+ [m
+[31m-        vcf_ann_file_ch = [m
+[31m-                RUN_VCF_ANNOTATOR.out.annotated_vcf_ch[m
+[31m-                .collect()[m
+[31m-                .flatten()[m
+[31m-                .map{it -> "ln -s " + it.toString() + " ." }[m
+[31m-                .collectFile(name: 'vcf_ann_paths.sh', newLine: true)[m
+ [m
+[32m+[m[32m        one_ch = RUN_NUCDIFF.out.nucdiff_res_ch.transpose()[m
+[32m+[m
+[32m+[m
+[32m+[m[32m        results_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch[m
+[32m+[m[32m                .join(one_ch, by: 0)[m
+[32m+[m[32m                .groupTuple( by : 0)[m
+         [m
+[31m-        nucdiff_file_ch = [m
+[31m-                RUN_NUCDIFF.out.nucdiff_res_ch[m
+[31m-                .collect()[m
+[31m-                .flatten()[m
+[31m-                .map{it -> "ln -s " + it.toString() + " ." }[m
+[31m-                .collectFile(name: 'nucdiff_file_paths.sh', newLine: true)        [m
+[32m+[m[32m           //         .map { (pair) = [it[0]] }[m
+[32m+[m[41m                [m
+[32m+[m
+ [m
+[31m-        //nucdiff_file_ch.view()[m
+[32m+[m[32m        WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)[m
+ [m
+[31m-        //WRANGLING_TO_DB(db_path_ch, comment_ch, vcf_ann_ch, nucdiff_ch)[m
+[31m-        WRANGLING_TO_DB(db_path_ch, comment_ch, vcf_ann_file_ch, nucdiff_file_ch)[m
+ [m
+         // This is run only once at the time to avoid many access to same DB which could be a problem[m
+[31m-        JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) [m
+[32m+[m[32m        //JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch)[m[41m [m
+ [m
+ [m
+ [m
