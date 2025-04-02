@@ -106,19 +106,22 @@ workflow DPI {
         //vcf_ann_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect()
         //nucdiff_ch = RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
 
+        RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.view()
 
-        one_ch = RUN_NUCDIFF.out.nucdiff_res_ch.transpose()
 
 
-        results_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
-                .join(one_ch, by: 0)
-                .groupTuple( by : 0)
+        // one_ch = RUN_NUCDIFF.out.nucdiff_res_ch.transpose()
+
+
+        // results_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
+        //         .join(one_ch, by: 0)
+        //         .groupTuple( by : 0)
         
-           //         .map { (pair) = [it[0]] }
+        //    //         .map { (pair) = [it[0]] }
                 
 
 
-        WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
+        // WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
 
 
         // This is run only once at the time to avoid many access to same DB which could be a problem
