@@ -83,7 +83,7 @@ ok, was interaction with Rprofiles ...
 --- 2023-10-02 worflow and modules reformated --- last testing to see if works :) 
 
 
-æ7# Ressources
+# Ressources
 - nf carpentry https://carpentries-incubator.github.io/workflows-nextflow/08-configuration/index.html 
 nextflow config workflow_02.nf -profile test
 
