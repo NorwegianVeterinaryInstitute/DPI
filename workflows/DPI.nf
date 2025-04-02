@@ -9,7 +9,7 @@ include { JSON_TO_DB; JSON_TO_DB_VERSION  } from "../modules/JSON_TO_DB.nf"
 
 workflow DPI {
      
-        // output sofware versions 
+/*         // output sofware versions 
         INPUT_VERSION()
         ANNOTATE_VERSION()
         PREPARE_NUCDIFF_VERSION()
@@ -17,7 +17,7 @@ workflow DPI {
         PREPARE_VCF_ANNOTATOR_VERSION()
         RUN_VCF_ANNOTATOR_VERSION()
         WRANGLING_TO_DB_VERSION()
-        JSON_TO_DB_VERSION()
+        JSON_TO_DB_VERSION() */
 
         // Workflow 
         if (!params.input) {exit 1, "Missing input file"}
@@ -45,6 +45,9 @@ workflow DPI {
         //ANNOTATION for all samples individually 
         ANNOTATE(input_samples_ch, params.baktaDB, params.training, params.genus, params.species)
 
+       
+       /* 
+       
         // Combining channels to form pairs - by: [0,2] possition does not error but not sure does the right thing
         // need to swap keys so it can belong - problem if no keys in the first line 
         // need to swap keys again - sample 2 - pair - sample 1  
@@ -119,7 +122,7 @@ workflow DPI {
         
         //    //         .map { (pair) = [it[0]] }
                 
-
+ */
 
         // WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
 

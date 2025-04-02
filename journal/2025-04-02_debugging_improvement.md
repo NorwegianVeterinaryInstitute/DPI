@@ -24,3 +24,8 @@ git checkout 7e50c99 -- workflows
 
 # Step 2 - Step by step modification of modles and resutls - deleted previous results
 
+```shell
+2025_test_run.sh
+``` 
+1. annotating only the samples 
+2. check if some results of the samples needed to be added to the database
