@@ -18,7 +18,7 @@ conn.close()
 # Getting Table Schema:
 import sqlite3
 
-    conn = sqlite3.connect('my_database.sqlite')
+    conn = sqlite3.connect('2025_DPI_test.sqlite')
     cursor = conn.cursor()
 
     cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='my_table'")

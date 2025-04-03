@@ -117,6 +117,9 @@ def create_or_append_table(df, table_name, identifier, file_name, db_conn):
     except sqlite3.IntegrityError:
         print(f"Skipping duplicate identifier: {identifier} in file {file_name}")
 
+    # log function
+    print(f"create_or_append_table function has run for {identifier}.")
+
     cursor.close()
 
 
