@@ -74,13 +74,17 @@ def create_or_append_table(df, table_name, identifier, file_name, db_conn):
     Args:
         df (pd.DataFrame): DataFrame to insert.
         table_name (str): Name of the table.
-        identifier (str): The identifier (primary key).
+        identifier (str): The identifier (pair or sample_id).
         file_name (str): The name of the processed file.
         db_conn (sqlite3.Connection): The database connection.
     """
     cursor = db_conn.cursor()
-    df.insert(0, "identifier", identifier)
-    df.insert(1, "file_name", file_name)
+
+    # Insert identifier with a different name
+    df.insert(0, "nf_val_identifier", identifier)
+
+    # Create a copy of the DataFrame *without* 'file_name' for checking duplicates and insertion
+    df_to_insert = df.copy().drop(columns=["file_name"], errors="ignore")
 
     # Check if table exists
     cursor.execute(
@@ -89,33 +93,57 @@ def create_or_append_table(df, table_name, identifier, file_name, db_conn):
     table_exists = cursor.fetchone()
 
     if not table_exists:
-        # Create table with 'identifier' as primary key
-        columns = ", ".join(f"{col} TEXT" for col in df.columns)
-        cursor.execute(
-            f"CREATE TABLE {table_name} (identifier TEXT PRIMARY KEY, {columns[13:]})"
-        )  # remove identifier column from columns string and add primary key
-        # TODO why columns[13:]?
+        # Create table
+        columns = ", ".join(f"{col} TEXT" for col in df_to_insert.columns)
+        columns_with_filename = f"file_name TEXT, {columns}"
+        cursor.execute(f"CREATE TABLE {table_name} ({columns_with_filename})")
+        print(f"Table '{table_name}' created.")
     else:
         # Check and add missing columns
         cursor.execute(f"PRAGMA table_info({table_name})")
         existing_cols = [row[1] for row in cursor.fetchall()]
-        missing_cols = [col for col in df.columns if col not in existing_cols]
+        missing_cols = [col for col in df_to_insert.columns if col not in existing_cols]
 
         for col in missing_cols:
             cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN {col} TEXT")
             cursor.execute(f"UPDATE {table_name} SET {col} = NULL")
-
         print(f"Table '{table_name}' already exists, columns added if needed.")
 
-    # Insert data, checking for duplicates based on 'identifier'
-    placeholders = ", ".join("?" for _ in df.columns)
-    try:
-        cursor.execute(
-            f"INSERT INTO {table_name} VALUES ({placeholders})", tuple(df.iloc[0])
-        )  # insert only one row at the time, because the identifier is a primary key.
-        print(f"Data inserted into '{table_name}'.")  # Add print statement
-    except sqlite3.IntegrityError:
-        print(f"Skipping duplicate identifier: {identifier} in file {file_name}")
+    # FIXME : if to heavy to check database : implement option to skip check duplicates
+    # and do a deduplication after on the whole database - this might be faster
+    # or optimize in another way
+
+    # Insert data, checking for duplicates across all data columns
+    placeholders = ", ".join("?" for _ in df_to_insert.columns)
+    # FIXME : continue here !!! see error message
+    for row in df_to_insert.itertuples(index=False):
+        row_values = list(row)
+        where_clause = " AND ".join(f"{col} = ?" for col in df_to_insert.columns)
+        select_query = f"SELECT 1 FROM {table_name} WHERE {where_clause}"
+
+        print(f"DEBUG: SELECT query: {select_query}")  # Print the SELECT query
+        print(f"DEBUG: SELECT query values: {tuple(row_values)}")  # Print the values
+
+        try:
+            cursor.execute(select_query, tuple(row_values))
+            exists = cursor.fetchone()
+        except sqlite3.Error as e:
+            print(f"DEBUG: Error during SELECT: {e}")
+            exists = None  # Handle the error and continue
+
+        if not exists:
+            insert_query = f"INSERT INTO {table_name} VALUES (?, {placeholders})"
+            print(f"DEBUG: INSERT query: {insert_query}")  # Print the INSERT query
+            print(
+                f"DEBUG: INSERT query values: {(file_name, *row_values)}"
+            )  # Print the values
+            cursor.execute(
+                insert_query,
+                (file_name, *row_values),
+            )
+            print(f"Data inserted into '{table_name}'.")
+        else:
+            print(f"Skipping duplicate row in file {file_name}")
 
     # log function
     print(f"create_or_append_table function has run for {identifier}.")
