@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
-
+import sqlite3
 # import sys
 # import os
-import sqlite3
+
 
 # import pandas as pd
 # import json
@@ -108,7 +108,12 @@ def main():
     db_conn = sqlite3.connect(db_path)
 
     # Process the result files
-    fk.process_result_file(result_file, result_type, identifier, db_conn)
+    if result_type == "json":
+        fk.process_result_file(result_file, result_type, identifier, db_conn, comment = None)
+    else:
+        fk.process_result_file(result_file, result_type, identifier, db_conn, comment)
+
+    print(f"{result_type} result processed")
 
     # Close the database connection
     db_conn.close()
