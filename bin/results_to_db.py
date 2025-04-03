@@ -88,7 +88,7 @@ def main():
     # Check if required arguments are provided when not version or example
     if (
         not args.comment
-        or not args.entifier
+        or not args.identifier
         or not args.result_type
         or not args.result_file
     ):

@@ -63,7 +63,7 @@ def process_result_file(file_path, result_type, identifier, db_conn):
         print(f"Error processing {file_path}: {e}")
         db_conn.rollback()
 
-    print("process_result_file function is not implemented yet.")
+    print("the function has run.")
 
 
 # ANCHOR : Functions for json data processing
