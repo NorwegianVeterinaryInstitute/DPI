@@ -29,3 +29,5 @@ git checkout 7e50c99 -- workflows
 ``` 
 1. annotating only the samples 
 2. check if some results of the samples needed to be added to the database
+- json results for samples from annotation need to be added - starting rewriting this
+

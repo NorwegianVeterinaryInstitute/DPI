@@ -46,8 +46,7 @@ workflow DPI {
         ANNOTATE(input_samples_ch, params.baktaDB, params.training, params.genus, params.species)
 
        
-       /* 
-       
+         
         // Combining channels to form pairs - by: [0,2] possition does not error but not sure does the right thing
         // need to swap keys so it can belong - problem if no keys in the first line 
         // need to swap keys again - sample 2 - pair - sample 1  
@@ -63,6 +62,8 @@ workflow DPI {
                 .map{it.swap(1,2)}
 
         PREPARE_NUCDIFF(fna_pairs_ch)
+        /* 
+
 
         //ref is the longuest of the two - prepare tags 
         //pairs always sorted - so can always match them 
@@ -130,11 +131,15 @@ workflow DPI {
         // This is run only once at the time to avoid many access to same DB which could be a problem
         //JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) 
 
+// This was the original
+/*
 
-
-
-
-
-
+        WRANGLING_TO_DB(
+                db_path_ch,
+                comment_ch, 
+                RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect(),
+                RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
+                )
+*/
 
 }

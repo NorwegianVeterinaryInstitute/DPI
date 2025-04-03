@@ -3,6 +3,157 @@
 import argparse
 import sys
 import os
+#import pandas as pd
+import json
+import sqlalchemy 
+#import numpy as np
+import funktions as fk
+
+# PARSING ARGUMENTS 
+#TODO NODIFY
+def parse_args(args):
+
+    parser = argparse.ArgumentParser(
+        prog="results_to_db.py",
+        usage=None, 
+        description='Import results of of the pipeline, transform into tables and add to a sqlite database.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        add_help=True
+        )
+
+    parser.add_argument("--json",
+                        action="store",
+                        required=True,
+                        help="json annotation file from bakta")
+    parser.add_argument("--database",
+                        action="store",
+                        default="nucdiff.sqlite",
+                        required=False,
+                        help="path/name of the database. If it does not exists, it will be created, otherwise results are append")
+    parser.add_argument("--sample_id",
+                        action="store",
+                        default=".",
+                        help="sample_id that will be used")
+    parser.add_argument("--version",
+                        action="version",
+                        version = "%(prog)s 0.0.1",
+                        help="print the version of the script")
+    
+    args = vars(parser.parse_args())
+    return args
+
+
+
+
+
+# ANCHOR Gemini suggestions
+
+# Function to process the different files types 
+def process_result_files(result_files, result_type, pair, db_conn):
+    """
+    Processes a list of result files of a specific type, 
+    transforms them into a table, and inserts them into the database.
+
+    Args:
+        result_files (list): List of paths to result files.
+        result_type (str): The type of result (e.g., "snp_annotations").
+        pair (str): The pair identifier.
+        db_conn (sqlite3.Connection): The database connection.
+    """
+    
+    # Create the table if it doesn't exist
+    db_abspath = os.path.abspath(db_file)
+    try:
+    # test if file exist
+    open(db_abspath)
+except OSError:
+    print("The database do not exist. Creating the database")
+    # abspath for windows compatibilty
+    os.makedirs(os.path.dirname(db_abspath), exist_ok=True)
+
+    # Adds the data for the different data types
+    ## JSON results
+    if result_type == "json":
+        db = sqlalchemy.create_engine(f"sqlite:////{db_abspath}")
+        
+        # if the table does not exist or exist and no more columns - we put data directly 
+        try :
+            df.to_sql(table_name, db, if_exists=if_exists, index=False)
+        # else: check if all columns exist in table
+        # https://stackoverflow.com/questions/58153158/to-sql-add-column-if-not-exists-sqlalchemy-mysql
+        except:      
+            target_cols = pd.read_sql_query(f"select * from {table_name} limit 1;", db).columns.tolist()
+            df_cols = df.columns.tolist()
+            missing_columns = set(df_cols) - set(target_cols) 
+        
+            if missing_columns != set():
+                # This is not elegent solution but did not manage to add directly column via sqlalchemy
+                temp_df = pd.read_sql_query(f"SELECT * FROM {table_name};", db)
+                
+                for missing_col in list(missing_columns):
+                    temp_df.insert(len(temp_df.columns), missing_col, "NaN")
+                    
+                # add updated database
+                temp_df.to_sql(table_name, db, if_exists="replace", index=False)
+                del(temp_df)
+                
+            # add latest data - at the end
+            df.to_sql(table_name, db, if_exists=if_exists, index=False)
+    
+
+    ## GFF results
+    elif result_type == "other_type":
+        cursor.execute(f"""
+            CREATE TABLE IF NOT EXISTS {result_type} (
+                pair TEXT,
+                file_name TEXT,
+                data TEXT
+            )
+        """)
+    else:
+        print(f"Warning: Unknown result type: {result_type}. Skipping.")
+        return
+
+    # Close the database connection
+    db.dispose()
+
+def main():
+    parser = argparse.ArgumentParser(description="Wrangle results and insert into SQLite database.")
+    parser.add_argument("--database", required=True, help="Path to the SQLite database file.")
+    parser.add_argument("--comment", required=True, help="Comment for the database entries.")
+    parser.add_argument("--pair", required=True, help="The pair identifier.")
+    parser.add_argument("--result_type", required=True, help="The type of result being processed.")
+    parser.add_argument("--result_files", required=True, help="Comma-separated list of result file paths.")
+    parser.add_argument("--version", action="store_true", help="Print the version of the script")
+
+    args = parser.parse_args()
+
+    if args.version:
+        print("results_to_db.py version 1.0")
+        return
+
+    db_path = args.database
+    comment = args.comment
+    pair = args.pair
+    result_type = args.result_type
+    result_files = args.result_files.split(',')
+
+    # Connect to the database
+    db_conn = sqlite3.connect(db_path)
+
+    # Process the result files
+    process_result_files(result_files, result_type, pair, db_conn)
+
+    # Close the database connection
+    db_conn.close()
+
+if __name__ == "__main__":
+    main()
+
+
+""" import argparse
+import sys
+import os
 import re
 import pandas as pd
 import gffpandas.gffpandas as gffpd
@@ -459,3 +610,4 @@ if __name__ == '__main__':
                               if_exists='append')
 
 
+ """
