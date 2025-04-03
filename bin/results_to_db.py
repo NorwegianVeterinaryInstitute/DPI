@@ -44,7 +44,7 @@ def main():
         required=False,
         help="Path to the SQLite database file.\n"
         "If the path does not exist, it will be created.\n"
-        "If not providentifiered, the database will default to: DPI.sqlite",
+        "If not provided, the database will default to: DPI.sqlite",
     )
     parser.add_argument(
         "--comment",
@@ -53,11 +53,11 @@ def main():
         "Long comments that include spaces must be surounded by '' ",
     )
     parser.add_argument(
-        "--identifierentifier",
+        "--identifier",
         required=False,
-        help="Either the sample_identifier or the pair identifierentifier.\n"
-        "   - sample_identifier: the sample identifierentifier (for results of type json).\n"
-        "   - The pair identifierentifier for any other result type.",
+        help="Either the sample_identifier or the pair identifier.\n"
+        "   - sample_identifier: the sample identifier (for results of type json).\n"
+        "   - The pair identifier for any other result type.",
     )
     parser.add_argument(
         "--result_type",
@@ -85,22 +85,23 @@ def main():
         print("  --result_file file.json")
         return
 
-    # Check if required arguments are providentifiered when not version or example
+    # Check if required arguments are provided when not version or example
     if (
         not args.comment
-        or not args.identifierentifier
+        or not args.entifier
         or not args.result_type
         or not args.result_file
     ):
         parser.error(
-            "The following arguments are required: --comment, --identifierentifier, --result_type, --result_file"
+            "The following arguments are required: --comment, --identifier, --result_type, --result_file"
         )
         return
 
     # Arguments usage definition
     db_path = args.database
     comment = args.comment
-    identifierentifier = args.identifierentifier
+    identifier = args.identifier
+
     result_type = args.result_type
     result_file = args.result_file
 
@@ -108,7 +109,7 @@ def main():
     db_conn = sqlite3.connect(db_path)
 
     # Process the result files
-    fk.process_result_file(result_file, result_type, identifierentifier, db_conn)
+    fk.process_result_file(result_file, result_type, identifier, db_conn)
 
     # Close the database connection
     db_conn.close()
