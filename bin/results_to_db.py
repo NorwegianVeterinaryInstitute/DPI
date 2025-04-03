@@ -14,9 +14,8 @@ import sqlite3
 # sys.path.append(os.getcwd())
 import funktions as fk
 
+
 # ANCHOR : Main Parsing arguments and running
-
-
 def main():
     parser = argparse.ArgumentParser(
         prog="results_to_db.py",
@@ -45,7 +44,7 @@ def main():
         required=False,
         help="Path to the SQLite database file.\n"
         "If the path does not exist, it will be created.\n"
-        "If not provided, the database will default to: DPI.sqlite",
+        "If not providentifiered, the database will default to: DPI.sqlite",
     )
     parser.add_argument(
         "--comment",
@@ -54,11 +53,11 @@ def main():
         "Long comments that include spaces must be surounded by '' ",
     )
     parser.add_argument(
-        "--id",
+        "--identifierentifier",
         required=False,
-        help="Either the sample_id or the pair identifier.\n"
-        "   - sample_id: the sample identifier (for results of type json).\n"
-        "   - The pair identifier for any other result type.",
+        help="Either the sample_identifier or the pair identifierentifier.\n"
+        "   - sample_identifier: the sample identifierentifier (for results of type json).\n"
+        "   - The pair identifierentifier for any other result type.",
     )
     parser.add_argument(
         "--result_type",
@@ -76,27 +75,32 @@ def main():
 
     args = parser.parse_args()
 
-    # Handling of examples and version
+    # Handling of examples
     if args.example:
         print("Example usage:")
         print(" python results_to_db.py --database my_database.sqlite \\")
         print("  --comment 'Analysis on 2023-10-01' \\")
-        print("  --id sample123 \\")
+        print("  --identifier sample123 \\")
         print("  --result_type json \\")
         print("  --result_file file.json")
         return
 
-    # Check if required arguments are provided when not version or example
-    if not args.comment or not args.id or not args.result_type or not args.result_file:
+    # Check if required arguments are providentifiered when not version or example
+    if (
+        not args.comment
+        or not args.identifierentifier
+        or not args.result_type
+        or not args.result_file
+    ):
         parser.error(
-            "The following arguments are required: --comment, --id, --result_type, --result_file"
+            "The following arguments are required: --comment, --identifierentifier, --result_type, --result_file"
         )
-        return  # added return here to exit the function
+        return
 
     # Arguments usage definition
     db_path = args.database
     comment = args.comment
-    id = args.id  # was pair or sample_id previously
+    identifierentifier = args.identifierentifier
     result_type = args.result_type
     result_file = args.result_file
 
@@ -104,7 +108,7 @@ def main():
     db_conn = sqlite3.connect(db_path)
 
     # Process the result files
-    fk.process_result_file(result_file, result_type, id, db_conn)
+    fk.process_result_file(result_file, result_type, identifierentifier, db_conn)
 
     # Close the database connection
     db_conn.close()
