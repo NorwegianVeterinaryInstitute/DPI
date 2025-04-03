@@ -51,6 +51,7 @@ $SCRIPT --version
 ``` 
 
 This sage is now working - commiting the changes before continuing the dev. 
-Commit id : dd7f49d
+Commit id : 28f779c
+ 
 
 - [ ] implementing adding json results to the database
