@@ -1,613 +1,114 @@
 #!/usr/bin/env python
 
 import argparse
-import sys
-import os
-#import pandas as pd
-import json
-import sqlalchemy 
-#import numpy as np
+
+# import sys
+# import os
+import sqlite3
+
+# import pandas as pd
+# import json
+# import sqlalchemy
+
+# import numpy as np
+# sys.path.append(os.getcwd())
 import funktions as fk
 
-# PARSING ARGUMENTS 
-#TODO NODIFY
-def parse_args(args):
+# ANCHOR : Main Parsing arguments and running
 
-    parser = argparse.ArgumentParser(
-        prog="results_to_db.py",
-        usage=None, 
-        description='Import results of of the pipeline, transform into tables and add to a sqlite database.',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        add_help=True
-        )
-
-    parser.add_argument("--json",
-                        action="store",
-                        required=True,
-                        help="json annotation file from bakta")
-    parser.add_argument("--database",
-                        action="store",
-                        default="nucdiff.sqlite",
-                        required=False,
-                        help="path/name of the database. If it does not exists, it will be created, otherwise results are append")
-    parser.add_argument("--sample_id",
-                        action="store",
-                        default=".",
-                        help="sample_id that will be used")
-    parser.add_argument("--version",
-                        action="version",
-                        version = "%(prog)s 0.0.1",
-                        help="print the version of the script")
-    
-    args = vars(parser.parse_args())
-    return args
-
-
-
-
-
-# ANCHOR Gemini suggestions
-
-# Function to process the different files types 
-def process_result_files(result_files, result_type, pair, db_conn):
-    """
-    Processes a list of result files of a specific type, 
-    transforms them into a table, and inserts them into the database.
-
-    Args:
-        result_files (list): List of paths to result files.
-        result_type (str): The type of result (e.g., "snp_annotations").
-        pair (str): The pair identifier.
-        db_conn (sqlite3.Connection): The database connection.
-    """
-    
-    # Create the table if it doesn't exist
-    db_abspath = os.path.abspath(db_file)
-    try:
-    # test if file exist
-    open(db_abspath)
-except OSError:
-    print("The database do not exist. Creating the database")
-    # abspath for windows compatibilty
-    os.makedirs(os.path.dirname(db_abspath), exist_ok=True)
-
-    # Adds the data for the different data types
-    ## JSON results
-    if result_type == "json":
-        db = sqlalchemy.create_engine(f"sqlite:////{db_abspath}")
-        
-        # if the table does not exist or exist and no more columns - we put data directly 
-        try :
-            df.to_sql(table_name, db, if_exists=if_exists, index=False)
-        # else: check if all columns exist in table
-        # https://stackoverflow.com/questions/58153158/to-sql-add-column-if-not-exists-sqlalchemy-mysql
-        except:      
-            target_cols = pd.read_sql_query(f"select * from {table_name} limit 1;", db).columns.tolist()
-            df_cols = df.columns.tolist()
-            missing_columns = set(df_cols) - set(target_cols) 
-        
-            if missing_columns != set():
-                # This is not elegent solution but did not manage to add directly column via sqlalchemy
-                temp_df = pd.read_sql_query(f"SELECT * FROM {table_name};", db)
-                
-                for missing_col in list(missing_columns):
-                    temp_df.insert(len(temp_df.columns), missing_col, "NaN")
-                    
-                # add updated database
-                temp_df.to_sql(table_name, db, if_exists="replace", index=False)
-                del(temp_df)
-                
-            # add latest data - at the end
-            df.to_sql(table_name, db, if_exists=if_exists, index=False)
-    
-
-    ## GFF results
-    elif result_type == "other_type":
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS {result_type} (
-                pair TEXT,
-                file_name TEXT,
-                data TEXT
-            )
-        """)
-    else:
-        print(f"Warning: Unknown result type: {result_type}. Skipping.")
-        return
-
-    # Close the database connection
-    db.dispose()
 
 def main():
-    parser = argparse.ArgumentParser(description="Wrangle results and insert into SQLite database.")
-    parser.add_argument("--database", required=True, help="Path to the SQLite database file.")
-    parser.add_argument("--comment", required=True, help="Comment for the database entries.")
-    parser.add_argument("--pair", required=True, help="The pair identifier.")
-    parser.add_argument("--result_type", required=True, help="The type of result being processed.")
-    parser.add_argument("--result_files", required=True, help="Comma-separated list of result file paths.")
-    parser.add_argument("--version", action="store_true", help="Print the version of the script")
+    parser = argparse.ArgumentParser(
+        prog="results_to_db.py",
+        usage="%(prog)s [options]",
+        description="Wrangle results and insert into SQLite database.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        add_help=True,
+    )
+    # Version and example arguments (optional)
+    parser.add_argument(
+        "--example", action="store_true", help="Show an example of usage and exit."
+    )
+
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s 0.0.2",
+        help="Print the script version and exit.",
+    )
+
+    # Required arguments
+    parser.add_argument(
+        "--database",
+        action="store",
+        default="DPI.sqlite",
+        required=False,
+        help="Path to the SQLite database file.\n"
+        "If the path does not exist, it will be created.\n"
+        "If not provided, the database will default to: DPI.sqlite",
+    )
+    parser.add_argument(
+        "--comment",
+        required=False,
+        help="Comment for the database entries.\n"
+        "Long comments that include spaces must be surounded by '' ",
+    )
+    parser.add_argument(
+        "--id",
+        required=False,
+        help="Either the sample_id or the pair identifier.\n"
+        "   - sample_id: the sample identifier (for results of type json).\n"
+        "   - The pair identifier for any other result type.",
+    )
+    parser.add_argument(
+        "--result_type",
+        action="store",
+        required=False,
+        help="The type of result being processed.\n"
+        "   - json: JSON annotation file from Bakta\n"
+        "   - gff: GFF file",
+    )
+    parser.add_argument(
+        "--result_file",
+        required=False,
+        help="result file path.",
+    )
 
     args = parser.parse_args()
 
-    if args.version:
-        print("results_to_db.py version 1.0")
+    # Handling of examples and version
+    if args.example:
+        print("Example usage:")
+        print(" python results_to_db.py --database my_database.sqlite \\")
+        print("  --comment 'Analysis on 2023-10-01' \\")
+        print("  --id sample123 \\")
+        print("  --result_type json \\")
+        print("  --result_file file.json")
         return
 
+    # Check if required arguments are provided when not version or example
+    if not args.comment or not args.id or not args.result_type or not args.result_file:
+        parser.error(
+            "The following arguments are required: --comment, --id, --result_type, --result_file"
+        )
+        return  # added return here to exit the function
+
+    # Arguments usage definition
     db_path = args.database
     comment = args.comment
-    pair = args.pair
+    id = args.id  # was pair or sample_id previously
     result_type = args.result_type
-    result_files = args.result_files.split(',')
+    result_file = args.result_file
 
     # Connect to the database
     db_conn = sqlite3.connect(db_path)
 
     # Process the result files
-    process_result_files(result_files, result_type, pair, db_conn)
+    fk.process_result_file(result_file, result_type, id, db_conn)
 
     # Close the database connection
     db_conn.close()
 
+
 if __name__ == "__main__":
     main()
-
-
-""" import argparse
-import sys
-import os
-import re
-import pandas as pd
-import gffpandas.gffpandas as gffpd
-import sqlalchemy
-import glob
-import functools
-import operator
-
-def parse_args(args):
-    parser = argparse.ArgumentParser(
-        prog="results_to_db.py",
-        usage=None, 
-        description='Wrangling results and appending to database',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        add_help=True)
-
-    parser.add_argument("--resdir",
-                        default=".",
-                        action="store",
-                        required=False,
-                        help="directory where all results to include in the database are deposited")
-    parser.add_argument("--database",
-                        action="store",
-                        default="nucdiff.sqlite",
-                        required=False,
-                        help="path/name of the database. If it does not exists, it will be created, otherwise results are append")
-    parser.add_argument("--comment",
-                        action="store",
-                        default="NA",
-                        help="Comment to add to the tables in the database (eg. date analysis, type assembly)")
-    parser.add_argument("--version",
-                        action="version",
-                        version = "%(prog)s 0.0.1",
-                        help="print the version of the script")
-    args = vars(parser.parse_args())
-    return args
-
-########################################################################################################################
-# %% Functions
-## %% helper detect ref_query_patterns
-def ref_query_patterns(dir):
-    """
-    detect the difference ref query patterns that will need to be added in database
-    :returns list of existing ref_query
-    """
-    list_path = glob.glob(dir + "/*_stat.out")
-    return list(map(lambda i: os.path.basename(i).replace("_stat.out", ""), list_path))
-
-#%% helper : return all the files per pattern
-def res_files_per_pattern(dir, list_patterns):
-    """
-    return each list element contain all the files per pattern
-    """
-    return list(map(lambda pattern: glob.glob(dir + "/" + pattern + "*"), list_patterns))
-
-## %% detect all results files per pattern
-def detect_result_files(res_files_list):
-    """
-    organize the detected result files for ONE ref_query pattern and create a dictionary so it can be wrangled correctly
-    builds on res_files_per_pattern
-    :res_files_list a flat list of all result files
-    :returns dictionary of list file paths to analyze in different categories id(ref,query), query_files, ref_files, stat_file
-    """
-    # Prepare creating the dictionary with all files types
-    # sorting lists so that ref_query order always identical
-    # query
-    query_blocks_files = sorted([s for s in res_files_list if any(xs in s for xs in ['_query_blocks.gff'])])
-    query_snps_gff_files = sorted([s for s in res_files_list if any(xs in s for xs in ['_query_snps.gff'])])
-    query_struct_files = sorted([s for s in res_files_list if any(xs in s for xs in ['_query_struct.gff'])])
-    query_additional_files = sorted([s for s in res_files_list if any(xs in s for xs in ['_query_additional.gff'])])
-    query_snps_annotated_files = sorted([s for s in res_files_list if any(xs in s for xs in ['_query_snps_annotated.vcf'])])
-    # ref
-    ref_blocks_files = sorted([s for s in res_files_list if any(xs in s for xs in ['_ref_blocks.gff'])])
-    ref_snps_gff_files = sorted([s for s in res_files_list if any(xs in s for xs in ['_ref_snps.gff'])])
-    ref_struct_files = sorted([s for s in res_files_list if any(xs in s for xs in ['_ref_struct.gff'])])
-    ref_additional_files = sorted([s for s in res_files_list if any(xs in s for xs in ['_ref_additional.gff'])])
-    ref_snps_annotated_files = sorted([s for s in res_files_list if any(xs in s for xs in ['_ref_snps_annotated.vcf'])])
-    # stat
-    stat_files_list = sorted([s for s in res_files_list if any(xs in s for xs in ['_stat.out'])])
-
-    # creating dictionaries
-    query_files = {'query_blocks': (query_blocks_files, "_query_blocks.gff"),
-                   'query_snps_gff': (query_snps_gff_files, "_query_snps.gff"),
-                   'query_struct': (query_struct_files, "_query_struct.gff"),
-                   'query_additional': (query_additional_files, "_query_additional.gff")}
-
-    ref_files = {'ref_blocks': (ref_blocks_files,"_ref_blocks.gff"),
-                 'ref_snps_gff': (ref_snps_gff_files,"_ref_snps.gff"),
-                 'ref_struct': (ref_struct_files,"_ref_struct.gff"),
-                 'ref_additional': (ref_additional_files,  "_ref_additional.gff")}
-
-    annotated_vcf_files = {"ref_snps_annotated": (ref_snps_annotated_files,  "_ref_snps_annotated.vcf"),
-                          "query_snps_annotated": (query_snps_annotated_files, "_query_snps_annotated.vcf")}
-
-    stat_files = {'stat_file': (stat_files_list, "_stat.out")}
-
-
-    # get the ref and query id - ordered in the tuple
-    prefixes = list(map(lambda x : re.sub("_stat.out", '', os.path.basename(x)), stat_files_list))
-    ref_query_ids = list(map(lambda x: re.split('_', x), prefixes))
-    ref_ids, query_ids = list(zip(*ref_query_ids ))
-    id = {'ref': ref_ids, 'query': query_ids}
-
-    # global dict
-    files_dict = {'id': id,
-                  'query_files': query_files,
-                  'ref_files': ref_files,
-                  'stat_files': stat_files,
-                  "annotated_vcf_files": annotated_vcf_files}
-    return files_dict
-
-## %% table to database
-def df_to_database(df, db_file, table_name, if_exists='replace'):
-    """ appends data to at SQLite table in a database.
-        If the table does not exist: creates the table
-        :param df  a pandas pdf
-        :param db_file sqlite database file
-        :param table_name sqlite table
-        :param if_exists pandas df.to_sql: if_exists 'replace','append','fail'
-    """
-
-    db_abspath = os.path.abspath(db_file)
-
-    try:
-        # test if file exist
-        open(db_abspath)
-
-    except OSError:
-        print("The database do not exist. Creating the database")
-        # abspath for windows compatibilty
-        os.makedirs(os.path.dirname(db_abspath), exist_ok=True)
-
-    finally:
-        db = sqlalchemy.create_engine(f"sqlite:////{db_abspath}")
-        df.to_sql(table_name, con=db, if_exists=if_exists, index=False)
-        db.dispose()
-
-## %% helper get ids
-def get_ids(file, pattern, sep="_"):
-    """ Getting ids from files path from basename eg. to add columns before adding to database
-        by default ref_query
-    :param file: path of file to get
-    :param pattern pattern to remove (that is not ID1_ID2)
-    :param sep separator used
-    """
-    file_basename = os.path.basename(file)
-    return file_basename.replace(pattern, "").split(sep)
-
-## %% gff
-def gff_to_df(gff_file, id_dict, gff_pattern, comment = None):
-    """
-    transforms gff file to pandas df. Appends query and ref names, result file name, and comment field (used for info about analysis)
-    :param gff_file nucdiff result gff_file
-    :param id_dict dictionary containing ref, query ids (from detect_result_files)
-    :param gff_pattern the pattern that is to remove from basename to obtain ref_query
-    :param comment a string describing additional data to add to the table (or None)
-    :return df if gff_file length >1 otherwise returns None
-    """
-
-    df = gffpd.read_gff3(gff_file)
-    ref_gff, query_gff = get_ids(gff_file, gff_pattern)
-    file_name = os.path.basename(gff_file)
-
-    # Sanity - control detected ids are matching
-    try:
-        ref_gff == id_dict["ref"] and query_gff == id_dict["query"]
-    except NameError:
-        sys.exit("the detected reference and query id do not match. Review your command or debug")
-    else:
-        # dealing with empty gff (eg. query_additional): only one line
-        with open(gff_file, "r") as f:
-            file_len = len(f.readlines())
-            f.close()
-        if file_len <= 1:
-            return None
-        else:
-            return df.attributes_to_columns().assign(_REF=id_dict["ref"],
-                                                     _QUERY=id_dict["query"],
-                                                     _RES_FILE=file_name,
-                                                     _COMMENT=comment)
-def wrapper_gff_to_db(gff_file, id_dict, gff_pattern, comment, db_file, table_name, all_keys, if_exists = 'append'):
-    """
-    transforms gff file to pandas df then appends to sqlite
-    :param: gff_file nucdiff result gff_file
-    :param: id_dict dictionary containing ref, query ids (from detect_result_files)
-    :param: gff_pattern the pattern that is to remove from basename to obtain ref_query
-    :param: comment a string describing additional data to add to the table (or None)
-    :param: db_file sqlite database file
-    :param: table_name name of table in database to use
-    :param: all keys - list_ all the keys existing for this type of table
-    :param if_exists pandas df.to_sql: if_exists 'replace','append','fail'
-    """
-
-    df = gff_to_df(gff_file = gff_file, id_dict = id_dict, gff_pattern = gff_pattern, comment = comment)
-
-    if not df is None:
-        col_to_add = list(set(all_keys) - set(list(df.columns)))
-        for value_col in col_to_add:
-            df[f'{value_col}']= None
-        df_to_database(df = df, db_file = db_file, table_name = table_name, if_exists = if_exists)
-    else:
-        print(f"No data to add for {gff_file}")
-
-## %% vcf
-def annotated_vcf_to_df(file):
-    """
-    Read the annotated vcf and returns a pandas dataframe
-    :param file: annotated vcf
-    :return: pandas dataframe
-    """
-    # Helpers
-    def row_to_dic_helper(row):
-        """
-        Returns a dictionary
-        splitting columns at ; and =
-        :param row: row
-        :return: dictionary
-        """
-        list_row = re.split(';|=', row)
-        # keys : values
-        return dict(zip(list_row[::2], list_row[1::2]))
-
-    # get position start table
-    start_row = 0
-    with open(file) as input:
-        for line in input:
-            if "#CHROM" in line:
-                 break
-
-            start_row += 1
-    input.close()
-    # get the body
-    df = pd.read_table(file, sep="\t", skiprows= start_row, skip_blank_lines=True, index_col=None)
-    # each row to dict
-    df["INFO"] = df["INFO"].apply(lambda row: row_to_dic_helper(row))
-    # normalize INFO
-    df2 = pd.json_normalize(df['INFO'])
-    # concatenate df
-    return pd.concat([df.drop("INFO", axis=1).reset_index(drop=True), df2.reset_index(drop=True)], axis=1)
-
-
-# Getting the unique keys previous to database creation
-def unique_df_type_keys(list_data, type_data, append_col = ["_REF", "_QUERY", "_RES_FILE", "_COMMENT" ]):
-    """
-    finds the unique keys between a list of files of the same type
-    :param: list_data : the list of files to find the keys in
-    :param: type_data :'gff', 'vcf', 'stat'
-    :param: append_col : list of column names to append to the datastructure (required for vcf)
-    :return list of unique keys
-    """
-    # In case not all columns were there
-    new_keys = append_col.copy()
-    if type_data == "gff":
-        for file in list_data:
-            try:
-                gffpd_df = gffpd.read_gff3(file)
-                df = gffpd_df.attributes_to_columns()
-                new_keys = list(set(new_keys + list(df.columns)))
-            except:
-                print(f"No data to add for {file}")
-    elif type_data == "vcf":
-        for file in list_data:
-            try:
-                df = annotated_vcf_to_df(file)
-                new_keys = list(set(new_keys + list(df.columns)))
-            except:
-                print(f"No data to add for {file}")
-    elif type_data == "stat":
-        for file in list_data:
-            try:
-                df = pd.read_table(file, sep="\t", header=None, names=["param", "value"],
-                                   skip_blank_lines=True, index_col=None)
-                df = df[df.value.notnull()]
-                new_keys = list(set(new_keys + list(df.columns)))
-            except:
-                print(f"No data to add for {file}")
-
-    return new_keys
-
-def wrapper_vcf_to_db(vcf_file, id_dict, vcf_pattern, comment, db_file, table_name, all_keys, if_exists = 'append'):
-    """
-    transforms annotated vcf file to pandas df, appends required columns then appends to sqlite databae
-    :param vcf_file annotated result from vcf-annotator
-    :param id_dict dictionary containing ref, query ids (from detect_result_files)
-    :param vcf_pattern the pattern that is to remove from basename to obtain ref_query
-    :param comment a string describing additional data to add to the table (or None)
-    :param db_file sqlite database file
-   :param: table_name name of table in database to use
-    :param: all keys - list_ all the keys existing for this type of table
-    :param if_exists pandas df.to_sql: if_exists 'replace','append','fail'
-    """
-
-    ref_vcf, query_vcf = get_ids(vcf_file, vcf_pattern)
-
-    # Sanity check
-    try:
-        ref_vcf == id_dict["ref"] and query_vcf == id_dict["query"]
-    except NameError:
-        sys.exit("the detected reference and query id do not match. Review your command or debug")
-    else:
-        df = annotated_vcf_to_df(vcf_file)
-        file_name = os.path.basename(vcf_file)
-        df = df.assign(_REF=id_dict["ref"], _QUERY=id_dict["query"], _RES_FILE=file_name, _COMMENT=comment)
-
-        if not df is None:
-            col_to_add = list(set(all_keys) - set(list(df.columns)))
-            for value_col in col_to_add:
-                df[f'{value_col}'] = None
-            df_to_database(df=df, db_file=db_file, table_name=table_name, if_exists=if_exists)
-        else:
-            print(f"No data to add for {vcf_file}")
-
-
-## %% stat
-def stats_to_df(stat_file, id_dict, stat_pattern, comment = None):
-    """
-    transforms stat file to pandas df. Appends query and ref names, result file name, and comment field (used for info about analysis)
-    :param stat_file nucdiff result gff_file
-    :param id_dict dictionary containing ref, query ids (from detect_result_files)
-    :param stat_pattern the pattern that is to remove from basename to obtain ref_query
-    :param comment a string describing additional data to add to the table (or None)
-    :return df (long format)
-    """
-
-    df = pd.read_table(stat_file, sep="\t", header=None, names=["param", "value"], skip_blank_lines=True, index_col=None)
-    ref_stat, query_stat = get_ids(stat_file, stat_pattern)
-    file_name = os.path.basename(stat_file)
-
-    # Sanity - control detected ids are matching
-    try:
-        ref_stat == id_dict["ref"] and query_stat == id_dict["query"]
-    except NameError:
-        sys.exit("the detected reference and query id do not match. Review your command or debug")
-    else:
-        # lines with empty info
-        df = df[df.value.notnull()].assign(_REF=id_dict["ref"],
-                                           _QUERY=id_dict["query"],
-                                           _RES_FILE=file_name,
-                                           _COMMENT=comment)
-        return df
-
-
-def wrapper_stat_to_db(stat_file, id_dict, stat_pattern, comment, db_file, table_name, if_exists = 'append'):
-    """
-    transforms stat file to pandas df then appends to sqlite
-    :param stat_file nucdiff result _stat.out
-    :param id_dict dictionary containing ref, query ids (from detect_result_files)
-    :param stat_pattern the pattern that is to remove from basename to obtain ref_query
-    :param comment a string describing additional data to add to the table (or None)
-    :param db_file sqlite database file
-    :param if_exists pandas df.to_sql: if_exists 'replace','append','fail'
-    """
-    df = stats_to_df(stat_file = stat_file, id_dict = id_dict,
-                     stat_pattern = stat_pattern, comment = comment)
-    if not df is None:
-        df_to_database(df = df, db_file = db_file, table_name = table_name, if_exists = if_exists)
-    else:
-        print(f"No data to add for {stat_file}")
-
-########################################################################################################################
-# %% SCRIPT
-if __name__ == '__main__':
-    args = parse_args(sys.argv[1:])
-
-    # Get the different ref_query patterns
-    all_ref_query_patterns = ref_query_patterns(args["resdir"])
-
-    # list where each element is a list of files for each pattern that need to go in the db
-    all_files_per_pattern = res_files_per_pattern(args["resdir"], all_ref_query_patterns)
-
-    # flatten list of files containing the results files
-    # We do not pair directly, in case order file is not same for each type
-    all_files = functools.reduce(operator.iconcat, all_files_per_pattern, [])
-
-    # Some keys might not be common for all results files
-    # 1. Creating dictionary with all results files per type for the respective tables:
-    res_files_dict = detect_result_files(all_files)
-    # 2. Result files per type table - files organized in same order
-    id_dict = res_files_dict["id"]
-    query_files_dict = res_files_dict["query_files"]
-    ref_files_dict = res_files_dict["ref_files"]
-    stat_files_dict = res_files_dict["stat_files"]
-    vcf_files_dict = res_files_dict["annotated_vcf_files"]
-
-    # 3. Get all the keys for each type of table to create and create the tables using the complete set of keys
-    ## %% the query_files to db
-    for table in query_files_dict.keys():
-        # list of keys
-        list_files = query_files_dict.get(table)[0]
-        key_list = unique_df_type_keys(list_files, "gff")
-        gff_pattern = query_files_dict.get(table)[1]
-
-        for i in range(0, len(list_files)):
-            # because ordered previously
-            each_id_dict = {"ref": id_dict.get("ref")[i], "query": id_dict.get("query")[i]}
-            wrapper_gff_to_db(list_files[i],
-                              each_id_dict,
-                              gff_pattern,
-                              comment=args["comment"],
-                              db_file=args["database"],
-                              table_name=table,
-                              all_keys=key_list,
-                              if_exists='append')
-    ## %% the ref_files to db
-    for table in ref_files_dict.keys():
-        list_files = ref_files_dict.get(table)[0]
-        key_list = unique_df_type_keys(list_files, "gff")
-        gff_pattern = ref_files_dict.get(table)[1]
-
-        # works because ordered previously
-        for i in range(0, len(list_files)):
-            each_id_dict = {"ref": id_dict.get("ref")[i], "query": id_dict.get("query")[i]}
-            wrapper_gff_to_db(list_files[i],
-                              each_id_dict,
-                              gff_pattern,
-                              comment=args["comment"],
-                              db_file= args["database"],
-                              table_name=table,
-                              all_keys=key_list,
-                              if_exists='append')
-
-    ## %% the stat_file to db - no need key list (param on rows)
-    for table in stat_files_dict.keys():
-        list_files = stat_files_dict.get(table)[0]
-        stat_pattern = stat_files_dict.get(table)[1]
-
-        for i in range(0, len(list_files)):
-            each_id_dict = {"ref": id_dict.get("ref")[i], "query": id_dict.get("query")[i]}
-            wrapper_stat_to_db(stat_file=list_files[i],
-                               id_dict=each_id_dict,
-                               stat_pattern=stat_pattern,
-                               comment=args["comment"],
-                               db_file=args["database"],
-                               table_name=table,
-                               if_exists='append')
-
-    ## %% the annotated_vcf to db
-    for table in vcf_files_dict.keys():
-        list_files = vcf_files_dict.get(table)[0]
-        key_list = unique_df_type_keys(list_files, "vcf")
-        vcf_pattern = vcf_files_dict.get(table)[1]
-
-
-
-        for i in range(0, len(list_files)):
-            each_id_dict = {"ref": id_dict.get("ref")[i], "query": id_dict.get("query")[i]}
-            wrapper_vcf_to_db(vcf_file=list_files[i],
-                              id_dict=each_id_dict,
-                              vcf_pattern=vcf_pattern,
-                              comment=args["comment"],
-                              db_file=args["database"],
-                              table_name=table,
-                              all_keys=key_list,
-                              if_exists='append')
-
-
- """

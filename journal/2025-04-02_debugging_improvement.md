@@ -25,9 +25,29 @@ git checkout 7e50c99 -- workflows
 # Step 2 - Step by step modification of modles and resutls - deleted previous results
 
 ```shell
-2025_test_run.sh
+# testing pipeline
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI
+./2025_test_run.sh
+# testing python script
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results
+
 ``` 
 1. annotating only the samples 
 2. check if some results of the samples needed to be added to the database
 - json results for samples from annotation need to be added - starting rewriting this
 
+- [ ] testing arguments for the script function
+```bash
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/02_ANNOTATE
+
+IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
+
+apptainer shell $IMG
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/results_to_db.py"
+ls */*.json
+$SCRIPT --result_file SRR11262033/SRR11262033.json --result_type json --id SRR11262033 --database 2025_DPI_test.sqlite --comment test
+$SCRIPT --example
+$SCRIPT --version
+``` 
+
+This sage is now working - commiting the changes before continuing the dev. 

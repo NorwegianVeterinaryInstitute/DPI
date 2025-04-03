@@ -4,6 +4,21 @@ import pandas as pd
 import numpy as np
 
 
+# ANCHOR : Wrapper : processing results files
+def process_result_file(result_file, result_type, id, db_conn):
+    """
+    Processes a result files of a specific type,
+    transforms them into a table, and inserts the results to the database.
+
+    Args:
+        result_file paths of the result file.
+        result_type (str): The type of result (e.g., "json", "snp_annotations").
+        id (str): The sample_id or pair identifier.
+        db_conn (sqlite3.Connection): The database connection.
+    """
+    print("process_result_file function is not implemented yet.")
+
+
 # ANCHOR : Functions for json data processing
 # json data will go into 3 different tables (for archive)
 def prep_info_df(json_object, sample_id):
