@@ -8,37 +8,13 @@ import json
 import sqlalchemy 
 import numpy as np
 
-# https://realpython.com/command-line-interfaces-python-argparse/ is good start
-def parse_args(args):
 
-    parser = argparse.ArgumentParser(
-        prog="json_annot_import.py",
-        usage=None, 
-        description='Import the total annotation json file from bakta and transform it to a panda df.',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        add_help=True
-        )
-
-    parser.add_argument("--json",
-                        action="store",
-                        required=True,
-                        help="json annotation file from bakta")
-    parser.add_argument("--database",
-                        action="store",
-                        default="nucdiff.sqlite",
-                        required=False,
-                        help="path/name of the database. If it does not exists, it will be created, otherwise results are append")
-    parser.add_argument("--sample_id",
-                        action="store",
-                        default=".",
-                        help="sample_id that will be used")
-    parser.add_argument("--version",
-                        action="version",
-                        version = "%(prog)s 0.0.1",
-                        help="print the version of the script")
+db_path = args.database
+comment = args.comment
+id = args.id  # was pair or sample_id previously
+result_type = args.result_type
+result_file = args.result_file
     
-    args = vars(parser.parse_args())
-    return args
 
 
 # %% functions

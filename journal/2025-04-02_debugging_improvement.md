@@ -36,7 +36,7 @@ cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results
 2. check if some results of the samples needed to be added to the database
 - json results for samples from annotation need to be added - starting rewriting this
 
-- [ ] testing arguments for the script function
+- [x] testing arguments for the script function
 ```bash
 cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/02_ANNOTATE
 
@@ -51,3 +51,6 @@ $SCRIPT --version
 ``` 
 
 This sage is now working - commiting the changes before continuing the dev. 
+Commit id : dd7f49d
+
+- [ ] implementing adding json results to the database

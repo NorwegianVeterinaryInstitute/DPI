@@ -2,20 +2,50 @@
 
 import pandas as pd
 import numpy as np
+import os
 
 
 # ANCHOR : Wrapper : processing results files
-def process_result_file(result_file, result_type, id, db_conn):
+def process_result_file(file_path, result_type, identifier, db_conn):
     """
-    Processes a result files of a specific type,
-    transforms them into a table, and inserts the results to the database.
+    Processes a single result file, transforms it into a table\n
+    If created, a new column will be created and appended to the database\n
+    NaN will be used to fill the column for previous records.\n
+    Then the result table will be inserted it into the database.
 
     Args:
-        result_file paths of the result file.
-        result_type (str): The type of result (e.g., "json", "snp_annotations").
-        id (str): The sample_id or pair identifier.
+        file_path (str): Path to the result file.
+        result_type (str): The type of result (e.g., "json").
+        identifier (str): The identifier (pair or sample_id).
         db_conn (sqlite3.Connection): The database connection.
     """
+    cursor = db_conn.cursor()
+    file_name = os.path.basename(file_path)
+
+    # try:
+    #     if result_type == "json":
+    #         with open(file_path, "r") as f:
+    #             data = json.load(f)
+    #         df = pd.json_normalize(data)  # Transform JSON to DataFrame
+    #         # Create or append to table
+    #         create_or_append_table(df, result_type, identifier, file_name, cursor)
+    #     elif result_type == "gff":
+    #         # Add logic for GFF parsing and table creation
+    #         # Example:
+    #         # df = parse_gff(file_path)
+    #         # create_or_append_table(df, result_type, identifier, file_name, cursor)
+    #         pass  # Add gff parsing here
+    #     else:
+    #         print(f"Warning: Unknown result type: {result_type}. Skipping {file_path}.")
+    #         return
+
+    #     db_conn.commit()
+    #     print(f"Processed and inserted: {file_path}")
+
+    # except Exception as e:
+    #     print(f"Error processing {file_path}: {e}")
+    #     db_conn.rollback()
+
     print("process_result_file function is not implemented yet.")
 
 
