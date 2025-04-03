@@ -55,3 +55,14 @@ Commit id : 28f779c
  
 
 - [ ] implementing adding json results to the database
+Test run 
+```bash
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/02_ANNOTATE
+IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
+apptainer shell $IMG
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/results_to_db.py"
+
+$SCRIPT --result_file SRR11262033/SRR11262033.json --result_type json --id SRR11262033 --database 2025_DPI_test.sqlite --comment test
+$SCRIPT --example
+$SCRIPT --version
+```
