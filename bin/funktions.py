@@ -2,6 +2,7 @@
 
 import pandas as pd
 import numpy as np
+import json
 import os
 import sqlite3
 
@@ -28,11 +29,22 @@ def process_result_file(file_path, result_type, identifier, db_conn):
             with open(file_path, "r") as f:
                 data = json.load(f)
 
+            # 3 types of data to extract for the json fil
             # Process info data
             info_df = prep_info_df(data, identifier)
             create_or_append_table(info_df, "info", identifier, file_name, cursor)
 
-            # ... (Process other dataframes from the json file) ...
+            # Process features data
+            features_df = prep_features_df(data, identifier)
+            create_or_append_table(
+                features_df, "features", identifier, file_name, cursor
+            )
+
+            # Process sequences data
+            sequences_df = prep_sequences_df(data, identifier)
+            create_or_append_table(
+                sequences_df, "sequences", identifier, file_name, cursor
+            )
 
         elif result_type == "gff":
             # Add logic for GFF parsing and table creation
@@ -125,35 +137,39 @@ def prep_info_df(json_object, identifier):
     return info
 
 
-def prep_features_df(json_object, sample_id):
-    """_summary_
-    prepare the features dataframe from the json annotation
+def prep_features_df(json_object, identifier):
+    """
+    Prepares the features DataFrame from the JSON annotation.
 
     Args:
-        json_object (_dict_): _annotation json from bakta_
-        sample_id (_str_): _sample id to add to the table_
+        json_object (dict): Annotation JSON from Bakta.
+        identifier (str): Sample ID to add to the table.
+    Returns:
+        pd.DataFrame: Prepared features DataFrame.
     """
     features = pd.json_normalize(json_object["features"])
-    features.insert(0, "sample_id", sample_id)
+    features.insert(0, "identifier", identifier)
     # need to change list types to string
     # we do not want to split those for now
     features = features.map(str)
     return features
 
 
-def prep_sequences_df(json_object, sample_id):
-    """_summary_
-    prepare the sequences dataframe from the json annotation
+def prep_sequences_df(json_object, identifier):
+    """
+    Prepares the sequences DataFrame from the JSON annotation.
 
     Args:
-        json_object (_dict_): _annotation json from bakta_
-        sample_id (_str_): _sample id to add to the table_
+        json_object (dict): Annotation JSON from Bakta.
+        identifier (str): Sample ID to add to the table.
+    Returns:
+        pd.DataFrame: Prepared sequences DataFrame.
     """
     sequences = pd.json_normalize(json_object["sequences"])
-    sequences.insert(0, "sample_id", sample_id)
+    sequences.insert(0, "identifier", identifier)
 
-    # cleaning the sequences table
-    ## orig_description is not always complete - we cant fix in those cases
+    # Cleaning the sequences table
+    ## orig_description is not always complete - we can't fix in those cases
     try:
         sequences[["len", "cov", "corr", "origname", "sw", "date"]] = sequences[
             "orig_description"
@@ -165,45 +181,18 @@ def prep_sequences_df(json_object, sample_id):
             columns=["len", "cov", "corr", "origname", "sw", "date"],
             index=np.arange(len(sequences["orig_description"])),
         )
+
     ## The rest should be ok
     sequences[["genus", "species", "gcode", "topology"]] = sequences[
         "description"
     ].str.split(" ", expand=True)
-    sequences.drop(labels=["orig_description", "description"], axis=1)
+
+    # Drop orig_description and description columns
+    sequences.drop(labels=["orig_description", "description"], axis=1, inplace=True)
+
+    # Replace unwanted patterns
     sequences.replace(["^.*=", "]", "NaN"], "", inplace=True, regex=True)
-    return sequences
 
-
-def prep_sequences_df(json_object, sample_id):
-    """_summary_
-    prepare the sequences dataframe from the json annotation
-
-    Args:
-        json_object (_dict_): _annotation json from bakta_
-        sample_id (_str_): _sample id to add to the table_
-    """
-    sequences = pd.json_normalize(json_object["sequences"])
-    sequences.insert(0, "sample_id", sample_id)
-
-    # cleaning the sequences table
-    ## orig_description is not always complete - we cant fix in those cases
-    try:
-        sequences[["len", "cov", "corr", "origname", "sw", "date"]] = sequences[
-            "orig_description"
-        ].str.split(" ", expand=True)
-    except:
-        # if it does not work we only report as empty - neabs the description is not complete
-        sequences[["len", "cov", "corr", "origname", "sw", "date"]] = pd.DataFrame(
-            np.nan,
-            columns=["len", "cov", "corr", "origname", "sw", "date"],
-            index=np.arange(len(sequences["orig_description"])),
-        )
-    ## The rest should be ok
-    sequences[["genus", "species", "gcode", "topology"]] = sequences[
-        "description"
-    ].str.split(" ", expand=True)
-    sequences.drop(labels=["orig_description", "description"], axis=1)
-    sequences.replace(["^.*=", "]", "NaN"], "", inplace=True, regex=True)
     return sequences
 
 

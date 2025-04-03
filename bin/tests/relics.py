@@ -1,16 +1,19 @@
-# Listing tables
 import sqlite3
+import os
+os.listdir()
 
-    conn = sqlite3.connect('my_database.sqlite')
-    cursor = conn.cursor()
 
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-    tables = cursor.fetchall()
+# Listing tables
+conn = sqlite3.connect('2025_DPI_test.sqlite')
+cursor = conn.cursor()
 
-    for table in tables:
-        print(table[0])
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+tables = cursor.fetchall()
 
-    conn.close()
+for table in tables:
+    print(table[0])
+
+conn.close()
     
 # Getting Table Schema:
 import sqlite3
