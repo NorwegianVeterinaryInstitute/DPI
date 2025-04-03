@@ -101,7 +101,6 @@ def main():
     db_path = args.database
     comment = args.comment
     identifier = args.identifier
-
     result_type = args.result_type
     result_file = args.result_file
 
