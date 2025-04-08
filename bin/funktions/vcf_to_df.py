@@ -43,25 +43,33 @@ def vcf_to_df(file_path):
     # normalize INFO
     df2 = pd.json_normalize(df['INFO'])
     # concatenate df
-    return pd.concat([df.drop("INFO", axis=1).reset_index(drop=True), df2.reset_index(drop=True)], axis=1)
+    snp_df = pd.concat([df.drop("INFO", axis=1).reset_index(drop=True), df2.reset_index(drop=True)], axis=1)
+    # #CHROM is not valid in sqlite 
+    snp_df.columns = [col.replace("#", "") for col in snp_df.columns]
+    # Cleaning the formating of data originating from INFO : 
+    for col in snp_df.select_dtypes(include='object').columns:
+        snp_df[col] = snp_df[col].str.replace('[space]', ' ')
+    
+    print(f"vcf_to_df as run for {file_path}")
+    return snp_df
 
-# if __name__ == '__main__':
-#     # Create a dummy VCF file for testing
-#     vcf_content = """##fileformat=VCFv4.2
-# ##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
-# ##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
-# ##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
-# ##INFO=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth; some reads may have been filtered">
-# #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-# chr1	100	rs123	A	G	100	PASS	AC=1;AF=0.5;AN=2;DP=10
-# chr1	101	rs456	C	T,A	150	PASS	AC=2,1;AF=0.667,0.333;AN=3;DP=15;MQ=30
-# chr2	200	.	G	C	90	FILTER	DP=5;MQ=40;SVTYPE=DEL
-# chr3	300	rs789	T	A	120	PASS	AC=1;DP=20;AF=0.25;
-# """
-#     with open("test.vcf", "w") as f:
-#         f.write(vcf_content)
+if __name__ == '__main__':
+    # Create a dummy VCF file for testing
+    vcf_content = """##fileformat=VCFv4.2
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth; some reads may have been filtered">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr1	100	rs123	A	G	100	PASS	AC=1;AF=0.5;AN=2;DP=10
+chr1	101	rs456	C	T,A	150	PASS	AC=2,1;AF=0.667,0.333;AN=3;DP=15;MQ=30
+chr2	200	.	G	C	90	FILTER	DP=5;MQ=40;SVTYPE=DEL
+chr3	300	rs789	T	A	120	PASS	AC=1;DP=20;AF=0.25;
+"""
+    with open("test.vcf", "w") as f:
+        f.write(vcf_content)
 
-#     # Example usage:
-#     file_path = "test.vcf"
-#     df_result = test_annotated_vcf_to_df(file_path)
-#     print(df_result)
+    # Example usage:
+    file_path = "test.vcf"
+    df_result = vcf_to_df(file_path)
+    print(df_result)
