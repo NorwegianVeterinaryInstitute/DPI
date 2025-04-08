@@ -13,6 +13,13 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
         db_conn (sqlite3.Connection): The database connection.
         comment (str): Comment for the database entries. Please set to NULL if not used.
     """
+    import os 
+    import json
+    from . import json_to_df
+    from . import gff_to_df
+    from . import vcf_to_df
+    from . import create_or_append_table
+    
     file_name = os.path.basename(file_path)
     print(f"Processing file: {file_name} for {identifier}")
 

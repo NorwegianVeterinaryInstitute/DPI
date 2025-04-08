@@ -14,12 +14,9 @@ import glob
 import functools
 import operator
 
-
-
 # sys.path.append(os.getcwd())
 import funktions as fk
 
-import 
 
 # ANCHOR : Login info output
 log_file_name = "results_to_db.log"
