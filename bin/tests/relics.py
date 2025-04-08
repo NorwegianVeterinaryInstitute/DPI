@@ -28,3 +28,8 @@ import sqlite3
         print(schema[0])
 
     conn.close()
+    
+    
+# clear console 
+os.system('clear')
+# os.system('cls')
