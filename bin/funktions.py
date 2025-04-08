@@ -350,7 +350,7 @@ def gff_to_df(file_path):
         return None
         
     try:
-        gff_df = gff_df.attributes_to_columns().assign(_REF=ref, _QUERY=query, _RES_FILE=file_name)
+        gff_df = gff_df.attributes_to_columns().assign(_REF=ref, _QUERY=query)
         # NOTE : in case: Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
         gff_df.columns = [col.replace(".", "_").replace("-", "_") for col in gff_df.columns]
         return gff_df
