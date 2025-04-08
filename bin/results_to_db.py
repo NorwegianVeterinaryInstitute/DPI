@@ -78,14 +78,6 @@ def main():
         "   - The pair identifier for any other result type.",
     )
     parser.add_argument(
-        "--result_type",
-        action="store",
-        required=False,
-        help="The type of result being processed.\n"
-        "   - json: JSON annotation file from Bakta\n"
-        "   - gff: GFF file",
-    )
-    parser.add_argument(
         "--result_file",
         required=False,
         help="result file path.",
@@ -99,7 +91,6 @@ def main():
         logging.info(" python results_to_db.py --database my_database.sqlite \\")
         logging.info("  --comment 'Analysis on 2023-10-01' \\")
         logging.info("  --identifier sample123 \\")
-        logging.info("  --result_type json \\")
         logging.info("  --result_file file.json")
         return
 
@@ -107,11 +98,10 @@ def main():
     if (
         not args.comment
         or not args.identifier
-        or not args.result_type
         or not args.result_file
     ):
         parser.error(
-            "The following arguments are required: --comment, --identifier, --result_type, --result_file"
+            "The following arguments are required: --comment, --identifier, --result_file"
         )
         return
 
@@ -119,7 +109,6 @@ def main():
     db_path = args.database
     comment = args.comment
     identifier = args.identifier
-    result_type = args.result_type
     result_file = args.result_file
 
     # Connect to the database
@@ -127,19 +116,11 @@ def main():
 
     # Process the result files
     try:
-        if result_type == "json":
-            logging.info(f"main: >Processing {result_type} for {identifier} in {result_file}")
-            process_result_file(result_file, result_type, identifier, db_conn, comment=None)
-        else:
-            # FIXME : I do not use the comment here ...
-            logging.info(f"main: >Processing {result_type} for {identifier} in {result_file}")
-            process_result_file(result_file, result_type, identifier, db_conn, comment)
+        logging.info(f"Processing {identifier} in {result_file}")
+        process_result_file(result_file, identifier, db_conn, comment=None)
     except Exception as e:
-        logging.error(f"main: >An error occurred during processin of {result_type} for {identifier}: {e}")
-        logging.error(f"main: >Check {log_file_name} for more details")
-
-
-    logging.info(f"{result_type} result processed for identifier: {identifier}")
+        logging.error(f"An error occurred during processin of {identifier}: {e}")
+        logging.error(f"Check {log_file_name} for more details")
     
     # Close the database connection
     db_conn.close()

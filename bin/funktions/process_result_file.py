@@ -12,8 +12,28 @@ from funktions.stats_to_df import stats_to_df as stats_to_df
 from funktions.comment_df import create_comment_df as create_comment_df
 
 from funktions.create_or_append_table import create_or_append_table as create_or_append_table
+
+def determine_result_type(file_path):
+    """
+    Helper: Determines the type of result for correct processing
+    Returns the result type
     
-def process_result_file(file_path, result_type, identifier, db_conn, comment):
+    Args:
+        file_path (str): Path to the result file.
+    """
+    
+    if file_path.endswith(".json"):
+        return "json"
+    elif file_path.endswith(".gff"):
+        return "gff"
+    elif file_path.endswith(".vcf"):
+        return "vcf"
+    elif file_path.endswith("_stat.out"):
+        return "stats"
+    else:
+        return None
+    
+def process_result_file(file_path, identifier, db_conn, comment):
     """
     Processes a single result file, transforms it into a table\n
     If created, a new column will be created and appended to the database\n
@@ -31,6 +51,7 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
     print(f"Processing file: {file_name} for {identifier}")
 
     # TODO Add automatic detection result type 
+    result_type = determine_result_type(file_path)
     
     try:
         if result_type == "json":

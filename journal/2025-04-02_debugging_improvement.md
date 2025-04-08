@@ -131,11 +131,14 @@ ok - working
 
 
 # FIXES NEEDED - check if working
-- [ ] add comment table to the database - can be used for fast ckecking duplicates ...
-- [ ] missing data in features, need to add NaN to all other columns
+- [x] add comment table to the database - can be used for fast ckecking duplicates ...
+- [x] automatic detectionof result types (I do not export the function - its an helper)
+
+- [ ] implementing in piepline for testing on several files
+- [ ] ? missing data in features, need to add NaN to all other columns
 - [ ] check if the unittest are working and improve them
-- [ ] automatic script for unittesting 
-- [ ] optimization sqlite writing in database - which efficient duplicate checks
+- [ ] automatic script to run unittesting 
+- [ ] optimization sqlite writing in database - need to have it add data efficiently (at the end because basic functions have to work=
 - [ ] check and adjust the log file for the scripts - so its is easy to detect errors and where 
 
 # Helpers gemini 
