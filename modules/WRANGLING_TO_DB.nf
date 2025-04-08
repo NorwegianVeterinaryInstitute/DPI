@@ -14,8 +14,8 @@ process WRANGLING_TO_DB {
     val(comment)        // Comment for the database entries
     tuple val(id), path(result_file) // id sample or pair identifier depending of result provenance
 
-    output:
-    path("*.sqlite"), emit: db_path_ch
+    // output:
+    // path("*.sqlite"), emit: db_path_ch
     
     script:
     """
