@@ -1,9 +1,13 @@
-def annotated_vcf_to_df(file_path):
+import re 
+import pandas as pd
+    
+def vcf_to_df(file_path):
     """
-    Read the annotated vcf and returns a pandas dataframe
+    Read the (annotated) vcf and returns a pandas dataframe
     :param file_path: annotated vcf
     :return: pandas dataframe
     """
+
     # Helpers
     def row_to_dic_helper(row):
         """
@@ -12,6 +16,9 @@ def annotated_vcf_to_df(file_path):
         :param row: row
         :return: dictionary
         """
+        import re
+        import pandas as pd
+        
         list_row = re.split(';|=', row)
         # Ensure even number of elements to form key-value pairs
         if len(list_row) % 2 != 0:
@@ -56,5 +63,5 @@ def annotated_vcf_to_df(file_path):
 
 #     # Example usage:
 #     file_path = "test.vcf"
-#     df_result = annotated_vcf_to_df(file_path)
+#     df_result = test_annotated_vcf_to_df(file_path)
 #     print(df_result)

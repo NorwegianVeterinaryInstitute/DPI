@@ -10,6 +10,9 @@ def create_or_append_table(df, table_name, identifier, file_name, db_conn):
         file_name (str): The name of the processed file.
         db_conn (sqlite3.Connection): The database connection.
     """
+    import sqlite3
+    import pandas as pd
+    
     cursor = db_conn.cursor()
 
     # Insert identifier with a different name

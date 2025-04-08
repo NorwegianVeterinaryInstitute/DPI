@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+    
 # processing json data - 3 different tables
 # NOTE : working
 def prep_info_df(json_object, identifier):

@@ -1,3 +1,9 @@
+import os
+import gffpandas.gffpandas as gffpd
+import pandas as pd
+import numpy as np
+import re
+
 def gff_to_df(file_path):
     """
     Reads a GFF file and converts it into a pandas DataFrame.
@@ -11,6 +17,7 @@ def gff_to_df(file_path):
     Returns:
         pd.DataFrame: DataFrame containing the GFF data, or None if the file is not found or empty.
     """
+    
     # Check if the file exists - report error if not
     if not os.path.exists(file_path):
         print(f"Error: GFF file not found: {file_path}")
