@@ -6,7 +6,7 @@ import json
 import os
 import sqlite3
 import re
-
+import gffpandas.gffpandas as gffpd
 
 # SECTION : Wrapper : processing results files
 # NOTE : working
@@ -60,24 +60,26 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
 
         elif result_type == "gff":           
             # processing each subtype of gff file 
+            df = gff_to_df(file_path)
+            
             if "_query_blocks" in file_name: 
-                pass 
+                create_or_append_table(df, 'query_blocks', identifier, file_path, db_conn)
             elif "_query_snps" in file_name:
-                pass 
+                create_or_append_table(df, 'query_snps', identifier, file_path, db_conn)
             elif "_query_struct" in file_name:
-                pass
+                create_or_append_table(df, 'query_struct', identifier, file_path, db_conn)
             elif "_query_additional" in file_name:
-                pass
+                create_or_append_table(df, 'query_additional', identifier, file_path, db_conn)
             elif "_query_snps_annotated" in file_name:
-                pass
+                create_or_append_table(df, 'query_snps_annotated', identifier, file_path, db_conn)
             elif "_ref_blocks" in file_name:
-                pass
+                create_or_append_table(df, 'ref_blocks', identifier, file_path, db_conn)
             elif "_ref_snps" in file_name:
-                pass
+                create_or_append_table(df, 'ref_snps', identifier, file_path, db_conn)
             elif "_ref_struct" in file_name:
-                pass
+                create_or_append_table(df, 'ref_struct', identifier, file_path, db_conn)
             elif "ref_additional" in file_name:
-                pass
+                create_or_append_table(df, 'ref_additional', identifier, file_path, db_conn)
             else:
                 print(f"Warning: Unknown GFF subtype for {result_type} for {identifier}. Skipping {file_path}.")
                 return 
@@ -98,6 +100,8 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
             else: 
                 print(f"Warning: Unknown stat subtype for for {result_type} for {identifier}. Skipping {file_path}.")
                 pass 
+                
+        # TODO add a comment table for each indentifier / processing 
                 
 
         db_conn.commit()
@@ -306,9 +310,54 @@ def prep_sequences_df(json_object, identifier):
 # !SECTION
 
 # SECTION : processing gff data 
+# NOTE : working
+def gff_to_df(file_path):
+    """
+    Reads a GFF file and converts it into a pandas DataFrame.
+    Appends query and ref names
+    :param gff_file nucdiff result gff_file
+    :return df if gff_file length >1 otherwise returns None
 
-# detect subtype of gff file 
+    Args:
+        file_path (str): Path to the GFF file.
 
+    Returns:
+        pd.DataFrame: DataFrame containing the GFF data, or None if the file is not found or empty.
+    """
+    # Check if the file exists - report error if not
+    if not os.path.exists(file_path):
+        print(f"Error: GFF file not found: {file_path}")
+        return None
+        
+        
+    # Extract the ref and query ids from the file name
+    file_name = os.path.basename(file_path)
+    parts = file_name.split("_")
+    ref, query = parts[0], parts[1]
+    
+    try:
+        gff_df = gffpd.read_gff3(file_path)
+    except Exception as e:
+        print(f"Error reading GFF file {file_path}: {e}")
+        return None
+        
+    # Dealing with empty gff (eg. query_additional): only one line
+    with open(file_path, "r") as f:
+        file_len = len(f.readlines())
+        
+    if file_len <= 1:
+        print(f"Warning: Empty GFF file: {file_path}. Skipping.")
+        return None
+        
+    try:
+        gff_df = gff_df.attributes_to_columns().assign(_REF=ref, _QUERY=query, _RES_FILE=file_name)
+        # NOTE : in case: Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
+        gff_df.columns = [col.replace(".", "_").replace("-", "_") for col in gff_df.columns]
+        return gff_df
+        
+    except Exception as e:
+        print(f"Error processing GFF data for {file_path}: {e}")
+        return None
 
 
 
