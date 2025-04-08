@@ -9,6 +9,8 @@ from funktions.json_to_df import prep_sequences_df as prep_sequences_df
 from funktions.gff_to_df import gff_to_df as gff_to_df
 from funktions.vcf_to_df import vcf_to_df as vcf_to_df
 from funktions.stats_to_df import stats_to_df as stats_to_df
+from funktions.comment_df import create_comment_df as create_comment_df
+
 from funktions.create_or_append_table import create_or_append_table as create_or_append_table
     
 def process_result_file(file_path, result_type, identifier, db_conn, comment):
@@ -104,11 +106,12 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
             else: 
                 print(f"Warning: Unknown stats subtype for for {result_type} for {identifier}. Skipping {file_path}.")
                 return
-            
-        #elif 
-                
-        # TODO add a comment table for each indentifier / processing 
-                
+        
+        # for each type of file added to the database will add a comment
+        # can be used to fast recovery if added or new data as first filter    
+        comment_df = create_comment_df(identifier, comment)
+        create_or_append_table(comment_df, "comments", identifier, file_path, db_conn)
+
     
         db_conn.commit()
         print(f"Processed and inserted: {file_path} for identifier {identifier}")
