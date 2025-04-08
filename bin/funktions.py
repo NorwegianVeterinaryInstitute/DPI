@@ -273,7 +273,34 @@ def prep_sequences_df(json_object, identifier):
 
 # !SECTION
 
+# SECTION : processing gff data 
 
+
+
+
+
+
+
+# SECTION : processing  query_blocks_files
+# !SECTION 
+
+# SECTION : processing  query_snps_gff_filess
+# !SECTION 
+
+# SECTION : processing  query_struct_files
+# !SECTION 
+
+# SECTION : processing  query_additional_files
+# !SECTION 
+
+# SECTION : processing  query_snps_annotated_files
+# !SECTION 
+
+
+
+
+
+# !SECTION
 
 # ANCHOR : Functions to process
 # ANCHOR : Functions to process
