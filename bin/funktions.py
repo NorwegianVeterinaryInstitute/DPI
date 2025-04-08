@@ -5,9 +5,11 @@ import numpy as np
 import json
 import os
 import sqlite3
+import re
 
 
-# ANCHOR : Wrapper : processing results files
+# SECTION : Wrapper : processing results files
+# NOTE : working
 def process_result_file(file_path, result_type, identifier, db_conn, comment):
     """
     Processes a single result file, transforms it into a table\n
@@ -34,31 +36,27 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
             try:
                 # Process info data
                 info_df = prep_info_df(data, identifier)
-                print(f"info_df created for {identifier}")
                 create_or_append_table(info_df, "info", identifier, file_name, db_conn)
             except Exception as e:
-                print(f"Error processing info_df: {e}")
+                print(f"Error processing info_df for {identifier}: {e}")
 
             try:
                 # Process features data
                 features_df = prep_features_df(data, identifier)
-                print(f"features_df created for {identifier}")
                 create_or_append_table(
                     features_df, "features", identifier, file_name, db_conn
                 )
             except Exception as e:
-                print(f"Error processing features_df: {e}")
-
+                print(f"Error processing features_df for {identifier}: {e}")
+                
             try:
                 # Process sequences data
-                # NOTE Working
                 sequences_df = prep_sequences_df(data, identifier)
-                print(f"sequences_df created for {identifier}")
                 create_or_append_table(
                     sequences_df, "sequences", identifier, file_name, db_conn
                 )
             except Exception as e:
-                print(f"Error processing sequences_df: {e}")
+                print(f"Error processing sequences_df for {identifier}: {e}")
 
         elif result_type == "gff":
             # Add logic for GFF parsing and table creation
@@ -67,20 +65,20 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
             # create_or_append_table(df, result_type, identifier, file_name, cursor)
             pass  # Add gff parsing here
         else:
-            print(f"Warning: Unknown result type: {result_type}. Skipping {file_path}.")
+            print(f"Warning: Unknown result type: {result_type} for {identifier}. Skipping {file_path}.")
             return
 
         db_conn.commit()
-        print(f"Processed and inserted: {file_path}")
+        print(f"Processed and inserted: {file_path} for identifier {identifier}")
 
     except Exception as e:
-        print(f"Error processing {file_path}: {e}")
+        print(f"Error processing {file_path} for identifier {identifier}: {e}")
         db_conn.rollback()
 
-    print("the function process_result_file has run.")
+    print(f"the function process_result_file has run for identifier {identifier}.")
 
-
-# ANCHOR : Functions for json data processing
+# NOTE : working
+# SECTION : General function for creating table and append to sqlite database
 def create_or_append_table(df, table_name, identifier, file_name, db_conn):
     """
     Creates or appends data to a SQLite table, using 'identifier' as the primary key,
@@ -136,22 +134,15 @@ def create_or_append_table(df, table_name, identifier, file_name, db_conn):
         where_clause = " AND ".join(f"{col} = ?" for col in df_to_insert.columns)
         select_query = f"SELECT 1 FROM {table_name} WHERE {where_clause}"
 
-        print(f"DEBUG: SELECT query: {select_query}")  # Print the SELECT query
-        print(f"DEBUG: SELECT query values: {tuple(row_values)}")  # Print the values
-
         try:
             cursor.execute(select_query, tuple(row_values))
             exists = cursor.fetchone()
         except sqlite3.Error as e:
-            print(f"DEBUG: Error during SELECT: {e}")
             exists = None  # Handle the error and continue
 
         if not exists:
             insert_query = f"INSERT INTO {table_name} VALUES (?, {placeholders})"
-            print(f"DEBUG: INSERT query: {insert_query}")  # Print the INSERT query
-            print(
-                f"DEBUG: INSERT query values: {(file_name, *row_values)}"
-            )  # Print the values
+
             cursor.execute(
                 insert_query,
                 (file_name, *row_values),
@@ -166,7 +157,8 @@ def create_or_append_table(df, table_name, identifier, file_name, db_conn):
     cursor.close()
 
 
-# json data will go into 3 different tables (for archive)
+# SECTION : processing json data - 3 different tables
+# NOTE : working
 def prep_info_df(json_object, identifier):
     """
     Prepares the info DataFrame from the JSON annotation.
@@ -185,17 +177,15 @@ def prep_info_df(json_object, identifier):
 
     # joining df for simple info - can go into own table
     info = pd.concat([genome, stats, run, version], axis=1)
+    
+    # NOTE : Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
+    info.columns = [col.replace(".", "_").replace("-", "_") for col in info.columns]
+    
     info.insert(0, "identifier", identifier)
-
-    # function log:
-    print(f"info table created for {identifier}")
-
-    # NOTE test if the info table is populated
-    info.to_csv("info.csv", index=False)
 
     return info
 
-
+# NOTE : working
 def prep_features_df(json_object, identifier):
     """
     Prepares the features DataFrame from the JSON annotation.
@@ -211,16 +201,13 @@ def prep_features_df(json_object, identifier):
     # need to change list types to string
     # we do not want to split those for now
     features = features.map(str)
-
-    # function log:
-    print(f"features table created for {identifier}")
-
-    # NOTE test if the features table is populated
-    features.to_csv("features.csv", index=False)
+    
+    # NOTE : Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
+    features.columns = [col.replace(".", "_").replace("-", "_") for col in features.columns]
 
     return features
 
-
+# NOTE : Working
 def prep_sequences_df(json_object, identifier):
     """
     Prepares the sequences DataFrame from the JSON annotation.
@@ -269,11 +256,9 @@ def prep_sequences_df(json_object, identifier):
         sequences.replace(["^.*=", "]", "NaN"], "", inplace=True, regex=True)
     except Exception as e:
         print(f"Error during replace operation: {e}")
-    # function log:
-    print(f"sequences table created for {identifier}")
-
-    # NOTE test if the sequences_df is empty
-    sequences.to_csv("sequences.csv", index=False)
+        
+    # NOTE : do not need to replace dots/- in sequences table - added for eventual compatibility
+    sequences.columns = [col.replace(".", "_").replace("-", "_") for col in sequences.columns]
 
     return sequences
 

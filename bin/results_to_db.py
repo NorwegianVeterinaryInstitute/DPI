@@ -113,7 +113,7 @@ def main():
     else:
         fk.process_result_file(result_file, result_type, identifier, db_conn, comment)
 
-    print(f"{result_type} result processed")
+    print(f"{result_type} result processed for identifier: {identifier}")
 
     # Close the database connection
     db_conn.close()
