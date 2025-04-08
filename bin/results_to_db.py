@@ -1,21 +1,20 @@
 #!/usr/bin/env python
-import os
 import argparse
 import sys
 import logging
-import sqlite3
 
-import pandas as pd
-import numpy as np
-import json
-import re
-import gffpandas.gffpandas as gffpd
+#import pandas as pd
+# import numpy as np
+# import json
+#import re
+#import gffpandas.gffpandas as gffpd
 import glob
 import functools
 import operator
+import sqlite3
 
 # sys.path.append(os.getcwd())
-import funktions as fk
+import funktions as fk 
 
 
 # ANCHOR : Login info output
@@ -130,6 +129,7 @@ def main():
             logging.info(f"main: >Processing {result_type} for {identifier} in {result_file}")
             fk.process_result_file(result_file, result_type, identifier, db_conn, comment=None)
         else:
+            # FIXME : I do not use the comment here ...
             logging.info(f"main: >Processing {result_type} for {identifier} in {result_file}")
             fk.process_result_file(result_file, result_type, identifier, db_conn, comment)
     except Exception as e:
