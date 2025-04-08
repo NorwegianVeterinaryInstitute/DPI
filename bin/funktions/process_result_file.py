@@ -8,6 +8,7 @@ from funktions.json_to_df import prep_features_df as prep_features_df
 from funktions.json_to_df import prep_sequences_df as prep_sequences_df 
 from funktions.gff_to_df import gff_to_df as gff_to_df
 from funktions.vcf_to_df import vcf_to_df as vcf_to_df
+from funktions.stats_to_df import stats_to_df as stats_to_df
 from funktions.create_or_append_table import create_or_append_table as create_or_append_table
     
 def process_result_file(file_path, result_type, identifier, db_conn, comment):
@@ -96,13 +97,15 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
                 print(f"Warning: Unknown VCF subtype for {result_type} for {identifier}. Skipping {file_path}.")
                 return
             
-        # elif result_type == "stat":
-        #     df = stat_to_df(file_path)
-        #     if "_stat.out in file_name":
-        #         create_or_append_table(df, 'stat_file', identifier, file_path, db_conn)
-        #     else: 
-        #         print(f"Warning: Unknown stat subtype for for {result_type} for {identifier}. Skipping {file_path}.")
-        #         pass 
+        elif result_type == "stats":
+            df = stats_to_df(file_path)
+            if "_stat.out in file_name":
+                create_or_append_table(df, 'stat_file', identifier, file_path, db_conn)
+            else: 
+                print(f"Warning: Unknown stats subtype for for {result_type} for {identifier}. Skipping {file_path}.")
+                return
+            
+        #elif 
                 
         # TODO add a comment table for each indentifier / processing 
                 
