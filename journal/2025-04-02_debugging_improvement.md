@@ -93,10 +93,11 @@ Retesting
 Ok it seems to be working now - continuing
 
 
-- Now need to add the vsf annotated results to the database 
+- Now need to add the vcf annotated results to the database 
 
 ```bash
 cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/06_VCF_ANNOTATOR
+IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
 apptainer shell $IMG
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/results_to_db.py"
 
@@ -108,14 +109,34 @@ I want to test if the function test is working
 
 ```bash
 cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/06_VCF_ANNOTATOR
+IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
 apptainer shell $IMG
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/vcf_to_df.py"
 python $SCRIPT
 ```
 
-GREAT ! working
+- now I need to add the stats file 
+
+```bash
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/04_NUCDIFF/SRR11262179_SRR11262033
+IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
+apptainer shell $IMG
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/results_to_db.py"
+$SCRIPT --result_file SRR11262179_SRR11262033_stat.out  --result_type stats --id SRR11262033 --database 2025_DPI_test.sqlite --comment test
+```
+ok - working
+
+
 
 
 
 # FIXES NEEDED - check if working
+- [ ] add comment table to the database - can be used for fast ckecking duplicates ...
 - [ ] missing data in features, need to add NaN to all other columns
+- [ ] check if the unittest are working and improve them
+- [ ] automatic script for unittesting 
+- [ ] optimization sqlite writing in database - which efficient duplicate checks
+- [ ] check and adjust the log file for the scripts - so its is easy to detect errors and where 
+
+# Helpers gemini 
+Hi, can you make an unittest for this file : xx.py. I want to be able to have the result in a jupyter notebook, your explanations included
