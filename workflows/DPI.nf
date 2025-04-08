@@ -5,7 +5,6 @@ include { RUN_NUCDIFF; RUN_NUCDIFF_VERSION } from "../modules/RUN_NUCDIFF.nf"
 include { PREPARE_VCF_ANNOTATOR; PREPARE_VCF_ANNOTATOR_VERSION } from "../modules/PREPARE_VCF_ANNOTATOR.nf"
 include { RUN_VCF_ANNOTATOR; RUN_VCF_ANNOTATOR_VERSION } from "../modules/RUN_VCF_ANNOTATOR.nf"
 include { WRANGLING_TO_DB; WRANGLING_TO_DB_VERSION  } from "../modules/WRANGLING_TO_DB.nf"
-include { JSON_TO_DB; JSON_TO_DB_VERSION  } from "../modules/JSON_TO_DB.nf"
 
 workflow DPI {
      
@@ -112,7 +111,7 @@ workflow DPI {
 
         RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.view()
 
-
+        // SECTION - OLD 
 
         // one_ch = RUN_NUCDIFF.out.nucdiff_res_ch.transpose()
 
@@ -122,7 +121,17 @@ workflow DPI {
         //         .groupTuple( by : 0)
         
         //         .map { (pair) = [it[0]] }
+        // ! SECTION 
+
+        // SECTION - results to db 
+        // results must be emited one by one but collected from all other modules from which we need to add them
+        results_ch = merge(
+                ANNOTATE.out.result_todb_ch,
+                RUN_NUCDIFF.out.result_todb_ch.flatten(),
+                RUN_VCF_ANNOTATOR.out.result_todb_ch.flatten()
+                )
                 
+        results_ch.subscribe { println "Received: $it" }
 
 
         //WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)

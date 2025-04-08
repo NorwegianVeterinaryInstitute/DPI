@@ -12,7 +12,7 @@ process WRANGLING_TO_DB {
     input:
     val(db)             // Path to the SQLite database
     val(comment)        // Comment for the database entries
-    tuple val(pair), val(result_type), path(result_files) // Pair identifier, result type, and files of that type
+    tuple val(id), path(result_file) // id sample or pair identifier depending of result provenance
 
     output:
     path(db), emit: db_path_ch // Emit the database path after processing
@@ -20,11 +20,10 @@ process WRANGLING_TO_DB {
     script:
     """
     python ${projectDir}/bin/results_to_db.py \\
+        --result_file "${result_file}" \\
+        --id "${id}" \\
         --database ${db} \\
-        --comment "${comment}" \\
-        --pair "${pair}" \\
-        --result_type "${result_type}" \\
-        --result_files "${result_files.join(',')}"
+        --comment "${comment}"
     """
 }
 
