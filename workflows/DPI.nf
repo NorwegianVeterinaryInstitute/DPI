@@ -44,7 +44,7 @@ workflow DPI {
         //ANNOTATION for all samples individually 
         ANNOTATE(input_samples_ch, params.baktaDB, params.training, params.genus, params.species)
 
-       /*
+ 
          
         // Combining channels to form pairs - by: [0,2] possition does not error but not sure does the right thing
         // need to swap keys so it can belong - problem if no keys in the first line 
@@ -95,66 +95,43 @@ workflow DPI {
         
         RUN_VCF_ANNOTATOR(vcf_annot_ch)
 
-        // Run at the end - in case need manual run (debug issues nb files)
-        // get path for database and comments 
-        // not a path because it needs to be created - does not exists yet
-        db_path_ch=Channel.value(params.sqlitedb)
-        comment_ch=Channel.value(params.comment) 
-
-        // create database - is run on all using selectors of files pattern
-        // This process is restarted at each resume - might be because non deterministic order ?                        
-        
-        // Need a find to reduce amount of simlink files otherwise nf pipeline bugs
-        // see: :https://github.com/nextflow-io/nextflow/issues/2852 "plaquette" solution
-        //vcf_ann_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect()
-        //nucdiff_ch = RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
-
-        RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.view()
-
-        // SECTION - OLD 
-
-        // one_ch = RUN_NUCDIFF.out.nucdiff_res_ch.transpose()
-
-
-        // results_ch = RUN_VCF_ANNOTATOR.out.annotated_vcf_ch
-        //         .join(one_ch, by: 0)
-        //         .groupTuple( by : 0)
-        
-        //         .map { (pair) = [it[0]] }
-        // ! SECTION 
-
-        // SECTION - results to db 
-        // results must be emited one by one but collected from all other modules from which we need to add them
-        results_ch = merge(
-                ANNOTATE.out.result_todb_ch,
-                RUN_NUCDIFF.out.result_todb_ch.flatten(),
-                RUN_VCF_ANNOTATOR.out.result_todb_ch.flatten()
-                )
-                
-        results_ch.subscribe { println "Received: $it" }
-
-        */
+        // prepare merging of results to database
         db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
         comment_ch=Channel.value(params.comment) 
 
-        results_ch = ANNOTATE.out.result_todb_ch
-        results_ch.view()
+        // results must be emited one by one but collected from all other modules from which we need to add them
+        // results_ch = ANNOTATE.out.result_todb_ch
+        // RUN_NUCDIFF.out.result_todb_ch
+        //         .flatMap { value, paths -> paths.collect { path -> [value, path]}}
+        //         .view()
 
-        WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
+        
+        RUN_NUCDIFF.out.result_todb_ch
+                .flatMap { value, paths ->  paths.collect { path -> [value, path] }} 
+                .view()
+
+
+        // results_ch = merge(
+        //         ANNOTATE.out.result_todb_ch, 
+        //         RUN_NUCDIFF.out.result_todb_ch.flatten(),
+        //         RUN_VCF_ANNOTATOR.out.result_todb_ch.flatten()
+        //         )
+
+        // results_ch.view()
+
+        //WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
 
 
         // This is run only once at the time to avoid many access to same DB which could be a problem
         //FIXME - rewrite JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) 
 
-// This was the original
-/*
+        // This was the original
+        // WRANGLING_TO_DB(
+        //         db_path_ch,
+        //         comment_ch, 
+        //         RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect(),
+        //         RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
+        //         )
 
-        WRANGLING_TO_DB(
-                db_path_ch,
-                comment_ch, 
-                RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect(),
-                RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
-                )
-*/
 
 }
