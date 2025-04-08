@@ -77,6 +77,11 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
 
     print(f"the function process_result_file has run for identifier {identifier}.")
 
+# !SECTION 
+
+
+
+
 # NOTE : working
 # SECTION : General function for creating table and append to sqlite database
 def create_or_append_table(df, table_name, identifier, file_name, db_conn):
@@ -155,6 +160,10 @@ def create_or_append_table(df, table_name, identifier, file_name, db_conn):
     print(f"create_or_append_table function has run for {identifier}.")
 
     cursor.close()
+
+# !SECTION
+
+
 
 
 # SECTION : processing json data - 3 different tables
@@ -261,6 +270,9 @@ def prep_sequences_df(json_object, identifier):
     sequences.columns = [col.replace(".", "_").replace("-", "_") for col in sequences.columns]
 
     return sequences
+
+# !SECTION
+
 
 
 # ANCHOR : Functions to process

@@ -1,18 +1,26 @@
 #!/usr/bin/env python
 
 import argparse
+import sys
+import logging
 import sqlite3
-# import sys
-# import os
 
 
-# import pandas as pd
-# import json
-# import sqlalchemy
-
-# import numpy as np
 # sys.path.append(os.getcwd())
 import funktions as fk
+
+
+# ANCHOR : Login info output
+log_file_name = "results_to_db.log"
+# FIXME : Change the log file name to include the when it runs the other functions
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(log_file_name, mode="w"),
+        logging.StreamHandler(sys.stdout),
+    ],
+    )
 
 
 # ANCHOR : Main Parsing arguments and running
@@ -23,6 +31,7 @@ def main():
         description="Wrangle results and insert into SQLite database.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         add_help=True,
+
     )
     # Version and example arguments (optional)
     parser.add_argument(
@@ -77,12 +86,12 @@ def main():
 
     # Handling of examples
     if args.example:
-        print("Example usage:")
-        print(" python results_to_db.py --database my_database.sqlite \\")
-        print("  --comment 'Analysis on 2023-10-01' \\")
-        print("  --identifier sample123 \\")
-        print("  --result_type json \\")
-        print("  --result_file file.json")
+        logging.info("Example usage:")
+        logging.info(" python results_to_db.py --database my_database.sqlite \\")
+        logging.info("  --comment 'Analysis on 2023-10-01' \\")
+        logging.info("  --identifier sample123 \\")
+        logging.info("  --result_type json \\")
+        logging.info("  --result_file file.json")
         return
 
     # Check if required arguments are provided when not version or example
@@ -108,13 +117,20 @@ def main():
     db_conn = sqlite3.connect(db_path)
 
     # Process the result files
-    if result_type == "json":
-        fk.process_result_file(result_file, result_type, identifier, db_conn, comment = None)
-    else:
-        fk.process_result_file(result_file, result_type, identifier, db_conn, comment)
+    try:
+        if result_type == "json":
+            logging.info(f"main: >Processing {result_type} for {identifier} in {result_file}")
+            fk.process_result_file(result_file, result_type, identifier, db_conn, comment=None)
+        else:
+            logging.info(f"main: >Processing {result_type} for {identifier} in {result_file}")
+            fk.process_result_file(result_file, result_type, identifier, db_conn, comment)
+    except Exception as e:
+        logging.error(f"main: >An error occurred during processin of {result_type} for {identifier}: {e}")
+        logging.error(f"main: >Check {log_file_name} for more details")
 
-    print(f"{result_type} result processed for identifier: {identifier}")
 
+    logging.info(f"{result_type} result processed for identifier: {identifier}")
+    
     # Close the database connection
     db_conn.close()
 
