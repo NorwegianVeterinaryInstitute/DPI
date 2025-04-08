@@ -1,14 +1,25 @@
 #!/usr/bin/env python
-
+import os
 import argparse
 import sys
 import logging
 import sqlite3
 
+import pandas as pd
+import numpy as np
+import json
+import re
+import gffpandas.gffpandas as gffpd
+import glob
+import functools
+import operator
+
+
 
 # sys.path.append(os.getcwd())
 import funktions as fk
 
+import 
 
 # ANCHOR : Login info output
 log_file_name = "results_to_db.log"
