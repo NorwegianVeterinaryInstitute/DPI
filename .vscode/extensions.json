@@ -27,6 +27,7 @@
     "exodiusstudios.comment-anchors",
     "njpwerner.autodocstring",
     "kevinrose.vsc-python-indent",
-    "qwtel.sqlite-viewer"
+    "qwtel.sqlite-viewer",
+    "grapecity.gc-excelviewer"
   ]
 }

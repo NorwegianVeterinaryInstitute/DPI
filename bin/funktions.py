@@ -23,6 +23,7 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
         comment (str): Comment for the database entries. Please set to NULL if not used.
     """
     file_name = os.path.basename(file_path)
+    print(f"Processing file: {file_name} for {identifier}")
 
     try:
         if result_type == "json":
@@ -30,20 +31,34 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
                 data = json.load(f)
 
             # 3 types of data to extract for the json fil
-            # Process info data
-            info_df = prep_info_df(data, identifier)
-            create_or_append_table(info_df, "info", identifier, file_name, db_conn)
+            try:
+                # Process info data
+                info_df = prep_info_df(data, identifier)
+                print(f"info_df created for {identifier}")
+                create_or_append_table(info_df, "info", identifier, file_name, db_conn)
+            except Exception as e:
+                print(f"Error processing info_df: {e}")
 
-            # Process features data
-            features_df = prep_features_df(data, identifier)
-            create_or_append_table(
-                features_df, "features", identifier, file_name, db_conn
-            )
-            # Process sequences data
-            sequences_df = prep_sequences_df(data, identifier)
-            create_or_append_table(
-                sequences_df, "sequences", identifier, file_name, db_conn
-            )
+            try:
+                # Process features data
+                features_df = prep_features_df(data, identifier)
+                print(f"features_df created for {identifier}")
+                create_or_append_table(
+                    features_df, "features", identifier, file_name, db_conn
+                )
+            except Exception as e:
+                print(f"Error processing features_df: {e}")
+
+            try:
+                # Process sequences data
+                # NOTE Working
+                sequences_df = prep_sequences_df(data, identifier)
+                print(f"sequences_df created for {identifier}")
+                create_or_append_table(
+                    sequences_df, "sequences", identifier, file_name, db_conn
+                )
+            except Exception as e:
+                print(f"Error processing sequences_df: {e}")
 
         elif result_type == "gff":
             # Add logic for GFF parsing and table creation
