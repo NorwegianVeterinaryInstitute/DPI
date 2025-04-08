@@ -62,7 +62,7 @@ workflow DPI {
                 .map{it.swap(1,2)}
 
         PREPARE_NUCDIFF(fna_pairs_ch)
-        /* 
+
 
 
         //ref is the longuest of the two - prepare tags 
@@ -121,15 +121,15 @@ workflow DPI {
         //         .join(one_ch, by: 0)
         //         .groupTuple( by : 0)
         
-        //    //         .map { (pair) = [it[0]] }
+        //         .map { (pair) = [it[0]] }
                 
- */
 
-        // WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
+
+        //WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
 
 
         // This is run only once at the time to avoid many access to same DB which could be a problem
-        //JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) 
+        //FIXME - rewrite JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) 
 
 // This was the original
 /*

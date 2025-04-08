@@ -58,15 +58,47 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
             except Exception as e:
                 print(f"Error processing sequences_df for {identifier}: {e}")
 
-        elif result_type == "gff":
-            # Add logic for GFF parsing and table creation
-            # Example:
-            # df = parse_gff(file_path)
-            # create_or_append_table(df, result_type, identifier, file_name, cursor)
-            pass  # Add gff parsing here
-        else:
-            print(f"Warning: Unknown result type: {result_type} for {identifier}. Skipping {file_path}.")
-            return
+        elif result_type == "gff":           
+            # processing each subtype of gff file 
+            if "_query_blocks" in file_name: 
+                pass 
+            elif "_query_snps" in file_name:
+                pass 
+            elif "_query_struct" in file_name:
+                pass
+            elif "_query_additional" in file_name:
+                pass
+            elif "_query_snps_annotated" in file_name:
+                pass
+            elif "_ref_blocks" in file_name:
+                pass
+            elif "_ref_snps" in file_name:
+                pass
+            elif "_ref_struct" in file_name:
+                pass
+            elif "ref_additional" in file_name:
+                pass
+            else:
+                print(f"Warning: Unknown GFF subtype for {result_type} for {identifier}. Skipping {file_path}.")
+                return 
+            
+        elif result_type == "vcf":
+            # processing each subtype of vcf file
+            if "_ref_snps_annotated" in file_name:
+                pass
+            elif "_query_snps_annotated" in file_name:
+                pass
+            else:
+                print(f"Warning: Unknown VCF subtype for {result_type} for {identifier}. Skipping {file_path}.")
+                return
+            
+        elif result_type == "stat":
+            if "_stat.out in file_name:
+                pass
+            else: 
+                print(f"Warning: Unknown stat subtype for for {result_type} for {identifier}. Skipping {file_path}.")
+                pass 
+                
 
         db_conn.commit()
         print(f"Processed and inserted: {file_path} for identifier {identifier}")
@@ -275,10 +307,13 @@ def prep_sequences_df(json_object, identifier):
 
 # SECTION : processing gff data 
 
+# detect subtype of gff file 
 
 
 
 
+
+# processing each subtype of gff file
 
 
 # SECTION : processing  query_blocks_files

@@ -66,3 +66,21 @@ $SCRIPT --result_file SRR11262033/SRR11262033.json --result_type json --id SRR11
 $SCRIPT --example
 $SCRIPT --version
 ```
+
+2025-04-08 ok now I fixed the adding of json results to the database
+launched the pipeline to get the rest of the results
+
+- add the gff results to the database
+```bash
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/04_NUCDIFF/SRR11262179_SRR11262033
+IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
+apptainer shell $IMG
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/results_to_db.py"
+
+$SCRIPT --result_file SRR11262179_SRR11262033_query_blocks.gff --result_type gff --id SRR11262033 --database 2025_DPI_test.sqlite --comment test
+```
+
+
+
+
+
