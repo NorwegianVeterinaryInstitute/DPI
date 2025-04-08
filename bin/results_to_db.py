@@ -1,20 +1,22 @@
 #!/usr/bin/env python
+
 import argparse
 import sys
 import logging
+import sqlite3
+import funktions.process_result_file as process_result_file
 
-#import pandas as pd
+
+# import pandas as pd
 # import numpy as np
 # import json
-#import re
-#import gffpandas.gffpandas as gffpd
-import glob
-import functools
-import operator
-import sqlite3
+# import re
+# import gffpandas.gffpandas as gffpd
 
+# import glob
+# import functools
+# import operator
 # sys.path.append(os.getcwd())
-import funktions as fk 
 
 
 # ANCHOR : Login info output
@@ -127,11 +129,11 @@ def main():
     try:
         if result_type == "json":
             logging.info(f"main: >Processing {result_type} for {identifier} in {result_file}")
-            fk.process_result_file(result_file, result_type, identifier, db_conn, comment=None)
+            process_result_file(result_file, result_type, identifier, db_conn, comment=None)
         else:
             # FIXME : I do not use the comment here ...
             logging.info(f"main: >Processing {result_type} for {identifier} in {result_file}")
-            fk.process_result_file(result_file, result_type, identifier, db_conn, comment)
+            process_result_file(result_file, result_type, identifier, db_conn, comment)
     except Exception as e:
         logging.error(f"main: >An error occurred during processin of {result_type} for {identifier}: {e}")
         logging.error(f"main: >Check {log_file_name} for more details")

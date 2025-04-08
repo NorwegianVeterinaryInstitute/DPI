@@ -1,4 +1,15 @@
 # Wrapper : processing each type of results files. A single file at the time
+import os 
+import json
+
+import funktions
+from funktions.json_to_df import prep_info_df as prep_info_df
+from funktions.json_to_df import prep_features_df as prep_features_df
+from funktions.json_to_df import prep_sequences_df as prep_sequences_df 
+from funktions.gff_to_df import gff_to_df as gff_to_df
+from funktions.vcf_to_df import vcf_to_df as vcf_to_df
+from funktions.create_or_append_table import create_or_append_table as create_or_append_table
+    
 def process_result_file(file_path, result_type, identifier, db_conn, comment):
     """
     Processes a single result file, transforms it into a table\n
@@ -13,13 +24,6 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
         db_conn (sqlite3.Connection): The database connection.
         comment (str): Comment for the database entries. Please set to NULL if not used.
     """
-    import os 
-    import json
-    from . import json_to_df
-    from . import gff_to_df
-    from . import vcf_to_df
-    from . import create_or_append_table
-    
     file_name = os.path.basename(file_path)
     print(f"Processing file: {file_name} for {identifier}")
 
@@ -81,7 +85,7 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
                 return 
             
         elif result_type == "vcf":
-            df = annotated_vcf_to_df(file_path)
+            df = vcf_to_df(file_path)
             
             # processing each subtype of vcf file
             if "_ref_snps_annotated" in file_name:
@@ -92,16 +96,17 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
                 print(f"Warning: Unknown VCF subtype for {result_type} for {identifier}. Skipping {file_path}.")
                 return
             
-        elif result_type == "stat":
-            if "_stat.out in file_name":
-                create_or_append_table(df, 'stat_file', identifier, file_path, db_conn)
-            else: 
-                print(f"Warning: Unknown stat subtype for for {result_type} for {identifier}. Skipping {file_path}.")
-                pass 
+        # elif result_type == "stat":
+        #     df = stat_to_df(file_path)
+        #     if "_stat.out in file_name":
+        #         create_or_append_table(df, 'stat_file', identifier, file_path, db_conn)
+        #     else: 
+        #         print(f"Warning: Unknown stat subtype for for {result_type} for {identifier}. Skipping {file_path}.")
+        #         pass 
                 
         # TODO add a comment table for each indentifier / processing 
                 
-
+    
         db_conn.commit()
         print(f"Processed and inserted: {file_path} for identifier {identifier}")
 
@@ -109,5 +114,5 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
         print(f"Error processing {file_path} for identifier {identifier}: {e}")
         db_conn.rollback()
 
-    print(f"the function process_result_file has run for identifier {identifier}.")
+
 
