@@ -95,7 +95,7 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
                 return
             
         elif result_type == "stat":
-            if "_stat.out in file_name:
+            if "_stat.out in file_name":
                 pass
             else: 
                 print(f"Warning: Unknown stat subtype for for {result_type} for {identifier}. Skipping {file_path}.")

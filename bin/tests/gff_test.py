@@ -16,4 +16,9 @@ ref, query = parts[0], parts[1]
 gff_df = gffpd.read_gff3(file_path)
 print(gff_df.header)
 print(gff_df.df)
-    
+
+gff_df.attributes_to_columns().assign(_REF=ref, _QUERY=query, _RES_FILE=file_name) 
+test_df = gff_to_df(file_path)
+
+os.system('clear')
+# os.system('cls')
