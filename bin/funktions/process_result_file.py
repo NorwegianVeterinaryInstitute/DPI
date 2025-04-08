@@ -30,6 +30,8 @@ def process_result_file(file_path, result_type, identifier, db_conn, comment):
     file_name = os.path.basename(file_path)
     print(f"Processing file: {file_name} for {identifier}")
 
+    # TODO Add automatic detection result type 
+    
     try:
         if result_type == "json":
             with open(file_path, "r") as f:
