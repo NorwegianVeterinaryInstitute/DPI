@@ -15,8 +15,7 @@ process RUN_VCF_ANNOTATOR{
         
         output:
         tuple val(pair), path("${ref_query}_ref_snps_annotated.vcf"), 
-        path("${ref_query}_query_snps_annotated.vcf"), emit: annotated_vcf_ch
-
+        path("${ref_query}_query_snps_annotated.vcf"), emit: result_todb_ch
         script:
         """
         vcf-annotator ${ref_vcf} ${ref_gbff} --output ${ref_query}_ref_snps_annotated.vcf >  ${ref}.sdout 2>&1 

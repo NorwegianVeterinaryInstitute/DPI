@@ -12,6 +12,8 @@ OUTDIR="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI"
 # this does not need to be changed
 BAKTADB="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/databases/bakta/db"
 PRODIGAL="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/databases/Listeria_monocytogenes.trn"
+DBOUT=${OUTDIR}/2025-04-08_DPI_TEST.sqlite
 
-$NEXTFLOW run $DPI/main.nf -c $SAGA_CONFIG --track DPI -profile apptainer --input $INPUT --out_dir $OUTDIR -work-dir $USERWORK/2025_DPI_TEST --baktaDB $BAKTADB --training $PRODIGAL --genus "Listeria" --species "monocytogenes" --sqlitedb "2025-04-02-Test.sqlite" --comment "'testing for debugging'" -resume
+
+$NEXTFLOW run $DPI/main.nf -c $SAGA_CONFIG --track DPI -profile apptainer --input $INPUT --out_dir $OUTDIR -work-dir $USERWORK/2025_DPI_TEST --baktaDB $BAKTADB --training $PRODIGAL --genus "Listeria" --species "monocytogenes" --sqlitedb $DBOUT --comment "'testing for debugging'" -resume
 

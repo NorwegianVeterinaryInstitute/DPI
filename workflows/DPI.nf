@@ -44,7 +44,7 @@ workflow DPI {
         //ANNOTATION for all samples individually 
         ANNOTATE(input_samples_ch, params.baktaDB, params.training, params.genus, params.species)
 
-       
+       /*
          
         // Combining channels to form pairs - by: [0,2] possition does not error but not sure does the right thing
         // need to swap keys so it can belong - problem if no keys in the first line 
@@ -133,8 +133,14 @@ workflow DPI {
                 
         results_ch.subscribe { println "Received: $it" }
 
+        */
+        db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
+        comment_ch=Channel.value(params.comment) 
 
-        //WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
+        results_ch = ANNOTATE.out.result_todb_ch
+        results_ch.view()
+
+        WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
 
 
         // This is run only once at the time to avoid many access to same DB which could be a problem

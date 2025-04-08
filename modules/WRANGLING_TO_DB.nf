@@ -10,19 +10,19 @@ process WRANGLING_TO_DB {
     cache 'lenient'
 
     input:
-    val(db)             // Path to the SQLite database
+    path (sqlite_db) 
     val(comment)        // Comment for the database entries
     tuple val(id), path(result_file) // id sample or pair identifier depending of result provenance
 
     output:
-    path(db), emit: db_path_ch // Emit the database path after processing
-
+    path("*.sqlite"), emit: db_path_ch
+    
     script:
     """
     python ${projectDir}/bin/results_to_db.py \\
         --result_file "${result_file}" \\
         --id "${id}" \\
-        --database ${db} \\
+        --database "${sqlite_db}" \\
         --comment "${comment}"
     """
 }

@@ -123,8 +123,14 @@ IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
 apptainer shell $IMG
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/results_to_db.py"
 $SCRIPT --result_file SRR11262179_SRR11262033_stat.out  --result_type stats --id SRR11262033 --database 2025_DPI_test.sqlite --comment test
+
+# modified auto detection result type
+$SCRIPT --result_file SRR11262179_SRR11262033_stat.out  --id SRR11262033 --database 2025_DPI_test.sqlite --comment test
+
 ```
 ok - working
+
+- reformatting the nf pipeline to allow adding the results to the database
 
 
 
