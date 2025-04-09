@@ -144,7 +144,7 @@ ok - working
 - [ ] debugging - the output in table is not the correct tables - need to check python script and lack tables. Vcf and gff are not added to the database. 
 - changed ' to "" in python script when passing arguments (I do not think was the problem but making sure)
 - ? modules to make the script not loaded - maybe : tested gff vcf and stats - all working - duplicates in database when run so need to check that when rest is fixed
-- so the problem is probably in the channels it receives. 
+- so the problem is probably in the channels it receives. ok, needed to transform the channel - the maxfork runs once so a bit tricky 
 
 
 
