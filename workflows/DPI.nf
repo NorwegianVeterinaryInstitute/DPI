@@ -93,27 +93,26 @@ workflow DPI {
 
         // results must be emited one by one but collected from all other modules from which we need to add them
         nucdiff_out_ch = RUN_NUCDIFF.out.result_todb_ch
-                .flatMap { pair_id, gff_stat_files ->
+                .flatMap { id, gff_stat_files ->
                         gff_stat_files.collect { gff_stat_file ->
-                        tuple(groupKey(pair_id, gff_stat_files.size()), gff_stat_file)
+                        tuple(groupKey(id, gff_stat_files.size()), gff_stat_file)
                         }}
         //        .view(v -> "scattered: ${v}" ) 
 
-        vcf_annot_out_ch = 
-                RUN_VCF_ANNOTATOR.out.result_todb_ch
-                .flatMap { pair_id, vcf1, vcf2 ->
-                        [
-                                [pair_id, vcf1],
-                                [pair_id, vcf2]
-                        ]
-                        }
+        vcf_annot_out_ch = RUN_VCF_ANNOTATOR.out.result_todb_ch
+                        .flatMap { id, vcfs ->
+                                vcfs.collect { vcf ->
+                                tuple(groupKey(id, vcfs.size()), vcf)
+                                }}
+        
         // combining all results into one chanel emiting tuple (id, file) to be inserted into DB (one by one)
-        results_ch = 
-                ANNOTATE.out.result_todb_ch
-                        .concat(nucdiff_out_ch)
-                        .concat(vcf_annot_out_ch)
+        // results_ch = 
+        //         ANNOTATE.out.result_todb_ch
+        //                 .concat(nucdiff_out_ch)
+        //                 .concat(vcf_annot_out_ch)
+        //                 .distinct()
         // results_ch.view()
-        WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
+        // WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
         // !SECTION
 
         // SECTION : output software versions
@@ -127,7 +126,7 @@ workflow DPI {
         // !SECTION
 
         // SECTION for test
-        results_ch.view()
+        // results_ch.view()
         // !SECTION
 }
 
