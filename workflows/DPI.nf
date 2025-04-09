@@ -105,14 +105,16 @@ workflow DPI {
                                 tuple(groupKey(id, vcfs.size()), vcf)
                                 }}
         
-        // combining all results into one chanel emiting tuple (id, file) to be inserted into DB (one by one)
-        // results_ch = 
-        //         ANNOTATE.out.result_todb_ch
-        //                 .concat(nucdiff_out_ch)
-        //                 .concat(vcf_annot_out_ch)
-        //                 .distinct()
-        // results_ch.view()
-        // WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
+        // combining all results into one chanel [db_path, comment, id, file] to be inserted into DB (one by one)
+        results_ch = 
+                db_path_ch.combine(comment_ch).combine(
+                        ANNOTATE.out.result_todb_ch
+                                .concat(nucdiff_out_ch)
+                                .concat(vcf_annot_out_ch)
+                                )
+                .distinct()
+
+        WRANGLING_TO_DB(results_ch)
         // !SECTION
 
         // SECTION : output software versions

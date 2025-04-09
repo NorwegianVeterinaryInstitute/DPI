@@ -7,15 +7,12 @@ process WRANGLING_TO_DB {
     maxForks 1 // Ensure only one instance runs at a time
     debug "${params.debug}"
     label 'process_short'
-    //cache 'lenient'
 
     input:
-    path (sqlite_db) 
-    val(comment)        // Comment for the database entries
-    tuple val(id), path(result_file) // id sample or pair identifier depending of result provenance
+    tuple path(sqlite_db),val(comment),val(id),path(result_file)
 
-    output:
-    path("*.sqlite"), emit: db_path_ch
+    //output:
+    //path("*.sqlite")
     
     script:
     """
