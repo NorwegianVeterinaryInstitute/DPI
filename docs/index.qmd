@@ -1,0 +1,11 @@
+# Preface {.unnumbered}
+
+This is a Quarto book.
+
+To learn more about Quarto books visit <https://quarto.org/docs/books>.
+
+The organization of this documentation and of this pipeline originates from [ALPPACA pipeline](https://github.com/NorwegianVeterinaryInstitute/ALPPACA) (at this stage)
+
+```{r}
+1 + 1
+```

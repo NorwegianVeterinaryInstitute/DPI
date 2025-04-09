@@ -1,0 +1,32 @@
+project:
+  type: book
+
+book:
+  title: "docs"
+  author: "Norah Jones"
+  date: "04/12/2024"
+  chapters:
+    - index.qmd
+    - requirements.qmd
+    - description.qmd
+    - installation.qmd
+    - usage.md
+    - configuration.qmd
+    - output.qmd
+    - contribution.qmd
+    - saga_users.qmd
+    - summary.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+  epub:
+    cover-image: cover.png
+
+editor: visual
+
