@@ -15,7 +15,7 @@ process RUN_NUCDIFF{
 
         output: 
         tuple val(pair), val(ref_query), val(ref), val(query), path("${ref_query}/${ref_query}_ref_snps.vcf"), path("${ref_query}/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
-        tuple val(pair), path ("${ref_query}/*.gff"), path("${ref_query}/*.out"), emit: result_todb_ch
+        tuple val(pair), path("${ref_query}/*{.gff,_stat.out}"), emit: result_todb_ch
         // TODO see if necessary 
         file("*")
 

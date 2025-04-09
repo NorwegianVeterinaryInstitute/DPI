@@ -105,10 +105,13 @@ workflow DPI {
         //         .flatMap { value, paths -> paths.collect { path -> [value, path]}}
         //         .view()
 
-        
+        // Better but the stat file is lost 
         RUN_NUCDIFF.out.result_todb_ch
-                .flatMap { value, paths ->  paths.collect { path -> [value, path] }} 
-                .view()
+                .flatMap { pair_id, gff_stat_files ->
+                        gff_stat_files.collect { gff_stat_file ->
+                        tuple(groupKey(pair_id, gff_stat_files.size()), gff_stat_file)
+                        }}
+                .view(v -> "scattered: ${v}" ) 
 
 
         // results_ch = merge(
