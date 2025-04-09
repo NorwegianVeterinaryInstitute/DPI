@@ -156,7 +156,7 @@ ok - working
 - [ ] ? missing data in features, need to add NaN to all other columns
 - [ ] check if the unittest are working and improve them
 - [ ] automatic script to run unittesting 
-- [ ] optimization sqlite writing in database - need to have it add data efficiently (at the end because basic functions have to work=
+- [ ] optimization sqlite writing in database - need to have it add data efficiently (at the end because basic functions have to work)
 - [ ] check and adjust the log file for the scripts - so its is easy to detect errors and where 
 
 # Helpers gemini 
