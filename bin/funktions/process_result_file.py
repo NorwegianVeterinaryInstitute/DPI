@@ -13,22 +13,22 @@ from funktions.comment_df import create_comment_df as create_comment_df
 
 from funktions.create_or_append_table import create_or_append_table as create_or_append_table
 
-def determine_result_type(file_path):
+def determine_result_type(file_name):
     """
     Helper: Determines the type of result for correct processing
     Returns the result type
     
     Args:
-        file_path (str): Path to the result file.
+        file_name (str): basename of the result file.
     """
     
-    if file_path.endswith(".json"):
+    if file_name.endswith(".json"):
         return "json"
-    elif file_path.endswith(".gff"):
+    elif file_name.endswith(".gff"):
         return "gff"
-    elif file_path.endswith(".vcf"):
+    elif file_name.endswith(".vcf"):
         return "vcf"
-    elif file_path.endswith("_stat.out"):
+    elif file_name.endswith("_stat.out"):
         return "stats"
     else:
         return None
@@ -51,7 +51,7 @@ def process_result_file(file_path, identifier, db_conn, comment):
     print(f"Processing file: {file_name} for {identifier}")
 
     # TODO Add automatic detection result type 
-    result_type = determine_result_type(file_path)
+    result_type = determine_result_type(file_name)
     
     try:
         if result_type == "json":
@@ -62,52 +62,52 @@ def process_result_file(file_path, identifier, db_conn, comment):
             try:
                 # Process info data
                 info_df = prep_info_df(data, identifier)
-                create_or_append_table(info_df, 'info', identifier, file_name, db_conn)
+                create_or_append_table(info_df, "info", identifier, file_name, db_conn)
             except Exception as e:
-                print(f"Error processing info_df for {identifier}: {e}")
+                print(f"Error processing info_df for {identifier} filename  {file_name}: {e}")
 
             try:
                 # Process features data
                 features_df = prep_features_df(data, identifier)
                 create_or_append_table(
-                    features_df, 'features', identifier, file_name, db_conn
+                    features_df, "features", identifier, file_name, db_conn
                 )
             except Exception as e:
-                print(f"Error processing features_df for {identifier}: {e}")
+                print(f"Error processing features_df for {identifier} filename  {file_name}: {e}")
                 
             try:
                 # Process sequences data
                 sequences_df = prep_sequences_df(data, identifier)
                 create_or_append_table(
-                    sequences_df, 'sequences', identifier, file_name, db_conn
+                    sequences_df, "sequences", identifier, file_name, db_conn
                 )
             except Exception as e:
-                print(f"Error processing sequences_df for {identifier}: {e}")
+                print(f"Error processing sequences_df for {identifier} filename  {file_name}: {e}")
 
         elif result_type == "gff":           
             # processing each subtype of gff file 
             df = gff_to_df(file_path)
             
             if "_query_blocks" in file_name: 
-                create_or_append_table(df, 'query_blocks', identifier, file_path, db_conn)
+                create_or_append_table(df, "query_blocks", identifier, file_name, db_conn)
             elif "_query_snps" in file_name:
-                create_or_append_table(df, 'query_snps', identifier, file_path, db_conn)
+                create_or_append_table(df, "query_snps", identifier, file_name, db_conn)
             elif "_query_struct" in file_name:
-                create_or_append_table(df, 'query_struct', identifier, file_path, db_conn)
+                create_or_append_table(df, "query_struct", identifier, file_name, db_conn)
             elif "_query_additional" in file_name:
-                create_or_append_table(df, 'query_additional', identifier, file_path, db_conn)
+                create_or_append_table(df, "query_additional", identifier, file_name, db_conn)
             elif "_query_snps_annotated" in file_name:
-                create_or_append_table(df, 'query_snps_annotated', identifier, file_path, db_conn)
+                create_or_append_table(df, "query_snps_annotated", identifier, file_name, db_conn)
             elif "_ref_blocks" in file_name:
-                create_or_append_table(df, 'ref_blocks', identifier, file_path, db_conn)
+                create_or_append_table(df, "ref_blocks", identifier, file_name, db_conn)
             elif "_ref_snps" in file_name:
-                create_or_append_table(df, 'ref_snps', identifier, file_path, db_conn)
+                create_or_append_table(df, "ref_snps", identifier, file_name, db_conn)
             elif "_ref_struct" in file_name:
-                create_or_append_table(df, 'ref_struct', identifier, file_path, db_conn)
+                create_or_append_table(df, "ref_struct", identifier, file_name, db_conn)
             elif "ref_additional" in file_name:
-                create_or_append_table(df, 'ref_additional', identifier, file_path, db_conn)
+                create_or_append_table(df, "ref_additional", identifier, file_name, db_conn)
             else:
-                print(f"Warning: Unknown GFF subtype for {result_type} for {identifier}. Skipping {file_path}.")
+                print(f"Warning: Unknown GFF subtype for {result_type} for {identifier}. Filepath {file_path}. Skipping {file_path}.")
                 return 
             
         elif result_type == "vcf":
@@ -115,29 +115,29 @@ def process_result_file(file_path, identifier, db_conn, comment):
             
             # processing each subtype of vcf file
             if "_ref_snps_annotated" in file_name:
-                create_or_append_table(df, 'ref_snps_annotated', identifier, file_path, db_conn)
+                create_or_append_table(df, "ref_snps_annotated", identifier, file_name, db_conn)
             elif "_query_snps_annotated" in file_name:
-                create_or_append_table(df, 'query_snps_annotated', identifier, file_path, db_conn)
+                create_or_append_table(df, "query_snps_annotated", identifier, file_name, db_conn)
             else:
-                print(f"Warning: Unknown VCF subtype for {result_type} for {identifier}. Skipping {file_path}.")
+                print(f"Warning: Unknown VCF subtype for {result_type} for {identifier}. Skipping {file_name}.")
                 return
             
         elif result_type == "stats":
             df = stats_to_df(file_path)
             if "_stat.out in file_name":
-                create_or_append_table(df, 'stat_file', identifier, file_path, db_conn)
+                create_or_append_table(df, "stat_file", identifier, file_name, db_conn)
             else: 
-                print(f"Warning: Unknown stats subtype for for {result_type} for {identifier}. Skipping {file_path}.")
+                print(f"Warning: Unknown stats subtype for {result_type} for {identifier}. Skipping {file_path}.")
                 return
         
         # for each type of file added to the database will add a comment
         # can be used to fast recovery if added or new data as first filter    
         comment_df = create_comment_df(identifier, comment)
-        create_or_append_table(comment_df, "comments", identifier, file_path, db_conn)
+        create_or_append_table(comment_df, "comments", identifier, file_name, db_conn)
 
     
         db_conn.commit()
-        print(f"Processed and inserted: {file_path} for identifier {identifier}")
+        print(f"Processed and inserted: {file_name} for identifier {identifier}")
 
     except Exception as e:
         print(f"Error processing {file_path} for identifier {identifier}: {e}")

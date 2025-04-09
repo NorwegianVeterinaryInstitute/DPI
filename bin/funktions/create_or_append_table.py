@@ -5,7 +5,7 @@ def create_or_append_table(df, table_name, identifier, file_name, db_conn):
 
     Args:
         df (pd.DataFrame): DataFrame to insert.
-        table_name (str): Name of the table.
+        table_name (str): Name of the table. When argument is passed, must be between "" and not ''
         identifier (str): The identifier (pair or sample_id).
         file_name (str): The name of the processed file.
         db_conn (sqlite3.Connection): The database connection.
@@ -14,6 +14,7 @@ def create_or_append_table(df, table_name, identifier, file_name, db_conn):
     import pandas as pd
     
     cursor = db_conn.cursor()
+    
 
     # Insert identifier with a different name
     df.insert(0, "nf_val_identifier", identifier)
@@ -74,6 +75,6 @@ def create_or_append_table(df, table_name, identifier, file_name, db_conn):
             print(f"Skipping duplicate row in file {file_name}")
 
     # log function
-    print(f"create_or_append_table function has run for {identifier}.")
+    print(f"create_or_append_table function has run for {identifier} and filename {file_name}.")
 
     cursor.close()
