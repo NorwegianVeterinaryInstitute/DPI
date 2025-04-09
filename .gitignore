@@ -1,11 +1,15 @@
 ## Added files
-DPI.code-workspace
 .nextflow*
 work
 old
 debug
 *.insyncdl
 NFTEST
+*_copy*
+*_gemini*
+*_original*
+*.sqlite
+/results/
 #####################################
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,456 @@
+
+[1m[38;5;232m[48;5;43m N E X T F L O W [0;2m  ~  [mversion 24.10.5[m
+[K
+Launching[35m `/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/main.nf` [0;2m[[0;1;36mamazing_mcclintock[0;2m] DSL2 - [36mrevision: [0;36mbb394c5909[m
+[K
+==========================================================================
+############################################################################
+##     DPI: a Tool that reports Differences between Pairs of Isolates     ##
+############################################################################
+==========================================================================
+                              Run track: DPI                              
+                                 DPI: 0.3                                 
+==========================================================================
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mINPUT -[K
+[2A
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mINPUT           -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE        -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF     -[K
+[5A
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mINPUT                         -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE                      -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF               -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF                   -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR         -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR             -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mINPUT_VERSION                 -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE_VERSION              -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF_VERSION       -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF_VERSION           -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR_VERSION -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR_VERSION     -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mWRANGLING_TO_DB_VERSION       -[K
+[14A
+[2m[[0;34m21/e1517c[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT[33;2m ([0;33m1[2m)[m                    [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[m[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE                      -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF               -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF                   -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR         -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR             -[K
+[2m[[0;34m62/7570de[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT_VERSION                [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[m[K
+[2m[[0;34m57/694f98[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE_VERSION             [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[m[K
+[2m[[0;34m55/35e20b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF_VERSION      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[m[K
+[2m[[0;34m93/b23139[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF_VERSION          [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[m[K
+[2m[[0;34mc6/41e01b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR_VERSION[2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[m[K
+[2m[[0;34m8c/7ca000[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR_VERSION    [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[m[K
+[2m[[0;34mf2/2e9626[0;2m] [0;2mprocess > [0;2mDPI:[mWRANGLING_TO_DB_VERSION      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[m[K
+[1] "input_check.log"[K
+[1] "creating a dataframe of unique isolates and corresponding paths"[K
+[1] "creating a dataframe of unique iunique pairs to compare"[K
+[1] "exporting table of unique pairs: unique_pairs.csv"[K
+[1] "exporting table of unique samples-paths: unique_samples.csv"[K
+[1] "Exporting session info into input_check.version"[K
+[K
+[21A
+[2m[[0;34m21/e1517c[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT[33;2m ([0;33m1[2m)[m                                [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mda/9ddedb[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE[33;2m ([0;33mSRR13588432[2m)[m                   [2m [[0;32m100%[0;2m][m 5 of 5[2m, cached: 5[0;32m ✔[m[K
+[2m[[0;34m0a/d62c2f[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF[33;2m ([0;33mSRR11262033_SRR11262179[2m)[m[2m [[0;32m100%[0;2m][m 2 of 2[2m, cached: 2[m[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF                               -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR                     -[K
+[2m[[0;34m-        [0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR                         -[K
+[2m[[0;34m62/7570de[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT_VERSION                            [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m57/694f98[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE_VERSION                         [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m55/35e20b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF_VERSION                  [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m93/b23139[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF_VERSION                      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mc6/41e01b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR_VERSION            [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m8c/7ca000[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR_VERSION                [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mf2/2e9626[0;2m] [0;2mprocess > [0;2mDPI:[mWRANGLING_TO_DB_VERSION                  [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[1] "input_check.log"[K
+[1] "creating a dataframe of unique isolates and corresponding paths"[K
+[1] "creating a dataframe of unique iunique pairs to compare"[K
+[1] "exporting table of unique pairs: unique_pairs.csv"[K
+[1] "exporting table of unique samples-paths: unique_samples.csv"[K
+[1] "Exporting session info into input_check.version"[K
+[K
+[SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/a2/c802cc25f754ec52b762a6bb8c8583/SRR13588387/SRR13588387.json][K
+[SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/a2/c802cc25f754ec52b762a6bb8c8583/SRR13588387/SRR13588387.json][K
+[SRR11262033, /cluster/work/users/evezeyl/2025_DPI_TEST/a0/dbee2eeac9e5a5eb3d4d747f29c2c9/SRR11262033/SRR11262033.json][K
+[SRR11262033, /cluster/work/users/evezeyl/2025_DPI_TEST/a0/dbee2eeac9e5a5eb3d4d747f29c2c9/SRR11262033/SRR11262033.json][K
+[SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/b4/187f714de6a70892f59ed91fabc994/SRR11262179/SRR11262179.json][K
+[SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/b4/187f714de6a70892f59ed91fabc994/SRR11262179/SRR11262179.json][K
+[SRR11262193, /cluster/work/users/evezeyl/2025_DPI_TEST/08/4d00a00c1f0c2274641d4d99cda942/SRR11262193/SRR11262193.json][K
+[SRR11262193, /cluster/work/users/evezeyl/2025_DPI_TEST/08/4d00a00c1f0c2274641d4d99cda942/SRR11262193/SRR11262193.json][K
+[SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/da/9ddedb0041d4064c4d80f7e8825244/SRR13588432/SRR13588432.json][K
+[SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/da/9ddedb0041d4064c4d80f7e8825244/SRR13588432/SRR13588432.json][K
+[31A
+[2m[[0;34m21/e1517c[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT[33;2m ([0;33m1[2m)[m                                      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mda/9ddedb[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE[33;2m ([0;33mSRR13588432[2m)[m                         [2m [[0;32m100%[0;2m][m 5 of 5[2m, cached: 5[0;32m ✔[m[K
+[2m[[0;34m1c/80165a[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m      [2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34m63/9a8935[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF[33;2m ([0;33mSRR11262179_SRR13588387[2m)[m          [2m [[0;32m100%[0;2m][m 2 of 2[2m, cached: 2[m[K
+[2m[[0;34mea/eba97d[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR[33;2m ([0;33mSRR11262033_SRR11262179[2m)[m[2m [[0;32m100%[0;2m][m 2 of 2[2m, cached: 2[m[K
+[2m[[0;34mf8/60b402[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR[33;2m ([0;33mSRR11262033_SRR11262179[2m)[m    [2m [[0;32m100%[0;2m][m 2 of 2[2m, cached: 2[m[K
+[2m[[0;34m62/7570de[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT_VERSION                                  [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m57/694f98[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE_VERSION                               [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m55/35e20b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF_VERSION                        [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m93/b23139[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF_VERSION                            [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mc6/41e01b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR_VERSION                  [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m8c/7ca000[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR_VERSION                      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mf2/2e9626[0;2m] [0;2mprocess > [0;2mDPI:[mWRANGLING_TO_DB_VERSION                        [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[1] "input_check.log"[K
+[1] "creating a dataframe of unique isolates and corresponding paths"[K
+[1] "creating a dataframe of unique iunique pairs to compare"[K
+[1] "exporting table of unique pairs: unique_pairs.csv"[K
+[1] "exporting table of unique samples-paths: unique_samples.csv"[K
+[1] "Exporting session info into input_check.version"[K
+[K
+[SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/a2/c802cc25f754ec52b762a6bb8c8583/SRR13588387/SRR13588387.json][K
+[SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/a2/c802cc25f754ec52b762a6bb8c8583/SRR13588387/SRR13588387.json][K
+[SRR11262033, /cluster/work/users/evezeyl/2025_DPI_TEST/a0/dbee2eeac9e5a5eb3d4d747f29c2c9/SRR11262033/SRR11262033.json][K
+[SRR11262033, /cluster/work/users/evezeyl/2025_DPI_TEST/a0/dbee2eeac9e5a5eb3d4d747f29c2c9/SRR11262033/SRR11262033.json][K
+[SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/b4/187f714de6a70892f59ed91fabc994/SRR11262179/SRR11262179.json][K
+[SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/b4/187f714de6a70892f59ed91fabc994/SRR11262179/SRR11262179.json][K
+[SRR11262193, /cluster/work/users/evezeyl/2025_DPI_TEST/08/4d00a00c1f0c2274641d4d99cda942/SRR11262193/SRR11262193.json][K
+[SRR11262193, /cluster/work/users/evezeyl/2025_DPI_TEST/08/4d00a00c1f0c2274641d4d99cda942/SRR11262193/SRR11262193.json][K
+[SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/da/9ddedb0041d4064c4d80f7e8825244/SRR13588432/SRR13588432.json][K
+[SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/da/9ddedb0041d4064c4d80f7e8825244/SRR13588432/SRR13588432.json][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_stat.out][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_stat.out][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_stat.out][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_stat.out][K
+[67A
+[2m[[0;34m21/e1517c[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT[33;2m ([0;33m1[2m)[m                                      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mda/9ddedb[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE[33;2m ([0;33mSRR13588432[2m)[m                         [2m [[0;32m100%[0;2m][m 5 of 5[2m, cached: 5[0;32m ✔[m[K
+[2m[[0;34m1c/80165a[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m      [2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34mf5/bc33db[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m          [2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34m81/9d4daa[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m[2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34m52/920c63[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m    [2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34m62/7570de[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT_VERSION                                  [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m57/694f98[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE_VERSION                               [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m55/35e20b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF_VERSION                        [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m93/b23139[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF_VERSION                            [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mc6/41e01b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR_VERSION                  [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m8c/7ca000[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR_VERSION                      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mf2/2e9626[0;2m] [0;2mprocess > [0;2mDPI:[mWRANGLING_TO_DB_VERSION                        [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[1] "input_check.log"[K
+[1] "creating a dataframe of unique isolates and corresponding paths"[K
+[1] "creating a dataframe of unique iunique pairs to compare"[K
+[1] "exporting table of unique pairs: unique_pairs.csv"[K
+[1] "exporting table of unique samples-paths: unique_samples.csv"[K
+[1] "Exporting session info into input_check.version"[K
+[K
+[SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/a2/c802cc25f754ec52b762a6bb8c8583/SRR13588387/SRR13588387.json][K
+[SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/a2/c802cc25f754ec52b762a6bb8c8583/SRR13588387/SRR13588387.json][K
+[SRR11262033, /cluster/work/users/evezeyl/2025_DPI_TEST/a0/dbee2eeac9e5a5eb3d4d747f29c2c9/SRR11262033/SRR11262033.json][K
+[SRR11262033, /cluster/work/users/evezeyl/2025_DPI_TEST/a0/dbee2eeac9e5a5eb3d4d747f29c2c9/SRR11262033/SRR11262033.json][K
+[SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/b4/187f714de6a70892f59ed91fabc994/SRR11262179/SRR11262179.json][K
+[SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/b4/187f714de6a70892f59ed91fabc994/SRR11262179/SRR11262179.json][K
+[SRR11262193, /cluster/work/users/evezeyl/2025_DPI_TEST/08/4d00a00c1f0c2274641d4d99cda942/SRR11262193/SRR11262193.json][K
+[SRR11262193, /cluster/work/users/evezeyl/2025_DPI_TEST/08/4d00a00c1f0c2274641d4d99cda942/SRR11262193/SRR11262193.json][K
+[SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/da/9ddedb0041d4064c4d80f7e8825244/SRR13588432/SRR13588432.json][K
+[SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/da/9ddedb0041d4064c4d80f7e8825244/SRR13588432/SRR13588432.json][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_stat.out][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_stat.out][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_stat.out][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_stat.out][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_stat.out][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_stat.out][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_ref_snps_annotated.vcf][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_ref_snps_annotated.vcf][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_query_snps_annotated.vcf][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_query_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_ref_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_ref_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_query_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_query_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_ref_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_query_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_ref_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_query_snps_annotated.vcf][K
+[97A
+[2m[[0;34m21/e1517c[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT[33;2m ([0;33m1[2m)[m                                      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mda/9ddedb[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE[33;2m ([0;33mSRR13588432[2m)[m                         [2m [[0;32m100%[0;2m][m 5 of 5[2m, cached: 5[0;32m ✔[m[K
+[2m[[0;34m1c/80165a[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m      [2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34mf5/bc33db[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m          [2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34m81/9d4daa[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m[2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34m52/920c63[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m    [2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34m62/7570de[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT_VERSION                                  [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m57/694f98[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE_VERSION                               [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m55/35e20b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF_VERSION                        [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m93/b23139[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF_VERSION                            [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mc6/41e01b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR_VERSION                  [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m8c/7ca000[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR_VERSION                      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mf2/2e9626[0;2m] [0;2mprocess > [0;2mDPI:[mWRANGLING_TO_DB_VERSION                        [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[1] "input_check.log"[K
+[1] "creating a dataframe of unique isolates and corresponding paths"[K
+[1] "creating a dataframe of unique iunique pairs to compare"[K
+[1] "exporting table of unique pairs: unique_pairs.csv"[K
+[1] "exporting table of unique samples-paths: unique_samples.csv"[K
+[1] "Exporting session info into input_check.version"[K
+[K
+[SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/a2/c802cc25f754ec52b762a6bb8c8583/SRR13588387/SRR13588387.json][K
+[SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/a2/c802cc25f754ec52b762a6bb8c8583/SRR13588387/SRR13588387.json][K
+[SRR11262033, /cluster/work/users/evezeyl/2025_DPI_TEST/a0/dbee2eeac9e5a5eb3d4d747f29c2c9/SRR11262033/SRR11262033.json][K
+[SRR11262033, /cluster/work/users/evezeyl/2025_DPI_TEST/a0/dbee2eeac9e5a5eb3d4d747f29c2c9/SRR11262033/SRR11262033.json][K
+[SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/b4/187f714de6a70892f59ed91fabc994/SRR11262179/SRR11262179.json][K
+[SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/b4/187f714de6a70892f59ed91fabc994/SRR11262179/SRR11262179.json][K
+[SRR11262193, /cluster/work/users/evezeyl/2025_DPI_TEST/08/4d00a00c1f0c2274641d4d99cda942/SRR11262193/SRR11262193.json][K
+[SRR11262193, /cluster/work/users/evezeyl/2025_DPI_TEST/08/4d00a00c1f0c2274641d4d99cda942/SRR11262193/SRR11262193.json][K
+[SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/da/9ddedb0041d4064c4d80f7e8825244/SRR13588432/SRR13588432.json][K
+[SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/da/9ddedb0041d4064c4d80f7e8825244/SRR13588432/SRR13588432.json][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_stat.out][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_stat.out][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_stat.out][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_stat.out][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_stat.out][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_stat.out][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_ref_snps_annotated.vcf][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_ref_snps_annotated.vcf][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_query_snps_annotated.vcf][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_query_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_ref_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_ref_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_query_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_query_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_ref_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_query_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_ref_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_query_snps_annotated.vcf][K
+==========================================================================[K
+                              DPI Complete!                               [K
+Output directory: /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI[K
+                              Duration: 8.5s                              [K
+                        Nextflow version: 24.10.5                         [K
+==========================================================================[K
+[103A
+[2m[[0;34m21/e1517c[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT[33;2m ([0;33m1[2m)[m                                      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mda/9ddedb[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE[33;2m ([0;33mSRR13588432[2m)[m                         [2m [[0;32m100%[0;2m][m 5 of 5[2m, cached: 5[0;32m ✔[m[K
+[2m[[0;34m1c/80165a[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m      [2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34mf5/bc33db[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m          [2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34m81/9d4daa[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m[2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34m52/920c63[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR[33;2m ([0;33mSRR11262193_SRR13588432[2m)[m    [2m [[0;32m100%[0;2m][m 3 of 3[2m, cached: 3[0;32m ✔[m[K
+[2m[[0;34m62/7570de[0;2m] [0;2mprocess > [0;2mDPI:[mINPUT_VERSION                                  [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m57/694f98[0;2m] [0;2mprocess > [0;2mDPI:[mANNOTATE_VERSION                               [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m55/35e20b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_NUCDIFF_VERSION                        [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m93/b23139[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_NUCDIFF_VERSION                            [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mc6/41e01b[0;2m] [0;2mprocess > [0;2mDPI:[mPREPARE_VCF_ANNOTATOR_VERSION                  [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34m8c/7ca000[0;2m] [0;2mprocess > [0;2mDPI:[mRUN_VCF_ANNOTATOR_VERSION                      [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[2m[[0;34mf2/2e9626[0;2m] [0;2mprocess > [0;2mDPI:[mWRANGLING_TO_DB_VERSION                        [2m [[0;32m100%[0;2m][m 1 of 1[2m, cached: 1[0;32m ✔[m[K
+[1] "input_check.log"[K
+[1] "creating a dataframe of unique isolates and corresponding paths"[K
+[1] "creating a dataframe of unique iunique pairs to compare"[K
+[1] "exporting table of unique pairs: unique_pairs.csv"[K
+[1] "exporting table of unique samples-paths: unique_samples.csv"[K
+[1] "Exporting session info into input_check.version"[K
+[K
+[SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/a2/c802cc25f754ec52b762a6bb8c8583/SRR13588387/SRR13588387.json][K
+[SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/a2/c802cc25f754ec52b762a6bb8c8583/SRR13588387/SRR13588387.json][K
+[SRR11262033, /cluster/work/users/evezeyl/2025_DPI_TEST/a0/dbee2eeac9e5a5eb3d4d747f29c2c9/SRR11262033/SRR11262033.json][K
+[SRR11262033, /cluster/work/users/evezeyl/2025_DPI_TEST/a0/dbee2eeac9e5a5eb3d4d747f29c2c9/SRR11262033/SRR11262033.json][K
+[SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/b4/187f714de6a70892f59ed91fabc994/SRR11262179/SRR11262179.json][K
+[SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/b4/187f714de6a70892f59ed91fabc994/SRR11262179/SRR11262179.json][K
+[SRR11262193, /cluster/work/users/evezeyl/2025_DPI_TEST/08/4d00a00c1f0c2274641d4d99cda942/SRR11262193/SRR11262193.json][K
+[SRR11262193, /cluster/work/users/evezeyl/2025_DPI_TEST/08/4d00a00c1f0c2274641d4d99cda942/SRR11262193/SRR11262193.json][K
+[SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/da/9ddedb0041d4064c4d80f7e8825244/SRR13588432/SRR13588432.json][K
+[SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/da/9ddedb0041d4064c4d80f7e8825244/SRR13588432/SRR13588432.json][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_query_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_additional.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_blocks.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_snps.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_ref_struct.gff][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_stat.out][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/63/9a893577cf0d4d5acf54264dce9dac/SRR11262179_SRR13588387/SRR11262179_SRR13588387_stat.out][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_query_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_additional.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_blocks.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_snps.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_stat.out][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_ref_struct.gff][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/51/2e37599d5944861b73361c321de5da/SRR11262179_SRR11262033/SRR11262179_SRR11262033_stat.out][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_query_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_additional.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_blocks.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_snps.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_ref_struct.gff][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_stat.out][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/f5/bc33dbb342f35a03631f796356ace4/SRR13588432_SRR11262193/SRR13588432_SRR11262193_stat.out][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_ref_snps_annotated.vcf][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_ref_snps_annotated.vcf][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_query_snps_annotated.vcf][K
+[SRR11262179_SRR13588387, /cluster/work/users/evezeyl/2025_DPI_TEST/05/5ecece0395be423d58e9670323dfe5/SRR11262179_SRR13588387_query_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_ref_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_ref_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_query_snps_annotated.vcf][K
+[SRR11262033_SRR11262179, /cluster/work/users/evezeyl/2025_DPI_TEST/f8/60b402787a354688e5291598f48a2c/SRR11262179_SRR11262033_query_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_ref_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_query_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_ref_snps_annotated.vcf][K
+[SRR11262193_SRR13588432, /cluster/work/users/evezeyl/2025_DPI_TEST/52/920c63fbfb5df46600b42950c47ac5/SRR13588432_SRR11262193_query_snps_annotated.vcf][K
+==========================================================================[K
+                              DPI Complete!                               [K
+Output directory: /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI[K
+                              Duration: 8.5s                              [K
+                        Nextflow version: 24.10.5                         [K
+==========================================================================[K
+

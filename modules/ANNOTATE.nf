@@ -17,7 +17,8 @@ process ANNOTATE {
         output:
         tuple val(sample), path("${sample}/${sample}.fna"), emit: bakta_fna_ch
         tuple val(sample), path("${sample}/${sample}.gbff"), emit: bakta_gbff_ch
-        tuple val(sample), path("${sample}/${sample}.json"), emit: bakta_json_ch
+        tuple val(sample), path("${sample}/${sample}.json"), emit: result_todb_ch
+        // TODO check if all tose files are needed
         file("*") 
 
         script:

@@ -5,21 +5,22 @@ include { RUN_NUCDIFF; RUN_NUCDIFF_VERSION } from "../modules/RUN_NUCDIFF.nf"
 include { PREPARE_VCF_ANNOTATOR; PREPARE_VCF_ANNOTATOR_VERSION } from "../modules/PREPARE_VCF_ANNOTATOR.nf"
 include { RUN_VCF_ANNOTATOR; RUN_VCF_ANNOTATOR_VERSION } from "../modules/RUN_VCF_ANNOTATOR.nf"
 include { WRANGLING_TO_DB; WRANGLING_TO_DB_VERSION  } from "../modules/WRANGLING_TO_DB.nf"
-include { JSON_TO_DB; JSON_TO_DB_VERSION  } from "../modules/JSON_TO_DB.nf"
 
 workflow DPI {
+        // SECTION Input parameters check 
         if (!params.input) {exit 1, "Missing input file"}
         if (!params.baktaDB) {exit 1, "Missing or wrong path for Bakta database"}
         if (!params.training) {exit 1, "missing or wrong path for prodigal training file"}
         if (!params.genus) {exit 1, "Please indicate genus name in parameters"}
         if (!params.species) { exit 1, "Please indicate species name in parameters"}
+        // !SECTION
 
-        // get the pairs file, check and restructure
+        // SECTION : input check 
         input_channel = Channel.fromPath(params.input, checkIfExists: true)
-
         INPUT(input_channel)
+        // !SECTION
 
-        
+        // SECTION : reformating input for annotation and annotation
         // creating unique samples list from csv files
         input_samples_ch = INPUT.out.unique_samples_ch
                 .splitCsv(header:['sample', 'path'], skip: 1, sep:",", strip:true)
@@ -30,9 +31,12 @@ workflow DPI {
                 .splitCsv(header:['sample1', 'path1', 'sample2', 'path2'], skip: 1, sep:",", strip:true)
                 .map { row -> (pair, sample1, sample2) =  [[row.sample1, row.sample2].sort().join("_"), row.sample1, row.sample2]}
    
-        //ANNOTATION for all samples individually 
+        
         ANNOTATE(input_samples_ch, params.baktaDB, params.training, params.genus, params.species)
+        // !SECTION
 
+ 
+        // SECTION: reforming pairs for pairwise analysis
         // Combining channels to form pairs - by: [0,2] possition does not error but not sure does the right thing
         // need to swap keys so it can belong - problem if no keys in the first line 
         // need to swap keys again - sample 2 - pair - sample 1  
@@ -46,23 +50,25 @@ workflow DPI {
                 .combine(ANNOTATE.out.bakta_fna_ch, by: 0)
                 .map{it.swap(0,1)} 
                 .map{it.swap(1,2)}
+        // !SECTION
 
+        // SECTION : nucdiff for detecting differences
         PREPARE_NUCDIFF(fna_pairs_ch)
 
-        //ref is the longuest of the two - prepare tags 
-        //pairs always sorted - so can always match them 
+        // ref is the longuest of the two - prepare tags 
+        // pairs always sorted - so can always match them 
         ref_query_ch = 
                 PREPARE_NUCDIFF.out.longest_param_ch
                 .splitCsv(header:['ref_query', 'ref', 'query'], skip: 0, sep:",", strip:true)
                 .map {row -> (pair, ref_query, ref, query) = [
                 [row.ref, row.query].sort().join("_"), row.ref_query, row.ref, row.query]}
                 .combine(PREPARE_NUCDIFF.out.fna_ch, by:0)
-
-
+        
         RUN_NUCDIFF(ref_query_ch)
+        // !SECTION 
 
+        // SECTION: adding annotations to vcf files 
         PREPARE_VCF_ANNOTATOR(RUN_NUCDIFF.out.nucdiff_vcf_ch)
-
 
         // gbff_pairs order must correspond to ref-query (pair - ref_query - ref - query ) //bakta is (sample, path)
         vcf_annot_ch = 
@@ -79,27 +85,39 @@ workflow DPI {
                 .map{it.swap(0,3)} 
         
         RUN_VCF_ANNOTATOR(vcf_annot_ch)
+        // !SECTION
 
-        // get path for database and comments 
-        db_path_ch=Channel.value(params.sqlitedb)
+        // SECTION : prepare chanel for merging of results to database and merging
+        db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
         comment_ch=Channel.value(params.comment) 
 
-        // create database - is run on all using selectors of files pattern
-        // This process is restarted at each resume - might be because non deterministic order ?                        
+        // results must be emited one by one but collected from all other modules from which we need to add them
+        nucdiff_out_ch = RUN_NUCDIFF.out.result_todb_ch
+                .flatMap { id, gff_stat_files ->
+                        gff_stat_files.collect { gff_stat_file ->
+                        tuple(groupKey(id, gff_stat_files.size()), gff_stat_file)
+                        }}
+        //        .view(v -> "scattered: ${v}" ) 
 
-        WRANGLING_TO_DB(
-                db_path_ch,
-                comment_ch, 
-                RUN_VCF_ANNOTATOR.out.annotated_vcf_ch.flatten().collect(),
-                RUN_NUCDIFF.out.nucdiff_res_ch.flatten().collect()
-                )
+        vcf_annot_out_ch = RUN_VCF_ANNOTATOR.out.result_todb_ch
+                        .flatMap { id, vcfs ->
+                                vcfs.collect { vcf ->
+                                tuple(groupKey(id, vcfs.size()), vcf)
+                                }}
+        
+        // combining all results into one chanel [db_path, comment, id, file] to be inserted into DB (one by one)
+        results_ch = 
+                db_path_ch.combine(comment_ch).combine(
+                        ANNOTATE.out.result_todb_ch
+                                .concat(nucdiff_out_ch)
+                                .concat(vcf_annot_out_ch)
+                                )
+                .distinct()
 
-        // This is run only once at the time to avoid many access to same DB which could be a problem
-        JSON_TO_DB(WRANGLING_TO_DB.out.db_path_ch, ANNOTATE.out.bakta_json_ch) 
+        WRANGLING_TO_DB(results_ch)
+        // !SECTION
 
-
-
-        //Final: output sofware versions 
+        // SECTION : output software versions
         INPUT_VERSION()
         ANNOTATE_VERSION()
         PREPARE_NUCDIFF_VERSION()
@@ -107,6 +125,11 @@ workflow DPI {
         PREPARE_VCF_ANNOTATOR_VERSION()
         RUN_VCF_ANNOTATOR_VERSION()
         WRANGLING_TO_DB_VERSION()
-        JSON_TO_DB_VERSION()
+        // !SECTION
 
+        // SECTION for test
+        // results_ch.view()
+        // !SECTION
 }
+
+
