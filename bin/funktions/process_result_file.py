@@ -132,6 +132,7 @@ def process_result_file(file_path, identifier, db_conn, comment):
         
         # for each type of file added to the database will add a comment
         # can be used to fast recovery if added or new data as first filter    
+        # FIXME must also check that there are no duplicates already 
         comment_df = create_comment_df(identifier, comment)
         create_or_append_table(comment_df, "comments", identifier, file_name, db_conn)
 
