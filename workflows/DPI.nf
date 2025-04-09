@@ -112,7 +112,7 @@ workflow DPI {
                 ANNOTATE.out.result_todb_ch
                         .concat(nucdiff_out_ch)
                         .concat(vcf_annot_out_ch)
-       
+        // results_ch.view()
         WRANGLING_TO_DB(db_path_ch, comment_ch, results_ch)
         // !SECTION
 
