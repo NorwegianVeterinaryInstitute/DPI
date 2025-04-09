@@ -125,6 +125,10 @@ workflow DPI {
         RUN_VCF_ANNOTATOR_VERSION()
         WRANGLING_TO_DB_VERSION()
         // !SECTION
+
+        // SECTION for test
+        results_ch.view()
+        // !SECTION
 }
 
 

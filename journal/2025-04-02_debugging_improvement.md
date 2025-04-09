@@ -130,8 +130,8 @@ $SCRIPT --result_file SRR11262179_SRR11262033_stat.out  --id SRR11262033 --datab
 ```
 ok - working
 
-- reformatting the nf pipeline to allow adding the results to the database
-
+- [x] reformatting the nf pipeline to allow adding the results to the database
+- [ ] debugging - the output in table is not the correct tables - need to check python script and lack tables
 
 
 
@@ -140,7 +140,7 @@ ok - working
 - [x] add comment table to the database - can be used for fast ckecking duplicates ...
 - [x] automatic detectionof result types (I do not export the function - its an helper)
 
-- [ ] implementing in piepline for testing on several files
+- [ ] implementing in pipeline for testing on several files
 - [ ] ? missing data in features, need to add NaN to all other columns
 - [ ] check if the unittest are working and improve them
 - [ ] automatic script to run unittesting 
