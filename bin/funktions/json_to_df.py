@@ -1,6 +1,15 @@
+#!/usr/bin/env python
+# SECTION : Imports
+import argparse
+import datetime
+import sys
+import logging
+
 import pandas as pd
 import numpy as np
-    
+#!SECTION
+
+# SECTION : Functions definitions 
 # processing json data - 3 different tables
 # NOTE : working
 def prep_info_df(json_object, identifier):
@@ -105,3 +114,84 @@ def prep_sequences_df(json_object, identifier):
     sequences.columns = [col.replace(".", "_").replace("-", "_") for col in sequences.columns]
 
     return sequences
+#!SECTION
+
+# SECTION MAIN
+if __name__ == "__main__":
+    # SECTION : Argument parsing
+    parser = argparse.ArgumentParser(description="Create a 3 tables to wrangle json results from annotations with Bakta and export as csv files.",)
+    # Version and example arguments (optional)
+    parser.add_argument(
+        "--example",
+        action="store_true",
+        help="Show an example of usage and exit.",
+        )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s 0.0.2",
+        help="Print the script version and exit.",
+        )
+    
+    # required arguments (only for main)
+    parser.add_argument("--input_json", required=True, help="Path of the dataframe that from which results will be appened to the database\n"
+                                                            "Note that the function uses a pandas dataframe object, which must have been created\n"
+                                                            "beforehand and passed to the function")
+    parser.add_argument("--identifier", required=True, help="Identifier for the data")
+    
+    args = parser.parse_args()
+    # !SECTION
+    
+    # SECTION : Check if required arguments are provided
+    if not all([args.input_json, args.identifier,]):
+        parser.error(
+            "The following arguments are required: --input_json, --identifier, "
+        )
+        sys.exit(1)      
+    # !SECTION
+    
+    # SECTION : Handling of example
+    if args.example:
+        logging.info("Example usage:")
+        logging.info("python json_to_df.py --input_json <path_to_file> --identifier <identifier>")
+    # !SECTION
+    
+
+    # SECTION : Login info output
+    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_json_to_df.log"
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler(log_file_name, mode="w"),
+            logging.StreamHandler(sys.stdout),
+        ],
+        )
+    # !SECTION
+    
+# SECTION : SCRIPT : Load data and insert into the database
+    try:
+        logging.info(f"Processing json file {args.input_json} for identifier '{args.identifier}'.")
+        
+        try:
+            with open(args.input_json, "r") as f:
+                data = json.load(f)
+                # NOTE: 3 types of data to extract for the json file
+                info_df = prep_info_df(data, args.identifier)
+                features_df = prep_features_df(data, args.identifier)
+                sequences_df = prep_sequences_df(data, args.identifier)
+                
+        except FileNotFoundError:
+            logging.error(f"Input file not found: {args.input_json}")
+            sys.exit(1)
+        
+        except Exception as e:
+            logging.error(f"Error processing tables for {args.identifier} from {args.input_json}: {e}")
+
+        logging.info("json_to_df.py script completed successfully.")
+    except Exception as e:
+        logging.error(f"An error occurred during the script execution: {e}")
+        logging.error(f"Check {log_file_name} for more details.")
+    # !SECTION
+# !SECTION

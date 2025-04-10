@@ -3,9 +3,10 @@
 import argparse
 import datetime
 import sys
+import logging
+
 import sqlite3
 import pandas
-import logging
 #!SECTION
 
 # SECTION : Functions definitions
@@ -88,9 +89,6 @@ if __name__ == "__main__":
     parser.add_argument("--table_name", required=True, help="Name of the table to be created. Depends on data type.")
     parser.add_argument("--identifier", required=True, help="Identifier for the data")
     
-    
-    
-
     args = parser.parse_args()
     # !SECTION
     
@@ -135,7 +133,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
         create_table(df, args.table_name, args.identifier, args.file_name,args.db_file)
-        logging.info("Script completed successfully.")
+        logging.info("create_table.py script completed successfully.")
     except Exception as e:
         logging.error(f"An error occurred during the script execution: {e}")
         logging.error(f"Check {log_file_name} for more details.")

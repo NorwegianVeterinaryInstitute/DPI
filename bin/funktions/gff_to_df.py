@@ -127,6 +127,7 @@ if __name__ == "__main__":
             index=False,
             header=True
             )
+        logging.info("gff_to_df.py script completed successfully.")
     except Exception as e:
         logging.error(f"An error occurred during the processing of result files: {e}")
         logging.error(f"Check {log_file_name} for more details")
