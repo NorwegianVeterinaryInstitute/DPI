@@ -6,6 +6,7 @@
 import sqlite3
 import argparse
 import os
+import datetime
 # !SECTION 
 
 # SECTION : FUNCTION Merging datase 
@@ -206,7 +207,6 @@ if __name__ == "__main__":
         )
     
     args = parser.parse_args()
-    
     # !SECTION
     
     # SECTION : Check if required arguments are provided
@@ -215,7 +215,6 @@ if __name__ == "__main__":
             "The following arguments are required: --output_db_path, --input_db_paths"
         )
         sys.exit(1)      
-    
     # !SECTION
     
     # SECTION : Handling of example
@@ -223,13 +222,12 @@ if __name__ == "__main__":
         logging.info("Example usage:")
         logging.info("python merge_sqlite_database.py --output_db_path --input_db_paths)")
         return
-    
     # !SECTION
     
 
     
     # SECTION : Login info output
-    log_file_name = "MERGE_DBS.log"
+    log_file_name = "f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_MERGE_DBS.log"
 
     logging.basicConfig(
         level=logging.DEBUG,

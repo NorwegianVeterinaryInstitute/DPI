@@ -174,9 +174,24 @@ apptainer shell $IMG
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/results_to_db.py"
 
 $SCRIPT --result_file SRR11262179_SRR11262033_query_blocks.gff --id SRR11262179_SRR11262033 --comment test
+$SCRIPT --result_file SRR11262179_SRR11262033_query_blocks.gff --id SRR11262179_SRR11262033 --comment test
+$SCRIPT --result_file SRR11262179_SRR11262033_query_blocks.gff --id SRR11262179_SRR11262033 --comment test
+$SCRIPT --result_file SRR11262179_SRR11262033_query_blocks.gff --id SRR11262179_SRR11262033 --comment test
 ```
+- The script results_to_db.py is functionning   
+
+Modifying the process_result_file.py - simpyfying and making more effective
 
 
+Hi, I need you to help me make some change to a pyton script (module) that is run by a main python script. 
+There are elements I want to write differently and some that just need to be removed, because it will be taken over by another script, later in the process (its part of a pipeline). 
+I need to make the module script faster also (I will paste it bellow). 
+It will only be used to process one file at the time, and append the results to sqlite database.
+Here is what needs to be changed: 
+1. It must create this database (the database will not exist before).
+2. It does not need to check for duplicates in the database (as all will be new, this part will be handled from another script, later on, all the data that will be added is unique). 
+3. Then I want to be able to run is as main if possible, for testing purposes.
+Can you make the changes ? 
 
 
 - [x] ? missing data in features, need to add NaN (None in sqlite) to all other columns - handled for all types of data

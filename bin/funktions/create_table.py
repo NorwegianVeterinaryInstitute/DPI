@@ -1,4 +1,4 @@
-def create_or_append_table(df, table_name, identifier, file_name, db_conn):
+def create_table(df, table_name, identifier, file_name, db_conn):
     """
     Creates or appends data to a SQLite table, using 'identifier' as the primary key,
     adding missing columns if necessary, and checking for existing data before inserting.
