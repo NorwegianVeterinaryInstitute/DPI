@@ -229,8 +229,18 @@ rm *{.csv,.sqlite,.log}
 
 Ok, it should not be a problem to add to database as is same process. I wont test here, will be tested when run test pipeline 
 
-- 
+Now same process with vcf files treatment
+```bash
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/vcf_to_df.py"
+$SCRIPT --file_path SRR11262179_SRR11262033_query_snps.vcf --identifier nucdiff_vcf #nucdiff_vcf simple - working
 
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/06_VCF_ANNOTATOR
+$SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier vcf_annotator_vcf
+```
+
+- ok this is functioning. So now we should try the process results file 
+
+# TODO 
 
 - [ ] automatic script to run unittesting 
 - [ ] check if the unittest are working and improve them

@@ -31,7 +31,7 @@ def stats_to_df(file_path):
 #!SECTION   
     
     
-    # SECTION MAIN
+# SECTION MAIN
 if __name__ == "__main__":
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(description="Process stat_file created by nucdiff and export as csv files.",)
