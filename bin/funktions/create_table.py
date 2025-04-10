@@ -66,18 +66,38 @@ def create_table(df : pandas.DataFrame, table_name, identifier, file_name, db_fi
 if __name__ == "__main__":
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(description="Create a table in a sqlite database and add results from a Pandas dataframe.",)
-    parser.add_argument("--table_name", required=True, help="Name of the table to be created. Depends on data type.",)
-    parser.add_argument("--identifier", required=True, help="Identifier for the data",)
-    parser.add_argument("--file_name", required=True, help="Path of the result file from which results will be appened to the dataframe",)
-    parser.add_argument("--db_file", required=True, help="Path to a sqlite dabase. If database does not exists it will be created",)
+    # Version and example arguments (optional)
+    parser.add_argument(
+        "--example",
+        action="store_true",
+        help="Show an example of usage and exit.",
+        )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s 0.0.2",
+        help="Print the script version and exit.",
+        )
+    
+    # required arguments (only for main)
+    parser.add_argument("--input_csv", required=True, help="Path of the dataframe that from which results will be appened to the database\n"
+                                                            "Note that the function uses a pandas dataframe object, which must have been created\n"
+                                                            "beforehand and passed to the function")
+    parser.add_argument("--file_name", required=False, default="dummy", help="Name of the processed file which lead to the table (only for documentation purposes in main).")
+    parser.add_argument("--db_file", required=True, help="Path to a sqlite dabase. If database does not exists it will be created")
+    parser.add_argument("--table_name", required=True, help="Name of the table to be created. Depends on data type.")
+    parser.add_argument("--identifier", required=True, help="Identifier for the data")
+    
+    
+    
 
     args = parser.parse_args()
     # !SECTION
     
     # SECTION : Check if required arguments are provided
-    if not all([args.table_name, args.identifier, args.file_name, args.db_file]):
+    if not all([args.input_csv, args.db_file, args.table_name, args.identifier,]):
         parser.error(
-            "The following arguments are required: --table_name, --identifier, --file_name, --db_conn"
+            "The following arguments are required: --input_csv --db_cfile, --table_name, --identifier, "
         )
         sys.exit(1)      
     # !SECTION
@@ -85,7 +105,7 @@ if __name__ == "__main__":
     # SECTION : Handling of example
     if args.example:
         logging.info("Example usage:")
-        logging.info("python create_table.py --table_name <table_name> --identifier <identifier> --file_name <file_name> --db_conn <db_conn>")
+        logging.info("python create_table.py --input_csv <path_to_file> --db_file <db_file> --table_name <table_name> --identifier <identifier>")
     # !SECTION
     
 
@@ -104,7 +124,7 @@ if __name__ == "__main__":
     
 # SECTION : SCRIPT : Load data and insert into the database
     try:
-        logging.info(f"Processing table '{args.table_name}' for identifier '{args.identifier}' from file '{args.file_name}' into database '{args.db_path}'.")
+        logging.info(f"Processing table '{args.table_name}' for identifier '{args.identifier}' from file '{args.input_csv}' into database '{args.db_file}'.")
         
         # # NOTE need to create the pandas dataframe from the file and the database connection
         # Load the Pandas DataFrame (replace with your actual data loading method)
@@ -113,8 +133,8 @@ if __name__ == "__main__":
         except FileNotFoundError:
             logging.error(f"Input CSV file not found: {args.input_csv}")
             sys.exit(1)
-        
-        create_table(df, args.table_name, args.identifier, args.file_name,args.df_file)
+
+        create_table(df, args.table_name, args.identifier, args.file_name,args.db_file)
         logging.info("Script completed successfully.")
     except Exception as e:
         logging.error(f"An error occurred during the script execution: {e}")
