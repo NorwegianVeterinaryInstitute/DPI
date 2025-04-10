@@ -206,6 +206,19 @@ rm *{.csv,.sqlite,.log}
 - [x] small error in prep_sequences_df in json_to_df when table is incomplete. Need to inspect further ?  
 using : $SCRIPT --input_json SRR11262033.json --identifier dummy. Gemini fixed that.
 
+Now adding this to the database for testing
+```bash
+```bash 
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/02_ANNOTATE/SRR11262033
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/create_table.py"
+$SCRIPT --table_name info --identifier json_info --input_csv dummy_info.csv --db_file dummy_info.sqlite --file_name SRR11262033.json
+$SCRIPT --table_name features --identifier json_features --input_csv dummy_features.csv --db_file dummy_features.sqlite --file_name SRR11262033.json
+$SCRIPT --table_name sequences --identifier json_sequences --input_csv dummy_sequences.csv --db_file dummy_sequences.sqlite --file_name SRR11262033.json
+rm *{.csv,.sqlite,.log}
+```
+
+
+
 
 
 
