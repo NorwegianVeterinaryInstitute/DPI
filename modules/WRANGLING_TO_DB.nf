@@ -6,7 +6,7 @@ process WRANGLING_TO_DB {
 
     maxForks 1 // Ensure only one instance runs at a time
     debug "${params.debug}"
-    label 'process_short'
+    label 'process_short_plus'
 
     input:
     tuple path(sqlite_db),val(comment),val(id),path(result_file)
