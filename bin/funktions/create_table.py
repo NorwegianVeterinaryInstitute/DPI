@@ -6,7 +6,7 @@ import sys
 import logging
 
 import sqlite3
-import pandas
+import pandas # type: ignore
 #!SECTION
 
 # SECTION : Functions definitions

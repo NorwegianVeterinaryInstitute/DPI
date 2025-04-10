@@ -4,9 +4,13 @@ import argparse
 import datetime
 import sys
 import logging
+import os
 
-import pandas as pd
-import numpy as np
+import pandas as pd # type: ignore
+import numpy as np # type: ignore
+
+# for main
+import json
 #!SECTION
 
 # SECTION : Functions definitions 
@@ -182,6 +186,26 @@ if __name__ == "__main__":
                 features_df = prep_features_df(data, args.identifier)
                 sequences_df = prep_sequences_df(data, args.identifier)
                 
+                current_working_directory = os.getcwd()  
+
+                info_df.to_csv(
+                    os.path.join(current_working_directory, f"{args.identifier}_info.csv"),
+                    index=False,
+                    header=True
+                    )
+                features_df.to_csv(
+                    os.path.join(current_working_directory, f"{args.identifier}_features.csv"),
+                    index=False,
+                    header=True
+                    )
+                sequences_df.to_csv(    
+                    os.path.join(current_working_directory, f"{args.identifier}_sequences.csv"),
+                    index=False,
+                    header=True
+                    )
+                logging.info(f"Successfully processed {args.input_json} for identifier '{args.identifier}'.")
+                logging.info(f"DataFrames saved as CSV files in {current_working_directory}.")
+                    
         except FileNotFoundError:
             logging.error(f"Input file not found: {args.input_json}")
             sys.exit(1)

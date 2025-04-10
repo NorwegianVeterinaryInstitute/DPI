@@ -193,14 +193,19 @@ ok - this is working so we can test the results_to_db.py script
 ```bash 
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/create_table.py"
 $SCRIPT --table_name test_gff --identifier dummy3 --input_csv SRR11262179_SRR11262033_query_blocks.csv --db_file dummy_test2.sqlite --file_name SRR11262179_SRR11262033_query_blocks.gff
+rm *{.csv,.sqlite,.log}
+```
+ok - this is working so we can test the other files
+script for json, updated with main for easier testing of the scrip
+```bash 
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/02_ANNOTATE/SRR11262033
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/json_to_df.py"
+$SCRIPT --file_path SRR11262033/SRR11262033.json --identifier dummy
+rm *{.csv,.sqlite,.log}
 ```
 
 
-Hi, can you help review this script ? I simplified it and I might have done some mistakes.
-The script is used to create a table in a connection to a sqlite database and insert data contained to a pandas dataframe into the table.
-(The connection and data are passed as arguments to the script).
-It rearranges a bit the pandas dataframe before doing that: remove the column containing file_names if it exist, and then insert the file_name
-and the identifier. So the info is pandas dataframe  + file_name + identifier 
+
 
 
 

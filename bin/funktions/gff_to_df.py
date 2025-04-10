@@ -2,11 +2,12 @@
 
 # SECTION : Imports
 import argparse
-import os
-import gffpandas.gffpandas as gffpd
 import datetime
 import sys
 import logging
+
+import os
+import gffpandas.gffpandas as gffpd
 
 # !SECTION
 
