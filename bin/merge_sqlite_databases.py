@@ -6,7 +6,6 @@
 import sqlite3
 import argparse
 import os
-
 # !SECTION 
 
 # SECTION : FUNCTION Merging datase 
@@ -175,36 +174,59 @@ def merge_databases(output_db_path, input_db_paths):
     finally:
         if output_conn:
             output_conn.close()
-
 # !SECTION 
 
 # SECTION MAIN
 if __name__ == "__main__":
-    # ANCHOR : Argument parser
-    parser = argparse.ArgumentParser(description="Merge multiple SQLite databases, optimizing duplicate check using the first 'file_name' value.")
-    parser.add_argument("--output", required=True, help="Path to the output SQLite database.")
-    parser.add_argument("--inputs", nargs='+', required=True, help="List of paths to the input SQLite databases.")
-    parser.add_argument("--example", action="store_true", help="Show an example of usage and exit.")
-    parser.add_argument("--version",action="version",version="%(prog)s 0.0.2",help="Print the script version and exit.")
+    # SECTION : Argument parsing
+    parser = argparse.ArgumentParser(
+        description="Merge multiple SQLite databases, optimizing duplicate check using the first 'file_name' value.",
+        )
+    parser.add_argument(
+        "--output",
+        required=True,
+        help="Path to the output SQLite database.",
+        )
+    parser.add_argument(
+        "--inputs",
+        nargs='+',
+        required=True,
+        help="List of paths to the input SQLite databases.",
+        )
+    parser.add_argument(
+        "--example",
+        action="store_true",
+        help="Show an example of usage and exit.",
+        )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s 0.0.2",
+        help="Print the script version and exit.",
+        )
     
     args = parser.parse_args()
     
-    # Handling of examples
+    # !SECTION
+    
+    # SECTION : Check if required arguments are provided
+    if not all([args.output_db_path, args.input_db_paths,]):
+        parser.error(
+            "The following arguments are required: --output_db_path, --input_db_paths"
+        )
+        sys.exit(1)      
+    
+    # !SECTION
+    
+    # SECTION : Handling of example
     if args.example:
         logging.info("Example usage:")
         logging.info("python merge_sqlite_database.py --output_db_path --input_db_paths)")
         return
     
-    # Check if required arguments are provided when not version or example
-    if (
-        not args.comment
-        or not args.output_db_path
-        or not args.input_db_paths
-    ):
-        parser.error(
-            "The following arguments are required: --output_db_path, --input_db_paths"
-        )
-        return
+    # !SECTION
+    
+
     
     # SECTION : Login info output
     log_file_name = "MERGE_DBS.log"
@@ -219,7 +241,7 @@ if __name__ == "__main__":
         )
     # !SECTION
     
-    # SECTION : Merge the result files
+    # SECTION : SCRIPT : Merge the result files
     try:
         logging.info(f"Merging sqlite databases")
         merge_databases(args.output, args.inputs)
