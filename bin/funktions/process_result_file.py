@@ -7,7 +7,6 @@ import argparse
 import os
 import json
 import datetime
-import sqlite3
 import sys
 import logging
 
@@ -44,7 +43,7 @@ def determine_result_type(file_name):
         return None
 
 
-def process_result_file(file_path, identifier,db_file, comment):
+def process_result_file(file_path, identifier, db_file, comment):
     """
     Processes a single result file, transforms it into a table
     and inserts it into the specified SQLite database.
@@ -60,12 +59,7 @@ def process_result_file(file_path, identifier,db_file, comment):
 
     result_type = determine_result_type(file_name)
     
-    try:
-        # NOTE: creates the db it if does not exists
-        db_conn = sqlite3.connect(db_file)
-        cursor = db_conn.cursor()
-        
-        
+    try:        
         if result_type == "json":
             with open(file_path, "r") as f:
                 data = json.load(f)
@@ -139,16 +133,10 @@ def process_result_file(file_path, identifier,db_file, comment):
         comment_df = create_comment_df(identifier, comment)
         create_table(comment_df, "comments", identifier, file_name, db_file)
 
-        db_conn.commit()
         print(f"Processed and inserted: {file_name} for identifier {identifier}")
 
     except Exception as e:
         print(f"Error processing {file_path} for identifier {identifier}: {e}")
-        if 'db_conn' in locals():
-            db_conn.rollback()
-    finally:
-        if 'db_conn' in locals():
-            db_conn.close()
 # !SECTION
 
 # SECTION MAIN
