@@ -10,14 +10,23 @@ import datetime
 import sys
 import logging
 
-from funktions.json_to_df import prep_info_df
-from funktions.json_to_df import prep_features_df
-from funktions.json_to_df import prep_sequences_df
-from funktions.gff_to_df import gff_to_df
-from funktions.vcf_to_df import vcf_to_df
-from funktions.stats_to_df import stats_to_df
-from funktions.comment_df import create_comment_df
-from funktions.create_table import create_table
+# NOTE : problem if running main 
+if __name__ == "__main__":
+    # Executes when process_result_file.py is run directly
+    from json_to_df import prep_info_df, prep_features_df, prep_sequences_df
+    from gff_to_df import gff_to_df
+    from vcf_to_df import vcf_to_df
+    from stats_to_df import stats_to_df
+    from comment_df import create_comment_df
+    from create_table import create_table
+else:
+    # Executed when funktions is imported as a module  
+    from funktions.json_to_df import prep_info_df, prep_features_df, prep_sequences_df
+    from funktions.gff_to_df import gff_to_df
+    from funktions.vcf_to_df import vcf_to_df
+    from funktions.stats_to_df import stats_to_df
+    from funktions.comment_df import create_comment_df
+    from funktions.create_table import create_table
 # !SECTION
 
 # SECTION : Functions definitions
@@ -142,12 +151,15 @@ def process_result_file(file_path, identifier, db_file, comment):
 # SECTION MAIN
 if __name__ == "__main__":
     # SECTION : Argument parsing
-    parser = argparse.ArgumentParser(description="Process a result file and add it to an SQLite database.")
+    parser = argparse.ArgumentParser(description="Process a result file and add it to an SQLite database.",)
     parser.add_argument("--file_path", required=True, help="Path to the result file",)
     parser.add_argument("--identifier", required=True, help="Identifier for the data",)
     parser.add_argument("--db_file", required=True, help="Path to the SQLite database file",)
     parser.add_argument("--comment", default="", required=False, help="Optional comment for the database entry",)
 
+    parser.add_argument("--example",action="store_true",help="Show an example of usage and exit.",)
+    parser.add_argument("--version",action="version",version="%(prog)s 0.0.2",help="Print the script version and exit.",)
+    
     args = parser.parse_args()
     # !SECTION
     

@@ -243,8 +243,27 @@ $SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier 
 ```bash
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/process_result_file.py"
 $SCRIPT --help
-$SCRIPT --result_file SRR11262179_SRR11262033_query_blocks.gff --id SRR11262179_SRR11262033 --comment test
+$SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier SRR11262179_SRR11262033 --db_file process_result_test  --comment test
+
+# this is bugging so testing one level down 
+# I need to create the csv file first
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/vcf_to_df.py"
+$SCRIPT --help
+$SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier SRR11262179_SRR11262033
+# OK 
+
+# now I can create the sqlite file
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/create_table.py"
+$SCRIPT --help
+$SCRIPT --input_csv SRR11262179_SRR11262033_vcf.csv --file_name SRR11262179_SRR11262033_ref_snps_annotated.vcf --db_file create_table.py_vcf.sqlite --table_name  test_SRR11262179_SRR11262033_vcf --identifier SRR11262179_SRR11262033 
+# OK so now I can test the process_result_file.py
+
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/process_result_file.py"
+$SCRIPT --help
+$SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier SRR11262179_SRR11262033 --db_file process_result_file.py.sqlite  --comment test
 ``` 
+
+ok, this worked, do not know why did not modify anything I think. 
 
 
 # TODO 
