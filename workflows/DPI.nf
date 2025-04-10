@@ -159,7 +159,7 @@ workflow DPI {
 
         // We need to add index to the channel - to avoid eventual colisions and merge the individual sqlite databases
         
-        // WRANGLING_TO_DB.out.individual_sqlite_ch.view()
+        WRANGLING_TO_DB.out.individual_sqlite_ch.view()
         // WRANGLING_TO_DB.out.individual_sqlite_ch = test_ch
   
         // // .view()

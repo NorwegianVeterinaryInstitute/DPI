@@ -264,6 +264,24 @@ $SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier 
 ``` 
 
 ok, this worked, do not know why did not modify anything I think. 
+- [x] launching test script for getting all the single databases. Ot seems to be running without problems. 
+
+# TODO 
+- [ ] testing and evt debugging of the merging of the sqlite databases
+
+```bash
+# need to get some results and simlink to make it convenient
+cd 
+mkdir test_dir_sqlite
+cd test_dir_sqlite
+ln -s ../**/*.sqlite .
+
+# testing script on those files
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/merge_sqlite_databases.py"
+$SCRIPT --help
+$SCRIPT --output test_merging.sqlite --input *.sqlite > test_merging.log 2>&1
+```
+
 
 
 # TODO 
