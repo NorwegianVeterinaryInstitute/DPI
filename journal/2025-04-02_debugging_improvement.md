@@ -186,11 +186,9 @@ Modifying the process_result_file.py - simpyfying and making more effective
 Hi, I need you to help me make some change to a pyton script (module) that is run by a main python script. 
 There are elements I want to write differently and some that just need to be removed, because it will be taken over by another script, later in the process (its part of a pipeline). 
 I need to make the module script faster also (I will paste it bellow). 
-It will only be used to process one file at the time, and append the results to sqlite database.
+It will only be used to process one file at the time, and append the results to sqlite connection (the database is created by the main script).
 Here is what needs to be changed: 
-1. It must create this database (the database will not exist before).
-2. It does not need to check for duplicates in the database (as all will be new, this part will be handled from another script, later on, all the data that will be added is unique). 
-3. Then I want to be able to run is as main if possible, for testing purposes.
+It does not need to check for duplicates in the database (as all will be new, this part will be handled from another script, later on, all the data that will be added is unique). 
 Can you make the changes ? 
 
 
