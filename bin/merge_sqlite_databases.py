@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # Made by gemini 2025-04-10
+# Improved by Eve Fiskebeck 
 
+# SECTION : IMPORTS
 import sqlite3
 import argparse
 import os
 
+# !SECTION 
+
+# SECTION : FUNCTION Merging datase 
 def merge_databases(output_db_path, input_db_paths):
     """Merges multiple SQLite databases into a single output database,
     handling schema evolution and preventing duplicate rows by checking the
@@ -171,11 +176,57 @@ def merge_databases(output_db_path, input_db_paths):
         if output_conn:
             output_conn.close()
 
+# !SECTION 
+
+# SECTION MAIN
 if __name__ == "__main__":
+    # ANCHOR : Argument parser
     parser = argparse.ArgumentParser(description="Merge multiple SQLite databases, optimizing duplicate check using the first 'file_name' value.")
     parser.add_argument("--output", required=True, help="Path to the output SQLite database.")
     parser.add_argument("--inputs", nargs='+', required=True, help="List of paths to the input SQLite databases.")
-
+    parser.add_argument("--example", action="store_true", help="Show an example of usage and exit.")
+    parser.add_argument("--version",action="version",version="%(prog)s 0.0.2",help="Print the script version and exit.")
+    
     args = parser.parse_args()
+    
+    # Handling of examples
+    if args.example:
+        logging.info("Example usage:")
+        logging.info("python merge_sqlite_database.py --output_db_path --input_db_paths)")
+        return
+    
+    # Check if required arguments are provided when not version or example
+    if (
+        not args.comment
+        or not args.output_db_path
+        or not args.input_db_paths
+    ):
+        parser.error(
+            "The following arguments are required: --output_db_path, --input_db_paths"
+        )
+        return
+    
+    # SECTION : Login info output
+    log_file_name = "MERGE_DBS.log"
 
-    merge_databases(args.output, args.inputs)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler(log_file_name, mode="w"),
+            logging.StreamHandler(sys.stdout),
+        ],
+        )
+    # !SECTION
+    
+    # SECTION : Merge the result files
+    try:
+        logging.info(f"Merging sqlite databases")
+        merge_databases(args.output, args.inputs)
+    except Exception as e:
+        logging.error(f"An error occurred during the merging of sqlite databases: {e}")
+        logging.error(f"Check {log_file_name} for more details")
+    
+    # !SECTION
+
+# !SECTION

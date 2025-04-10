@@ -7,19 +7,8 @@ import sqlite3
 import funktions.process_result_file as process_result_file
 
 
-# import pandas as pd
-# import numpy as np
-# import json
-# import re
-# import gffpandas.gffpandas as gffpd
-
-# import glob
-# import functools
-# import operator
-# sys.path.append(os.getcwd())
-
-
-# ANCHOR : Login info output
+# SECTION : Login info output
+# FIXME : write a the end for clarity 
 log_file_name = "results_to_db.log"
 # FIXME : Change the log file name to include the when it runs the other functions
 logging.basicConfig(
@@ -30,9 +19,10 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout),
     ],
     )
+# !SECTION 
 
-
-# ANCHOR : Main Parsing arguments and running
+# SECTION : Arguments parsing
+# FIXME : write a the end for clarity 
 def main():
     parser = argparse.ArgumentParser(
         prog="results_to_db.py",
@@ -51,8 +41,7 @@ def main():
         "--version",
         action="version",
         version="%(prog)s 0.0.2",
-        help="Print the script version and exit.",
-    )
+        help="Print the script version and exit.") # was , at the end before brachet - removed it
 
     # Required arguments
     parser.add_argument(
@@ -104,7 +93,10 @@ def main():
             "The following arguments are required: --comment, --identifier, --result_file"
         )
         return
+    
+    # !SECTION : Arguments parsing
 
+    # FIXME : will be modified at the end 
     # Arguments usage definition
     db_path = args.database
     comment = args.comment
@@ -119,7 +111,7 @@ def main():
         logging.info(f"Processing {identifier} in {result_file}")
         process_result_file(result_file, identifier, db_conn, comment=None)
     except Exception as e:
-        logging.error(f"An error occurred during processin of {identifier}: {e}")
+        logging.error(f"An error occurred during processing of {identifier}: {e}")
         logging.error(f"Check {log_file_name} for more details")
     
     # Close the database connection
