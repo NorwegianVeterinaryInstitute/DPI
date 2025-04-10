@@ -240,6 +240,13 @@ $SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier 
 
 - ok this is functioning. So now we should try the process results file 
 
+```bash
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/process_result_file.py"
+$SCRIPT --help
+$SCRIPT --result_file SRR11262179_SRR11262033_query_blocks.gff --id SRR11262179_SRR11262033 --comment test
+``` 
+
+
 # TODO 
 
 - [ ] automatic script to run unittesting 

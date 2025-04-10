@@ -6,8 +6,8 @@ import sys
 import logging
 import os
 
-#import re 
-import pandas as pd
+import re 
+import pandas as pd # type: ignore
 # !SECTION
 
 # SECTION : Functions definitions
@@ -19,9 +19,6 @@ def row_to_dic_helper(row):
     :param row: row
     :return: dictionary
     """
-    import re
-    import pandas as pd
-    
     # NOTE if space is a splitting delimiter
     list_row = re.split(';|=', row)
     # Ensure even number of elements to form key-value pairs
