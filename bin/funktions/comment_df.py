@@ -1,4 +1,5 @@
 # Creates a comment dataframe
+# NOTE : I do not think I make this one a script - as wont be used outside of the pipeline
 import pandas as pd
 
 
