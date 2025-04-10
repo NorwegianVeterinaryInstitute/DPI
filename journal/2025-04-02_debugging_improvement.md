@@ -200,11 +200,11 @@ script for json, updated with main for easier testing of the scrip
 ```bash 
 cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/02_ANNOTATE/SRR11262033
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/json_to_df.py"
-$SCRIPT --file_path SRR11262033/SRR11262033.json --identifier dummy
+$SCRIPT --input_json SRR11262033.json --identifier dummy
 rm *{.csv,.sqlite,.log}
 ```
-
-
+- [x] small error in prep_sequences_df in json_to_df when table is incomplete. Need to inspect further ?  
+using : $SCRIPT --input_json SRR11262033.json --identifier dummy. Gemini fixed that.
 
 
 

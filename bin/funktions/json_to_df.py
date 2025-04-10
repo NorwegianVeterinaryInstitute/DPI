@@ -6,8 +6,8 @@ import sys
 import logging
 import os
 
-import pandas as pd # type: ignore
-import numpy as np # type: ignore
+import pandas as pd
+import numpy as np
 
 # for main
 import json
@@ -73,7 +73,7 @@ def prep_sequences_df(json_object, identifier):
         json_object (dict): Annotation JSON from Bakta.
         identifier (str): Sample ID to add to the table.
     Returns:
-        pd.DataFrame: Prepared sequences DataFrame.
+        pandas.DataFrame: Prepared sequences DataFrame.
     """
     sequences = pd.json_normalize(json_object["sequences"])
     sequences.insert(0, "identifier", identifier)
@@ -81,18 +81,22 @@ def prep_sequences_df(json_object, identifier):
     # Cleaning the sequences table
     ## NOTE : split orig_description field
     ## orig_description is not always complete
+    split_columns = ["len", "cov", "corr", "origname", "sw", "date"]
+    new_columns = sequences["orig_description"].str.split(" ", expand=True)
+
+    # Initialize the new columns with NaN
+    for col in split_columns:
+        sequences[col] = np.nan
+
+    # Iterate through the split columns and assign values where available
     try:
-        sequences[["len", "cov", "corr", "origname", "sw", "date"]] = sequences[
-            "orig_description"
-        ].str.split(" ", expand=True)
+        for i, col in enumerate(split_columns):
+            if i < new_columns.shape[1]:  # Ensure the split produced enough columns
+                sequences[col] = new_columns[i]
+            else:
+                print(f"Warning: 'orig_description' split did not produce enough values for column '{col}'.")
     except Exception as e:
-        print(f"Error during orig_description split: {e}")
-        # if it does not work we only report as empty - neabs the description is not complete
-        sequences[["len", "cov", "corr", "origname", "sw", "date"]] = pd.DataFrame(
-            np.nan,
-            columns=["len", "cov", "corr", "origname", "sw", "date"],
-            index=np.arange(len(sequences["orig_description"])),
-        )
+        print(f"Error during individual 'orig_description' column assignment: {e}")
 
     ## NOTE : split description field
     try:
@@ -113,7 +117,7 @@ def prep_sequences_df(json_object, identifier):
         sequences.replace(["^.*=", "]", "NaN"], "", inplace=True, regex=True)
     except Exception as e:
         print(f"Error during replace operation: {e}")
-        
+
     # NOTE : do not need to replace dots/- in sequences table - added for eventual compatibility
     sequences.columns = [col.replace(".", "_").replace("-", "_") for col in sequences.columns]
 
