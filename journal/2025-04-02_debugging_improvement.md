@@ -181,15 +181,27 @@ $SCRIPT --result_file SRR11262179_SRR11262033_query_blocks.gff --id SRR11262179_
 - The script results_to_db.py is functionning   
 
 Modifying the process_result_file.py - simpyfying and making more effective
+Need also to modify the create_table ... -> to make it work
+going back to testing from gff_to_df.py (modified to create a csv files also for testing)
+
+```bash 
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/gff_to_df.py"
+$SCRIPT --file_path SRR11262179_SRR11262033_query_blocks.gff
+```
+ok - this is working so we can test the results_to_db.py script
+
+```bash 
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/create_table.py"
+$SCRIPT --table_name test_gff --identifier dummy3 --input_csv SRR11262179_SRR11262033_query_blocks.csv --db_file dummy_test2.sqlite --file_name SRR11262179_SRR11262033_query_blocks.gff
+```
 
 
-Hi, I need you to help me make some change to a pyton script (module) that is run by a main python script. 
-There are elements I want to write differently and some that just need to be removed, because it will be taken over by another script, later in the process (its part of a pipeline). 
-I need to make the module script faster also (I will paste it bellow). 
-It will only be used to process one file at the time, and append the results to sqlite connection (the database is created by the main script).
-Here is what needs to be changed: 
-It does not need to check for duplicates in the database (as all will be new, this part will be handled from another script, later on, all the data that will be added is unique). 
-Can you make the changes ? 
+Hi, can you help review this script ? I simplified it and I might have done some mistakes.
+The script is used to create a table in a connection to a sqlite database and insert data contained to a pandas dataframe into the table.
+(The connection and data are passed as arguments to the script).
+It rearranges a bit the pandas dataframe before doing that: remove the column containing file_names if it exist, and then insert the file_name
+and the identifier. So the info is pandas dataframe  + file_name + identifier 
+
 
 
 - [x] ? missing data in features, need to add NaN (None in sqlite) to all other columns - handled for all types of data
