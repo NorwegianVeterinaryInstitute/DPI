@@ -7,6 +7,9 @@ import sqlite3
 import argparse
 import os
 import datetime
+import logging
+import sys
+
 # !SECTION 
 
 # SECTION : FUNCTION Merging datase 
@@ -221,13 +224,12 @@ if __name__ == "__main__":
     if args.example:
         logging.info("Example usage:")
         logging.info("python merge_sqlite_database.py --output_db_path --input_db_paths)")
-        return
     # !SECTION
     
 
     
     # SECTION : Login info output
-    log_file_name = "f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_MERGE_DBS.log"
+    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_MERGE_DBS.log"
 
     logging.basicConfig(
         level=logging.DEBUG,
@@ -241,7 +243,7 @@ if __name__ == "__main__":
     
     # SECTION : SCRIPT : Merge the result files
     try:
-        logging.info(f"Merging sqlite databases")
+        logging.info("Merging sqlite databases")
         merge_databases(args.output, args.inputs)
     except Exception as e:
         logging.error(f"An error occurred during the merging of sqlite databases: {e}")

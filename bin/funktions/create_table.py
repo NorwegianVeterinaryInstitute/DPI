@@ -1,4 +1,15 @@
-def create_table(df, table_name, identifier, file_name, db_conn):
+#!/usr/bin/env python
+# SECTION : Imports
+import argparse
+import datetime
+import sys
+import sqlite3
+import pandas as pd
+import logging
+#!SECTION
+
+# SECTION : Functions definitions
+def create_table(df : pd.DataFrame, table_name, identifier, file_name, db_conn):
     """
     Creates or appends data to a SQLite table, using 'identifier' as the primary key,
     adding missing columns if necessary, and checking for existing data before inserting.
@@ -9,12 +20,8 @@ def create_table(df, table_name, identifier, file_name, db_conn):
         identifier (str): The identifier (pair or sample_id).
         file_name (str): The name of the processed file.
         db_conn (sqlite3.Connection): The database connection.
-    """
-    import sqlite3
-    import pandas as pd
-    
+    """    
     cursor = db_conn.cursor()
-    
 
     # Insert identifier with a different name
     df.insert(0, "nf_val_identifier", identifier)
@@ -78,3 +85,54 @@ def create_table(df, table_name, identifier, file_name, db_conn):
     print(f"create_or_append_table function has run for {identifier} and filename {file_name}.")
 
     cursor.close()
+#!SECTION
+
+# SECTION MAIN
+if __name__ == "__main__":
+    # SECTION : Argument parsing
+    parser = argparse.ArgumentParser(description="Create a table in a sqlite database and add results from a Pandas dataframe.",)
+    parser.add_argument("--table_name", required=True, help="Name of the table to be created. Depends on data type.",)
+    parser.add_argument("--identifier", required=True, help="Identifier for the data",)
+    parser.add_argument("--file_name", required=True, help="Path of the result file from which results will be appened to the dataframe",)
+    parser.add_argument("--db_conn", required=True, help="A sqlite connection",)
+
+    args = parser.parse_args()
+    # !SECTION
+    
+    # SECTION : Check if required arguments are provided
+    if not all([args.table_name, args.identifier, args.file_name, args.db_conn]):
+        parser.error(
+            "The following arguments are required: --table_name, --identifier, --file_name, --db_conn"
+        )
+        sys.exit(1)      
+    # !SECTION
+    
+    # SECTION : Handling of example
+    if args.example:
+        logging.info("Example usage:")
+        logging.info("python create_table.py --table_name <table_name> --identifier <identifier> --file_name <file_name> --db_conn <db_conn>")
+    # !SECTION
+    
+
+    # SECTION : Login info output
+    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_create_table.log"
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler(log_file_name, mode="w"),
+            logging.StreamHandler(sys.stdout),
+        ],
+        )
+    # !SECTION
+    
+    # SECTION : SCRIPT : Merge the result files
+    try:
+        logging.info(f"Added table for {args.table_name} and identifier {args.identifier}")
+        create_table(args.table_name, args.identifier, args.file_name, args.db_conn)
+    except Exception as e:
+        logging.error(f"An error occurred during the creation of the table for {args.table_name} and identifier {args.identifier}: {e}")
+        logging.error(f"Check {log_file_name} for more details")
+    # !SECTION
+# !SECTION

@@ -7,6 +7,9 @@ import argparse
 import os
 import json
 import datetime
+import sqlite3
+import sys
+import logging
 
 from funktions.json_to_df import prep_info_df
 from funktions.json_to_df import prep_features_df
@@ -171,8 +174,7 @@ if __name__ == "__main__":
     # SECTION : Handling of example
     if args.example:
         logging.info("Example usage:")
-        logging.info("python process_result_file.py --file_path <path_to_file> --identifier <identifier> --db_file <db_file>")")
-        return
+        logging.info("python process_result_file.py --file_path <path_to_file> --identifier <identifier> --db_file <db_file>")
     # !SECTION
     
 
