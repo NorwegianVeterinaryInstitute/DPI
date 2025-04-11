@@ -57,4 +57,16 @@ cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/process_result_file.py"
 $SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier SRR11262179_SRR11262033 --db_file process_result_file.py.sqlite  --comment test
 
+# NOTE merging databses 
+# Need to create 2 files for testing 
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/06_VCF_ANNOTATOR
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/process_result_file.py"
+$SCRIPT --file_path SRR11262179_SRR11262033_query_snps_annotated.vcf --identifier SRR11262179_SRR11262033 --db_file process_result_file1.py.sqlite  --comment test
+$SCRIPT --file_path SRR11262179_SRR13588387_query_snps_annotated.vcf --identifier SRR11262179_SRR13588387 --db_file process_result_file2.py.sqlite  --comment test
+
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/merge_sqlite_databases.py"
+$SCRIPT --help
+$SCRIPT --output test_merging.sqlite --input_file_1 process_result_file1.py.sqlite,process_result_file2.py.sqlite 
+
+
 # !SECTION 

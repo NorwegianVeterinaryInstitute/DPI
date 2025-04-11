@@ -106,39 +106,6 @@ def processing_result_message(script_name, file_path, identifier = None, e  = No
     
 # !SECTION
         
-
-
-# Examples error messages
-# print(f"Error: GFF file not found: {file_path}")
-# print(f"Error reading GFF file {file_path}: {e}")
-# print(f"Warning: Empty GFF file: {file_path}. Skipping.")
-
-#warning_message = "Warning: the table gff_df is empty.
-#warning_message += f"Check the GFF file: {file_path}.\n"       
-# print(warning_message)
-
-# sys.exit(1)
-
-
-
-# SECTION : Examples
-# def create_table(df, table_name, identifier, file_name, db_file):
-#     try:
-#         # ... your database operations ...
-#     except Exception as e:
-#         log_error_and_exit(
-#             f"Error creating table '{table_name}': {e}",
-#             log_file="create_table.log" # Or a global log file
-#         )
-#     finally:
-#         # ... your finally block ...
-#         if table_is_empty:
-#             log_error_and_exit(
-#                 f"Table '{table_name}' is empty after creation.",
-#                 log_file="create_table.log"
-#             )
-# ! SECTION 
-
 # SECTION : Example main 
 # Example in main
 # if __name__ == "__main__":

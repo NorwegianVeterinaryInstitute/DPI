@@ -3,32 +3,42 @@
 # Improved by Eve Fiskebeck 
 
 # SECTION : IMPORTS
-import sqlite3
 import argparse
 import os
-import datetime
-import logging
 import sys
 
+#import funktions
+from funktions.error_template import log_message, processing_error_message, processing_result_message
+import sqlite3
 # !SECTION 
 
 # SECTION : FUNCTION Merging datase 
 def merge_databases(output_db_path, input_db_paths):
     """Merges multiple SQLite databases into a single output database,
     handling schema evolution and preventing duplicate rows by checking the
-    'file_name' of the first row of each input database's tables."""
+    'file_name' of the first row of each input database's tables.
+    """
+    
+    # script name and info
+    script_name = os.path.basename(__file__)
+    
+    info_message = processing_result_message(script_name, "input_dbs")
+    print(info_message)
+    log_message(info_message, script_name)
+    
     output_conn = None
     try:
         # Connect to the output database (creates if it doesn't exist)
         output_conn = sqlite3.connect(output_db_path)
         output_conn.row_factory = sqlite3.Row  # Access columns by name
         output_cursor = output_conn.cursor()
-
+    
         for i, input_db_path in enumerate(input_db_paths):
             if not os.path.exists(input_db_path):
-                print(f"Warning: Input database not found: {input_db_path}")
-                continue
-
+                warning_message = f"Warning: Input database {input_db_path} not found"
+                print(warning_message)
+                log_message(warning_message, script_name, exit_code=0)
+                # NOTE : here I want to continue but through a warning. Data will be missing
             input_conn = None
             try:
                 input_conn = sqlite3.connect(input_db_path)
@@ -160,20 +170,26 @@ def merge_databases(output_db_path, input_db_paths):
                                 output_cursor.execute(insert_sql, values)
                                 output_conn.commit()
                                 inserted_count += 1
-                        print(f"Inserted {inserted_count} new rows into table '{table_name}' from: {input_db_path} (full row comparison).")
+                        # print(f"Inserted {inserted_count} new rows into table '{table_name}' from: {input_db_path} (full row comparison).")
 
             except sqlite3.Error as e:
-                print(f"SQLite error while processing {input_db_path}: {e}")
+                error_message = f"SQLite error while processing {input_db_path}: {e}"
+                print(error_message)
+                log_message(error_message, script_name)
                 if input_conn:
                     input_conn.rollback()
             finally:
                 if input_conn:
                     input_conn.close()
-
-        print(f"Successfully merged all databases into: {output_db_path}")
-
+        
+        info_message = f"Successfully merged all databases into: {output_db_path}"
+        print(info_message)
+        log_message(info_message, script_name)
+        
     except sqlite3.Error as e:
-        print(f"SQLite error while creating/merging into {output_db_path}: {e}")
+        error_message = f"SQLite error while creating/merging into {output_db_path}: {e}"
+        print(error_message)
+        log_message(error_message, script_name)
         if output_conn:
             output_conn.rollback()
     finally:
@@ -183,6 +199,7 @@ def merge_databases(output_db_path, input_db_paths):
 
 # SECTION MAIN
 if __name__ == "__main__":
+    script_name = os.path.basename(__file__)    
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(
         description="Merge multiple SQLite databases, optimizing duplicate check using the first 'file_name' value.",
@@ -223,33 +240,31 @@ if __name__ == "__main__":
     
     # SECTION : Handling of example
     if args.example:
-        logging.info("Example usage:")
-        logging.info("python merge_sqlite_database.py --output <output_db_path> --input <input_db_paths>)")
+        info_message = "Example usage:"
+        info_message += "python {script_name} --output <output_db_path> --input <input_db_paths>"
+        log_message(info_message, script_name, exit_code=0)
     # !SECTION
     
-
-    
-    # SECTION : Login info output
-    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_merge_sqlite_databaes.log"
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler(log_file_name, mode="w"),
-            logging.StreamHandler(sys.stdout),
-        ],
-        )
-    # !SECTION
-    
+    # NOTE:  Login info output - handled by log_error
+         
     # SECTION : SCRIPT : Merge the result files
+    info_message = processing_result_message(
+            script_name,
+            "input_dbs",
+            )
+    log_message(info_message, script_name)
     try:
-        logging.info("Merging sqlite databases")
         merge_databases(args.output, args.input)
+    except FileNotFoundError:
+        error_message = f"Input file not found: {args.file_path}"
+        log_message(error_message, script_name, exit_code=1)
     except Exception as e:
-        logging.error(f"An error occurred during the merging of sqlite databases: {e}")
-        logging.error(f"Check {log_file_name} for more details")
-    
+        error_message = processing_error_message(
+            script_name, 
+            "inputs_db",
+            identifier = None, 
+            e = e)
+        log_message(error_message, script_name, exit_code=1)
     # !SECTION
 
 # !SECTION
