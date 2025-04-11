@@ -28,31 +28,39 @@ def prep_info_df(json_object, identifier):
     """
     # script name
     script_name = os.path.basename(__file__)
+    
     info_message = processing_result_message(script_name, "f{prep_info.__name__}", identifier)
+    print(info_message)
     log_message(info_message, script_name)
     
-    
-    # create df for each separate key
-    genome = pd.json_normalize(json_object["genome"])
-    stats = pd.json_normalize(json_object["stats"])
-    run = pd.json_normalize(json_object["run"])
-    version = pd.json_normalize(json_object["version"])
+    try: 
+        # create df for each separate key
+        genome = pd.json_normalize(json_object["genome"])
+        stats = pd.json_normalize(json_object["stats"])
+        run = pd.json_normalize(json_object["run"])
+        version = pd.json_normalize(json_object["version"])
 
-    # joining df for simple info - can go into own table
-    info = pd.concat([genome, stats, run, version], axis=1)
+        # joining df for simple info - can go into own table
+        info = pd.concat([genome, stats, run, version], axis=1)
     
-    # NOTE : Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
-    info.columns = [col.replace(".", "_").replace("-", "_") for col in info.columns]
+        # NOTE : Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
+        info.columns = [col.replace(".", "_").replace("-", "_") for col in info.columns]
+        info.insert(0, "identifier", identifier)
     
-    info.insert(0, "identifier", identifier)
+        if info.empty:
+            warning_message = "Warning: the table 'info' is empty"
+            warning_message += f"Check the JSON file for identifier: {identifier}.\n"  
+            print(warning_message)
+            log_message(warning_message, script_name, exit_code=1)
+        
+        return info
     
-    if info.empty:
-        warning_message = "Warning: the table 'info' is empty"
-        warning_message += f"Check the JSON file for identifier: {identifier}.\n"  
-        print(warning_message)
-        log_message(warning_message, script_name, exit_code=1)
+    except Exception as e:
+        error_message = f"Error in processing the json_object with prep_info_df: {e}"
+        print(error_message)
+        log_message(error_message, script_name, exit_code=1) 
+        
     
-    return info
 
 # NOTE : working
 def prep_features_df(json_object, identifier):
@@ -67,25 +75,33 @@ def prep_features_df(json_object, identifier):
     """
     # script name
     script_name = os.path.basename(__file__)
+    
     info_message = processing_result_message(script_name, "f{prep_features_df.__name__}", identifier)
+    print(info_message)
     log_message(info_message, script_name)
     
-    features = pd.json_normalize(json_object["features"])
-    features.insert(0, "identifier", identifier)
-    # need to change list types to string
-    # we do not want to split those for now
-    features = features.map(str)
-    
-    # NOTE : Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
-    features.columns = [col.replace(".", "_").replace("-", "_") for col in features.columns]
-    
-    if features.empty:
-        warning_message = "Warning: the table 'features' is empty."
-        warning_message += f"Check the JSON file for identifier: {identifier}.\n"  
-        print(warning_message)
-        log_message(warning_message, script_name, exit_code=1)
+    try: 
+        features = pd.json_normalize(json_object["features"])
+        features.insert(0, "identifier", identifier)
+        # need to change list types to string
+        # we do not want to split those for now
+        features = features.map(str)
         
-    return features
+        # NOTE : Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
+        features.columns = [col.replace(".", "_").replace("-", "_") for col in features.columns]
+        
+        if features.empty:
+            warning_message = "Warning: the table 'features' is empty."
+            warning_message += f"Check the JSON file for identifier: {identifier}.\n"  
+            print(warning_message)
+            log_message(warning_message, script_name, exit_code=1)
+            
+        return features
+    
+    except Exception as e:
+        error_message = f"Error in processing the json_object with prep_features_df: {e}"
+        print(error_message)
+        log_message(error_message, script_name, exit_code=1) 
 
 # NOTE : Working
 def prep_sequences_df(json_object, identifier):
@@ -100,74 +116,83 @@ def prep_sequences_df(json_object, identifier):
     """
     # script name
     script_name = os.path.basename(__file__)
+    
     info_message = processing_result_message(script_name, "f{prep_sequences.__name__}", identifier)
+    print(info_message)
     log_message(info_message, script_name)
     
-    sequences = pd.json_normalize(json_object["sequences"])
-    sequences.insert(0, "identifier", identifier)
+    try: 
+        sequences = pd.json_normalize(json_object["sequences"])
+        sequences.insert(0, "identifier", identifier)
 
-    # Cleaning the sequences table
-    ## NOTE : split orig_description field
-    ## orig_description is not always complete
-    split_columns = ["len", "cov", "corr", "origname", "sw", "date"]
-    new_columns = sequences["orig_description"].str.split(" ", expand=True)
+        # Cleaning the sequences table
+        ## NOTE : split orig_description field
+        ## orig_description is not always complete
+        split_columns = ["len", "cov", "corr", "origname", "sw", "date"]
+        new_columns = sequences["orig_description"].str.split(" ", expand=True)
 
-    # Initialize the new columns with NaN
-    for col in split_columns:
-        sequences[col] = np.nan
+        # Initialize the new columns with NaN
+        for col in split_columns:
+            sequences[col] = np.nan
 
-    # Iterate through the split columns and assign values where available
-    try:
-        for i, col in enumerate(split_columns):
-            if i < new_columns.shape[1]:  # Ensure the split produced enough columns
-                sequences[col] = new_columns[i]
-            else:
-                info_message = f"Warning: 'orig_description' split did not produce enough values for column '{col}'."
-                print(info_message)
-                log_message(info_message, script_name)
-                
+        # Iterate through the split columns and assign values where available
+        try:
+            for i, col in enumerate(split_columns):
+                if i < new_columns.shape[1]:  # Ensure the split produced enough columns
+                    sequences[col] = new_columns[i]
+                else:
+                    info_message = f"Warning: 'orig_description' split did not produce enough values for column '{col}'."
+                    print(info_message)
+                    log_message(info_message, script_name)
+                    
+        except Exception as e:
+            warning_message = f"Error during individual 'orig_description' column assignment: {e}"
+            print(warning_message)
+            log_message(warning_message, script_name)
+
+        ## NOTE : split description field
+        try:
+            sequences[["genus", "species", "gcode", "topology"]] = sequences[
+                "description"
+            ].str.split(" ", expand=True)
+        except Exception as e:
+            warning_message = f"Error during description split: {e}\n"
+            warning_message += "Descriptions are not always complete, this might be the reason and not an error.\n"
+            print(warning_message)
+            log_message(warning_message, script_name)
+
+        ## NOTE : Drop orig_description and description columns. 
+        try:
+            sequences.drop(labels=["orig_description", "description"], axis=1, inplace=True)
+        except Exception as e:
+            warning_message = f"Error dropping columns: {e}"
+            print(warning_message)
+            log_message(warning_message, script_name)
+
+        # Replace unwanted patterns
+        try:
+            sequences.replace(["^.*=", "]", "NaN"], "", inplace=True, regex=True)
+        except Exception as e:
+            warning_message = f"Error during replace operation: {e}"
+            print(warning_message)
+            log_message(warning_message, script_name)
+            
+        # NOTE : do not need to replace dots/- in sequences table - added for eventual compatibility
+        sequences.columns = [col.replace(".", "_").replace("-", "_") for col in sequences.columns]
+
+        if sequences.empty:
+            warning_message = "Warning: the table 'sequences' is empty."
+            warning_message += f"Check the JSON file for identifier: {identifier}.\n"
+            print(warning_message)
+            log_message(warning_message, script_name, exit_code=1) 
+            
+        return sequences
+    
     except Exception as e:
-        warning_message = f"Error during individual 'orig_description' column assignment: {e}"
-        print(warning_message)
-        log_message(warning_message, script_name)
-
-    ## NOTE : split description field
-    try:
-        sequences[["genus", "species", "gcode", "topology"]] = sequences[
-            "description"
-        ].str.split(" ", expand=True)
-    except Exception as e:
-        warning_message = f"Error during description split: {e}\n"
-        warning_message += "Descriptions are not always complete, this might be the reason and not an error.\n"
-        print(warning_message)
-        log_message(warning_message, script_name)
-
-    ## NOTE : Drop orig_description and description columns. 
-    try:
-        sequences.drop(labels=["orig_description", "description"], axis=1, inplace=True)
-    except Exception as e:
-        warning_message = f"Error dropping columns: {e}"
-        print(warning_message)
-        log_message(warning_message, script_name)
-
-    # Replace unwanted patterns
-    try:
-        sequences.replace(["^.*=", "]", "NaN"], "", inplace=True, regex=True)
-    except Exception as e:
-        warning_message = f"Error during replace operation: {e}"
-        print(warning_message)
-        log_message(warning_message, script_name)
-        
-    # NOTE : do not need to replace dots/- in sequences table - added for eventual compatibility
-    sequences.columns = [col.replace(".", "_").replace("-", "_") for col in sequences.columns]
-
-    if sequences.empty:
-        warning_message = "Warning: the table 'sequences' is empty."
-        warning_message += f"Check the JSON file for identifier: {identifier}.\n"
-        print(warning_message)
-        log_message(warning_message, script_name, exit_code=1) 
-        
-    return sequences
+        error_message = f"Error in processing the json_object with prep_sequencesdf: {e}"
+        print(error_message)
+        log_message(error_message, script_name, exit_code=1) 
+    
 #!SECTION
 
 # SECTION MAIN
@@ -208,7 +233,7 @@ if __name__ == "__main__":
     # SECTION : Handling of example
     if args.example:
         info_message = "Example usage:"
-        info_message += "\npython json_to_df.py --input_json <path_to_file> --identifier <identifier>"
+        info_message += f"python {script_name} --input_json <path_to_file> --identifier <identifier>"
         log_message(info_message, script_name)
     # !SECTION
     
@@ -221,6 +246,7 @@ if __name__ == "__main__":
         args.identifier
         )
     log_message(info_message, script_name)
+    
     try:
         with open(args.input_json, "r") as f:
             data = json.load(f)
@@ -250,7 +276,19 @@ if __name__ == "__main__":
             info_message = f"\t\t{script_name} completed successfully.\n\n"
             info_message += f"DataFrames saved as CSV files in {current_working_directory}.\n"
             log_message(info_message, script_name)
-                
+    
+    except FileNotFoundError:
+        error_message = f"Input file not found: {args.file_path}"
+        log_message(error_message, script_name, exit_code=1)
+        
+    except Exception as e:
+        error_message = processing_error_message(
+            script_name, 
+            args.file_path, 
+            identifier = None, 
+            e = e)
+        log_message(error_message, script_name, exit_code=1)
+                   
     except FileNotFoundError:
         error_message = f"Input file not found: {args.input_json}"
         log_message(error_message, script_name, exit_code=1)

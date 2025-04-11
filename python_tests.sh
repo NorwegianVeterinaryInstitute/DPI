@@ -27,7 +27,7 @@ rm *{.csv,.log}
 # ANCHOR : json files 
 cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/02_ANNOTATE/SRR11262033
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/json_to_df.py"
-cat SRR11262033.json
+#cat SRR11262033.json
 $SCRIPT --input_json SRR11262033.json --identifier json_test
 
 rm *{.csv,.sqlite,.log}
