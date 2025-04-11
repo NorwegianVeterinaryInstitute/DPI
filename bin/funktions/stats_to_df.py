@@ -20,31 +20,45 @@ def stats_to_df(file_path):
      # script name
     script_name = os.path.basename(__file__)
     
-    # Check if the file exists - report error if not
-    if not os.path.exists(file_path):
-        error_message = f"Error: GFF file not found: {file_path}"
+    info_message = processing_result_message(script_name, file_path)
+    print(info_message)
+    log_message(info_message, script_name)
+        
+    # script
+    try:  
+        df = pd.read_table(file_path, sep="\t", header=None, names=["param", "value"], skip_blank_lines=True, index_col=None)
+    
+    except Exception as e:
+        error_message = f"Error reading stats_out file {file_path}: {e}"
         print(error_message)
-        log_message(error_message, script_name, exit_code=1) # log and exit
+        log_message(error_message, script_name, exit_code=1) 
+            
+    try:         
+        # Extract the ref and query ids from the file name
+        file_name = os.path.basename(file_path)
+        parts = file_name.split("_")
+        ref, query = parts[0], parts[1]
+        
+        # lines with empty info
+        df = df[df.value.notnull()].assign(_REF=ref,_QUERY=query)
+        
+        # eg. prevents read/write errors
+        if df.empty:
+            warning_message = "Warning: the table 'stats' is empty"
+            warning_message += "Check the stats_out file.\n"  
+            print(warning_message)
+            log_message(warning_message, script_name, exit_code=1)
     
-    # script     
-    df = pd.read_table(file_path, sep="\t", header=None, names=["param", "value"], skip_blank_lines=True, index_col=None)
+        return df
     
-    # Extract the ref and query ids from the file name
-    file_name = os.path.basename(file_path)
-    parts = file_name.split("_")
-    ref, query = parts[0], parts[1]
-    
-    # lines with empty info
-    df = df[df.value.notnull()].assign(_REF=ref,_QUERY=query)
-    
-    # eg. prevents read/write errors
-    if df.empty:
-        warning_message = "Warning: the table 'stats' is empty"
-        warning_message += "Check the stats_out file.\n"  
-        print(warning_message)
-        log_message(warning_message, script_name, exit_code=1)
-    
-    return df
+    except Exception as e:
+        error_message = processing_error_message(
+            script_name, 
+            file_path,
+            identifier= None,
+            e = e
+            )
+        log_message(error_message, script_name, exit_code=1)
 #!SECTION   
     
     
@@ -85,7 +99,7 @@ if __name__ == "__main__":
     if args.example:
         info_message = "Example usage:"
         info_message += f"python {script_name} --file_path <path_to_file> --identifier <identifier>"
-        log_message(info_message, script_name)
+        log_message(info_message, script_name,exit_code=0)
 
     # !SECTION
     
@@ -110,8 +124,6 @@ if __name__ == "__main__":
         info_message = f"\t\t{script_name} completed successfully.\n\n"
         info_message += f"DataFrame saved as CSV files in {current_working_directory}."
         log_message(info_message, script_name)
-        
-        
                 
     except FileNotFoundError:
         error_message = f"Input file not found: {args.file_path}"
@@ -124,6 +136,5 @@ if __name__ == "__main__":
             args.identifier, 
             e = e)
         log_message(error_message, script_name, exit_code=1)
-        
     # !SECTION
 # !SECTION
