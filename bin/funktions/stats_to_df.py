@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # SECTION : Imports
 import argparse
-import datetime
-import sys
-import logging
 import os
+import sys
 
 import pandas as pd # type: ignore
+from error_template import log_message
+from error_template import processing_error_message
+from error_template import processing_result_message
 # !SECTION
 
 # SECTION : Functions definitions
@@ -16,7 +17,16 @@ def stats_to_df(file_path):
     :param file_path nucdiff result ref_query_stats.out 
     :return df (long format)
     """
-
+     # script name
+    script_name = os.path.basename(__file__)
+    
+    # Check if the file exists - report error if not
+    if not os.path.exists(file_path):
+        error_message = f"Error: GFF file not found: {file_path}"
+        print(error_message)
+        log_message(error_message, script_name, exit_code=1) # log and exit
+    
+    # script     
     df = pd.read_table(file_path, sep="\t", header=None, names=["param", "value"], skip_blank_lines=True, index_col=None)
     
     # Extract the ref and query ids from the file name
@@ -27,12 +37,20 @@ def stats_to_df(file_path):
     # lines with empty info
     df = df[df.value.notnull()].assign(_REF=ref,_QUERY=query)
     
+    # eg. prevents read/write errors
+    if df.empty:
+        warning_message = "Warning: the table 'stats' is empty"
+        warning_message += "Check the stats_out file.\n"  
+        print(warning_message)
+        log_message(warning_message, script_name, exit_code=1)
+    
     return df
 #!SECTION   
     
     
 # SECTION MAIN
 if __name__ == "__main__":
+    script_name = os.path.basename(__file__)
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(description="Process stat_file created by nucdiff and export as csv files.",)
     # Version and example arguments (optional)
@@ -65,50 +83,47 @@ if __name__ == "__main__":
     
     # SECTION : Handling of example
     if args.example:
-        logging.info("Example usage:")
-        logging.info("python stats_to_df.py --file_path <path_to_file> --identifier <identifier>")
+        info_message = "Example usage:"
+        info_message += f"python {script_name} --file_path <path_to_file> --identifier <identifier>"
+        log_message(info_message, script_name)
+
     # !SECTION
     
-
-    # SECTION : Login info output
-    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_stats_to_df.log"
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler(log_file_name, mode="w"),
-            logging.StreamHandler(sys.stdout),
-        ],
-        )
-    # !SECTION
+    # NOTE:  Login info output - handled by log_error    
     
-# SECTION : SCRIPT : Load data and insert into the database
+    # SECTION : SCRIPT : Load data and insert into the database
+    info_message = processing_result_message(
+            script_name,
+            args.file_path
+            )
+    log_message(info_message, script_name)
+    
     try:
-        logging.info(f"Processing stat_file {args.file_path} for identifier '{args.identifier}'.")
-        
-        try:
-                df = stats_to_df(args.file_path)
-                current_working_directory = os.getcwd()  
-                df.to_csv(
-                    os.path.join(current_working_directory, f"{args.identifier}_stats.csv"),
-                    index=False,
-                    header=True
-                    )
+        df = stats_to_df(args.file_path)
+        current_working_directory = os.getcwd()  
+        df.to_csv(
+            os.path.join(current_working_directory, f"{args.identifier}_stats.csv"),
+            index=False,
+            header=True
+            )
 
-                logging.info(f"Successfully processed {args.file_path} for identifier '{args.identifier}'.")
-                logging.info(f"DataFrame saved as CSV files in {current_working_directory}.")
-                    
-        except FileNotFoundError:
-            logging.error(f"Input file not found: {args.file_path}")
-            sys.exit(1)
+        info_message = f"\t\t{script_name} completed successfully.\n\n"
+        info_message += f"DataFrame saved as CSV files in {current_working_directory}."
+        log_message(info_message, script_name)
         
-        except Exception as e:
-            logging.error(f"Error processing data for {args.identifier} from {args.file_path}: {e}")
+        
+                
+    except FileNotFoundError:
+        error_message = f"Input file not found: {args.file_path}"
+        log_message(error_message, script_name, exit_code=1)
 
-        logging.info("stats_to_df.py script completed successfully.")
     except Exception as e:
-        logging.error(f"An error occurred during the script execution: {e}")
-        logging.error(f"Check {log_file_name} for more details.")
+        error_message = processing_error_message(
+            script_name, 
+            args.file_path, 
+            args.identifier, 
+            e = e)
+        log_message(error_message, script_name, exit_code=1)
+        
     # !SECTION
 # !SECTION

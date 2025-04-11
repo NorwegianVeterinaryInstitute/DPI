@@ -20,7 +20,11 @@ $SCRIPT --input_json SRR11262033.json --identifier json_test
 
 rm *{.csv,.sqlite,.log}
 
-
+# ANCHOR : stats 
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/04_NUCDIFF/SRR11262179_SRR11262033
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/stats_to_df.py"
+$SCRIPT --file_path SRR11262179_SRR11262033_stat.out --identifier test
+rm *{.csv,.sqlite,.log}
 # !SECTION
 
 
