@@ -185,9 +185,10 @@ to test within the container due to scope of python modules. After lots of troub
 scope of package and modules ... though I might forget but  I will have an example to follow.)
 - [x] We need to add val to sqlite name, using val - because then it will allow checking which sqlite_output had problems more easily . ... 
 
-
+- [ ] script for merge to main github from main, update dev from main and then and continue on working with dev (commands - so do not need to search next time)
 - [ ] testing the merging of the sqlite databases. We might still have to many paths ... will see, but Will be better for nf debugging / processing errors. Will make retry the processes 
 
+running now test nf in tmux login 5
 # TODO 
 - [ ] optimization sqlite writing in database - need to have it add data efficiently (at the end because basic functions have to work)
 - [ ] automatic script to run unittesting - check if working and improve that  

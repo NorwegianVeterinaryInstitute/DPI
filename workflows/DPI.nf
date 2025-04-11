@@ -152,14 +152,25 @@ workflow DPI {
                 return tuple(index, item[0], item[1], item[2])
                 }
         
-        WRANGLING_TO_DB(results_ch).view()
+        WRANGLING_TO_DB(results_ch).out.individual_sqlite_ch.view()
+
 
         // // SECTION : prepare chanel for merging of results to a single database
         // db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
 
-        // We need to add index to the channel - to avoid eventual colisions and merge the individual sqlite databases
+        // We need to collect to ensure that all the results are ready to merge
+        // Defensive programing?  compute expected number of results and do not start the process if some errors 
+        // aqua if some data is missing? because otherwise the whole process of merging ? because then it will 
+        // need to try to merge everything so will run for everything again to add only the missing data ... 
+        // question of efficency 
+
         
-        // WRANGLING_TO_DB.out.individual_sqlite_ch.view()
+        // chunked_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
+//                 .collect() 
+//                 .buffer (size : 200, reminder: true)
+//       
+        // chunked_dbs_ch.view()
+
         // WRANGLING_TO_DB.out.individual_sqlite_ch = test_ch
   
         // // .view()
