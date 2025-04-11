@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # SECTION : Imports
 import argparse
-import datetime
-import sys
-import logging
 import os
+import sys
 
 import re 
 import pandas as pd # type: ignore
+from error_template import log_message
+from error_template import processing_error_message
+from error_template import processing_result_message
 # !SECTION
 
 # SECTION : Functions definitions
@@ -35,44 +36,72 @@ def vcf_to_df(file_path):
     :param file_path: annotated vcf
     :return: pandas dataframe
     """
-    # get position start table
-    start_row = 0
-    with open(file_path) as input_file:
-        for line in input_file:
-            if "#CHROM" in line:
-                 break
-            start_row += 1
-    print(start_row)
+    # script name and info
+    script_name = os.path.basename(__file__)
     
-    # get the body
-    df = pd.read_table(file_path, sep="\t", skiprows=start_row, skip_blank_lines=True, index_col=None)
-    # each row to dict
+    info_message = processing_result_message(script_name, file_path)
+    print(info_message)
+    log_message(info_message, script_name)
     
-    # NOTE: nucdiff vcf files do not have INFO column with ; and = as separators
-    # For annotated vcf files 
-    if "INFO" in df.columns:
-        df["INFO"] = df["INFO"].apply(lambda row: row_to_dic_helper(row))
-        # normalize INFO
-        df2 = pd.json_normalize(df['INFO'])
-        # concatenate df
-        snp_df = pd.concat([df.drop("INFO", axis=1).reset_index(drop=True), df2.reset_index(drop=True)], axis=1)
+    # script 
+    try:     
+        # get position start table
+        start_row = 0
+        with open(file_path) as input_file:
+            for line in input_file:
+                if "#CHROM" in line:
+                    break
+                start_row += 1
+        print(f"starting row for reading vcf file: {start_row}")
+    except Exception as e:
+        error_message = f"Error reading VCF file {file_path}: {e}"
+        print(error_message)
+        log_message(error_message, script_name, exit_code=1) 
+            
+    try:
+        df = pd.read_table(file_path, sep="\t", skiprows=start_row, skip_blank_lines=True, index_col=None)
+        # FIXME ? check missing ? each row to dict
+
+        # For annotated vcf files 
+        if "INFO" in df.columns:
+            df["INFO"] = df["INFO"].apply(lambda row: row_to_dic_helper(row))
+            # normalize INFO
+            df2 = pd.json_normalize(df['INFO'])
+            # concatenate df
+            snp_df = pd.concat([df.drop("INFO", axis=1).reset_index(drop=True), df2.reset_index(drop=True)], axis=1)
+
+        # NOTE: For Nucdiff vcf files do not have INFO column with ; and = as separators
+        else:
+            snp_df = df
+        
+        # NOTE #CHROM is not valid in sqlite headers
+        snp_df.columns = [col.replace("#", "") for col in snp_df.columns]
+        # Cleaning the formating of data originating from INFO : 
+        for col in snp_df.select_dtypes(include='object').columns:
+            snp_df[col] = snp_df[col].str.replace('[space]', ' ')
     
-    # should work for nucdiff vcf files
-    else:
-        snp_df = df
+        if snp_df.empty:
+            warning_message = "Warning: the table snp_df is empty."
+            warning_message += f"Check the SNP file: {file_path}.\n"       
+            print(warning_message)
+            log_message(warning_message, script_name, exit_code=1)
+                
+        return snp_df
     
-    # NOTE #CHROM is not valid in sqlite 
-    snp_df.columns = [col.replace("#", "") for col in snp_df.columns]
-    # Cleaning the formating of data originating from INFO : 
-    for col in snp_df.select_dtypes(include='object').columns:
-        snp_df[col] = snp_df[col].str.replace('[space]', ' ')
+    except Exception as e:
+        error_message = processing_error_message(
+            script_name, 
+            file_path,
+            identifier= None,
+            e = e
+            )
+        log_message(error_message, script_name, exit_code=1)
     
-    print(f"vcf_to_df as run for {file_path}")
-    return snp_df
 #!SECTION  
 
 # SECTION MAIN
 if __name__ == "__main__":
+    script_name = os.path.basename(__file__)    
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(description="Process vcf_file created by eg. nucdiff and export as csv files.",)
     # Version and example arguments (optional)
@@ -105,51 +134,44 @@ if __name__ == "__main__":
     
     # SECTION : Handling of example
     if args.example:
-        logging.info("Example usage:")
-        logging.info("python vcf_to_df.py --file_path <path_to_file> --identifier <identifier>")
+        info_message = "Example usage:"
+        info_message += f"python {script_name} --file_path <path_to_file> --identifier <identifier>"
+        log_message(info_message, script_name, exit_code=0)
     # !SECTION
     
-
-    # SECTION : Login info output
-    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_vcf_to_df.log"
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler(log_file_name, mode="w"),
-            logging.StreamHandler(sys.stdout),
-        ],
-        )
-    # !SECTION
+    # NOTE:  Login info output - handled by log_error
     
 # SECTION : SCRIPT : Load data and insert into the database
+    info_message = processing_result_message(
+            script_name,
+            args.file_path
+            )
+    log_message(info_message, script_name)
+    
     try:
-        logging.info(f"Processing vcf_file {args.file_path} for identifier '{args.identifier}'.")
+        current_working_directory = os.getcwd()  
+        df = vcf_to_df(args.file_path)
+        df.to_csv(
+            os.path.join(current_working_directory, f"{args.identifier}_vcf.csv"),
+            index=False,
+            header=True
+            )
+    
+        info_message = f"\t\t{script_name} completed successfully.\n\n"
+        info_message += f"DataFrame saved as CSV file in {current_working_directory}.\n"
+        log_message(info_message, script_name)
+                
+    except FileNotFoundError:
+        error_message = f"Input file not found: {args.file_path}"
+        log_message(error_message, script_name, exit_code=1)
         
-        try:
-                df = vcf_to_df(args.file_path)
-                current_working_directory = os.getcwd()  
-                df.to_csv(
-                    os.path.join(current_working_directory, f"{args.identifier}_vcf.csv"),
-                    index=False,
-                    header=True
-                    )
-
-                logging.info(f"Successfully processed {args.file_path} for identifier '{args.identifier}'.")
-                logging.info(f"DataFrame saved as CSV files in {current_working_directory}.")
-                    
-        except FileNotFoundError:
-            logging.error(f"Input file not found: {args.file_path}")
-            sys.exit(1)
-        
-        except Exception as e:
-            logging.error(f"Error processing data for {args.identifier} from {args.file_path}: {e}")
-
-        logging.info("vcf_to_df.py script completed successfully.")
     except Exception as e:
-        logging.error(f"An error occurred during the script execution: {e}")
-        logging.error(f"Check {log_file_name} for more details.")
+        error_message = processing_error_message(
+            script_name, 
+            args.file_path, 
+            identifier = None, 
+            e = e)
+        log_message(error_message, script_name, exit_code=1)
     # !SECTION
 # !SECTION
 

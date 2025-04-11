@@ -7,10 +7,13 @@ apptainer shell $IMG
 # ANCHOR : GFF tables - ok 
 cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/04_NUCDIFF/SRR11262179_SRR11262033
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/gff_to_df.py"
-cat SRR11262179_SRR11262033_query_blocks.gff
+#cat SRR11262179_SRR11262033_query_blocks.gff
 $SCRIPT --file_path SRR11262179_SRR11262033_query_blocks.gff
 
 rm *{.csv,.log}
+
+# ANCHOR : vcf tables 
+
 
 # ANCHOR : json files 
 cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/02_ANNOTATE/SRR11262033

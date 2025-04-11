@@ -28,24 +28,18 @@ def gff_to_df(file_path):
     # script name
     script_name = os.path.basename(__file__)
 
-    # Check if the file exists - report error if not
-    if not os.path.exists(file_path):
-        error_message = f"Error: GFF file not found: {file_path}"
-        print(error_message)
-        log_message(error_message, script_name, exit_code=1) # log and exit
-              
-    # Extract the ref and query ids from the file name
-    file_name = os.path.basename(file_path)
-    parts = file_name.split("_")
-    ref, query = parts[0], parts[1]
-    
     try:
         gff_df = gffpd.read_gff3(file_path)
+        
+        # Extract the ref and query ids from the file name
+        file_name = os.path.basename(file_path)
+        parts = file_name.split("_")
+        ref, query = parts[0], parts[1]
+        
     except Exception as e:
         error_message = f"Error reading GFF file {file_path}: {e}"
         print(error_message)
         log_message(error_message, script_name, exit_code=1) 
-        
         
     # Dealing with empty gff (eg. query_additional): only one line
     with open(file_path, "r") as f:
@@ -118,8 +112,8 @@ if __name__ == "__main__":
     # SECTION : Handling of example
     if args.example:
         info_message = "Example usage:"
-        info_message += "\npython gff_to_df.py --file_path <path_to_file>"
-        log_message(info_message, script_name)
+        info_message += "python {script_name} --file_path <path_to_file>"
+        log_message(info_message, script_name, exit_code=0)
     # !SECTION
     
     # NOTE:  Login info output - handled by log_error
@@ -154,7 +148,6 @@ if __name__ == "__main__":
             args.file_path, 
             identifier = None, 
             e = e)
-        
         log_message(error_message, script_name, exit_code=1)
     # !SECTION
 # !SECTION
