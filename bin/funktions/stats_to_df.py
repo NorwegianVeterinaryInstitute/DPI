@@ -5,9 +5,7 @@ import os
 import sys
 
 import pandas as pd # type: ignore
-from error_template import log_message
-from error_template import processing_error_message
-from error_template import processing_result_message
+from .error_template import log_message, processing_error_message, processing_result_message
 # !SECTION
 
 # SECTION : Functions definitions

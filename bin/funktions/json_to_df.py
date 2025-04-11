@@ -7,11 +7,11 @@ import sys
 import pandas as pd # type: ignore
 import numpy as np # type: ignore
 
-from error_template import log_message
-from error_template import processing_error_message
-from error_template import processing_result_message
-# for main
-import json
+from .error_template import log_message, processing_error_message, processing_result_message
+
+if __name__ == "__main__":
+    import json
+
 #!SECTION
 
 # SECTION : Functions definitions 
@@ -279,13 +279,13 @@ if __name__ == "__main__":
             log_message(info_message, script_name)
     
     except FileNotFoundError:
-        error_message = f"Input file not found: {args.file_path}"
+        error_message = f"Input file not found: {args.input_json}"
         log_message(error_message, script_name, exit_code=1)
         
     except Exception as e:
         error_message = processing_error_message(
             script_name, 
-            args.file_path, 
+            args.input_json, 
             identifier = None, 
             e = e)
         log_message(error_message, script_name, exit_code=1)

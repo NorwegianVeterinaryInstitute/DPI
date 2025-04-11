@@ -3,9 +3,7 @@
 import os
 
 import pandas as pd
-from error_template import log_message
-from error_template import processing_error_message
-from error_template import processing_result_message
+from .error_template import log_message, processing_result_message
 
 
 def create_comment_df (identifier, comment): 

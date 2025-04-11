@@ -7,8 +7,12 @@ import argparse
 import os
 import sys
 
-#import funktions
-from funktions.error_template import log_message, processing_error_message, processing_result_message
+
+
+from funktions.error_template import log_message as log_message
+from funktions.error_template import processing_error_message as processing_error_message
+from funktions.error_template import processing_result_message as processing_result_message
+
 import sqlite3
 # !SECTION 
 
