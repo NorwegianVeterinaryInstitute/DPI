@@ -266,23 +266,49 @@ $SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier 
 ok, this worked, do not know why did not modify anything I think. 
 - [x] launching test script for getting all the single databases. Ot seems to be running without problems. 
 
-# TODO 
-- [ ] testing and evt debugging of the merging of the sqlite databases
 
+Some few errors, do not appear really systematic unless vcf fies
+retrying . keep otherwise this one and try to adapt script
+```text
+/cluster/work/users/evezeyl/2025_DPI_TEST/e5/fcdf030c333727ab84ca6e6e5444d1/output_37.sqlite
+2025-04-10 18:25:33,123 - INFO - Processing SRR11262033_SRR11262179 in SRR11262179_SRR11262033_query_snps_annotated.vcf
+Processing file: SRR11262179_SRR11262033_query_snps_annotated.vcf for SRR11262033_SRR11262179
+22
+vcf_to_df as run for SRR11262179_SRR11262033_query_snps_annotated.vcf
+Error processing SRR11262179_SRR11262033_query_snps_annotated.vcf for identifier SRR11262033_SRR11262179: expected str, bytes or os.PathLike object, not Connection
+create_or_append_table function has run for SRR11262033_SRR11262179 and filename SRR11262179_SRR11262033_query_snps_annotated.vcf.
+Error processing SRR11262179_SRR11262033_query_snps_annotated.vcf for identifier SRR11262033_SRR11262179: expected str, bytes or os.PathLike object, not Connection
+create_or_append_table function has run for SRR11262033_SRR11262179 and filename SRR11262179_SRR11262033_query_snps_annotated.vcf.
+Processed and inserted: SRR11262179_SRR11262033_query_snps_annotated.vcf for identifier SRR11262033_SRR11262179
+
+```
+
+ok, relaunched and is completed (my guess something buggy with saga, already sometimes did not find previous runs ,,,)
+
+2025-04-11 
+- [ ] testing the merging of the sqlite databases. We might still have to many paths ... will see
+
+- first testing if script is working
 ```bash
 # need to get some results and simlink to make it convenient
-cd 
-mkdir test_dir_sqlite
-cd test_dir_sqlite
-ln -s ../**/*.sqlite .
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/results/test_dir_sqlite
+ln -s $USERWORK/2025_DPI_TEST/**/**/output_*.sqlite .
 
 # testing script on those files
 SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/merge_sqlite_databases.py"
 $SCRIPT --help
-$SCRIPT --output test_merging.sqlite --input *.sqlite > test_merging.log 2>&1
+$SCRIPT --output merging_test.sqlite --input output*.sqlite > merging_test.log 2>&1
+
+srun --account=nn9305k --mem-per-cpu=8G --cpus-per-task=1 --qos=devel --time=1:00:00 --pty bash -i
+srun --account=nn9305k --mem-per-cpu=4G --cpus-per-task=4 --time=3:00:00 --pty bash -i
+
 ```
-
-
+- output 17, 33 are empty - so no filename (so why adding does not work as should). In merged table there is only 25 out of 38 where comments are added so this is the ones that really worked and are different
+- [ ] nextflow find a way to remove all sqlite files / merging db  from cache - so I do not need to restart all 
+- [ ] so we need to add a defencive programming that the sqlite addition make the process exit error status as failed if db is empty - then can find out what is wrong there
+- [ ] We need to add val to sqlite name, using val - because then it will allow checking which sqlite_output had problems more easily . ... 
+```bash
+```
 
 # TODO 
 

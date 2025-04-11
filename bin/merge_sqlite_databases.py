@@ -55,6 +55,7 @@ def merge_databases(output_db_path, input_db_paths):
                         output_cursor.execute(create_table_sql)
                         output_conn.commit()
                         print(f"Created table '{table_name}' in output database.")
+                        output_column_names = list(input_columns.keys())
                     else:
                         # Add missing columns to the output table
                         output_cursor.execute(f"PRAGMA table_info({table_name})")
@@ -192,7 +193,7 @@ if __name__ == "__main__":
         help="Path to the output SQLite database.",
         )
     parser.add_argument(
-        "--inputs",
+        "--input",
         nargs='+',
         required=True,
         help="List of paths to the input SQLite databases.",
@@ -213,9 +214,9 @@ if __name__ == "__main__":
     # !SECTION
     
     # SECTION : Check if required arguments are provided
-    if not all([args.output_db_path, args.input_db_paths,]):
+    if not all([args.output, args.input,]):
         parser.error(
-            "The following arguments are required: --output_db_path, --input_db_paths"
+            "The following arguments are required: --output <output_db_path>, --input <input_db_paths>.\n"
         )
         sys.exit(1)      
     # !SECTION
@@ -223,13 +224,13 @@ if __name__ == "__main__":
     # SECTION : Handling of example
     if args.example:
         logging.info("Example usage:")
-        logging.info("python merge_sqlite_database.py --output_db_path --input_db_paths)")
+        logging.info("python merge_sqlite_database.py --output <output_db_path> --input <input_db_paths>)")
     # !SECTION
     
 
     
     # SECTION : Login info output
-    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_MERGE_DBS.log"
+    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_merge_sqlite_databaes.log"
 
     logging.basicConfig(
         level=logging.DEBUG,
@@ -244,7 +245,7 @@ if __name__ == "__main__":
     # SECTION : SCRIPT : Merge the result files
     try:
         logging.info("Merging sqlite databases")
-        merge_databases(args.output, args.inputs)
+        merge_databases(args.output, args.input)
     except Exception as e:
         logging.error(f"An error occurred during the merging of sqlite databases: {e}")
         logging.error(f"Check {log_file_name} for more details")
