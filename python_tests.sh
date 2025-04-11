@@ -39,5 +39,22 @@ $SCRIPT --file_path SRR11262179_SRR11262033_stat.out --identifier test
 rm *{.csv,.sqlite,.log}
 # !SECTION
 
+# SECTION : WRAPPERS 
 
-# SECTION 
+# NOTE create table - ALL STEPS 
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/06_VCF_ANNOTATOR
+# I need to create the csv file first
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/vcf_to_df.py"
+$SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier SRR11262179_SRR11262033
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/create_table.py"
+$SCRIPT --input_csv SRR11262179_SRR11262033_vcf.csv --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --db_file create_table.py_vcf.sqlite --table_name  test_SRR11262179_SRR11262033_vcf --identifier SRR11262179_SRR11262033 
+rm *{.csv,.sqlite,.log}
+# This is working, now should work for all 
+
+
+# NOTE process file 
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025_TEST_DPI/results/06_VCF_ANNOTATOR
+SCRIPT="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/funktions/process_result_file.py"
+$SCRIPT --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier SRR11262179_SRR11262033 --db_file process_result_file.py.sqlite  --comment test
+
+# !SECTION 

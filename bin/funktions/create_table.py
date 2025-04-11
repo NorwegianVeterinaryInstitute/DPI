@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 # SECTION : Imports
 import argparse
-import datetime
+import os
 import sys
-import logging
 
 import sqlite3
 import pandas # type: ignore
+from error_template import log_message
+from error_template import processing_error_message
+from error_template import processing_result_message
 #!SECTION
 
 # SECTION : Functions definitions
-def create_table(df : pandas.DataFrame, table_name, identifier, file_name, db_file):
+def create_table(df : pandas.DataFrame, table_name, identifier, file_path, db_file):
     """
     Creates or appends data to a SQLite table, using 'identifier' as the primary key,
     adding missing columns if necessary, and checking for existing data before inserting.
@@ -19,52 +21,81 @@ def create_table(df : pandas.DataFrame, table_name, identifier, file_name, db_fi
         df (pd.DataFrame): DataFrame to insert.
         table_name (str): Name of the table. When argument is passed, must be between "" and not ''
         identifier (str): The identifier (pair or sample_id) - solely used for error messages.
-        file_name (str): The name of the processed file.
+        file_path (str): The name of the processed file.
         db_file (str): Path to the SQLite database file.
     """
+    # script name and info
+    script_name = os.path.basename(__file__)
+    
+    info_message = processing_result_message(script_name, file_path)
+    print(info_message)
+    log_message(info_message, script_name)
+    
+    db_conn = None
+    
     try:
         # NOTE: creates the db it if does not exists
         db_conn = sqlite3.connect(db_file)
         cursor = db_conn.cursor()
-                
-        # Create a copy of the DataFrame *without* 'file_name' for insertion
-        df_to_insert = df.copy().drop(columns=["file_name"], errors="ignore")
+
+        # Create a copy of the DataFrame *without* 'file_path' for insertion
+        df_to_insert = df.copy().drop(columns=["file_path"], errors="ignore")
+
+        if df_to_insert.empty:
+                    warning_message = f"Warning: Input DataFrame is empty for {identifier} and file {file_path}. No table will be created."
+                    print(warning_message)
+                    sys.exit(1)
+
 
         # NOTE : the table does not exist yet (empty connection) - it must be created
         cursor.execute(
             f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'"
         )
         columns = ", ".join(f"{col} TEXT" for col in df_to_insert.columns)
-        columns_with_filename = f"file_name TEXT, {columns}"
-        
+        columns_with_filename = f"file_path TEXT, {columns}"
+
         cursor.execute(f"CREATE TABLE {table_name} ({columns_with_filename})")
         print(f"Table '{table_name}' created.")
 
         # NOTE : there is no need to check for duplicates. All data is new
         # Insert data, checking for duplicates across all data columns
         placeholders = ", ".join("?" for _ in df_to_insert.columns)
-        
+
         for row in df_to_insert.itertuples(index=False):
             row_values = list(row)
             insert_query = f"INSERT INTO {table_name} VALUES (?, {placeholders})"
-            cursor.execute(insert_query,(file_name, *row_values),)
-            
+            cursor.execute(insert_query,(file_path, *row_values),)
+
         cursor.close()
-        
+
     except Exception as e:
-        print(f"Error processing {file_name} for identifier {identifier}: {e}")
-        if 'db_conn' in locals():
+        error_message = processing_error_message(script_name, file_path, identifier, e)
+        print(error_message)        
+        if db_conn:
             db_conn.rollback()
+        log_message(error_message, script_name, exit_code=1)
+            
+        
     finally:
-        if 'db_conn' in locals():
+        if db_conn:
             db_conn.commit()
+            cursor = db_conn.cursor()
+            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+            row_count = cursor.fetchone()[0]
+            cursor.close()
             db_conn.close()
             
-    print(f"create_or_append_table function has run for {identifier} and filename {file_name}.")
+            if row_count == 0:
+                error_message = f"Error: Table '{table_name}' in '{db_file}' is empty after processing '{file_path}' for '{identifier}'."
+                log_message(error_message, script_name, exit_code=1)
+
+        message_info = f"create_or_append_table function has run for {identifier} and filename {file_path}."
+        log_message(message_info, script_name)
 #!SECTION
 
 # SECTION MAIN
 if __name__ == "__main__":
+    script_name = os.path.basename(__file__) 
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(description="Create a table in a sqlite database and add results from a Pandas dataframe.",)
     # Version and example arguments (optional)
@@ -79,63 +110,59 @@ if __name__ == "__main__":
         version="%(prog)s 0.0.2",
         help="Print the script version and exit.",
         )
-    
+
     # required arguments (only for main)
     parser.add_argument("--input_csv", required=True, help="Path of the dataframe that from which results will be appened to the database\n"
                                                             "Note that the function uses a pandas dataframe object, which must have been created\n"
                                                             "beforehand and passed to the function")
-    parser.add_argument("--file_name", required=False, default="dummy", help="Name of the processed file which lead to the table (only for documentation purposes in main).")
+    parser.add_argument("--file_path", required=False, default="dummy", help="Name of the processed file which lead to the table (only for documentation purposes in main).")
     parser.add_argument("--db_file", required=True, help="Path to a sqlite dabase. If database does not exists it will be created")
     parser.add_argument("--table_name", required=True, help="Name of the table to be created. Depends on data type.")
     parser.add_argument("--identifier", required=True, help="Identifier for the data")
-    
+
     args = parser.parse_args()
     # !SECTION
-    
+
     # SECTION : Check if required arguments are provided
     if not all([args.input_csv, args.db_file, args.table_name, args.identifier,]):
         parser.error(
             "The following arguments are required: --input_csv --db_cfile, --table_name, --identifier, "
         )
-        sys.exit(1)      
+        sys.exit(1)
     # !SECTION
-    
+
     # SECTION : Handling of example
     if args.example:
-        logging.info("Example usage:")
-        logging.info("python create_table.py --input_csv <path_to_file> --db_file <db_file> --table_name <table_name> --identifier <identifier>")
+        info_message = "Example usage:"
+        info_message += f"python {script_name} --input_csv <path_to_file> --db_file <db_file> --table_name <table_name> --identifier <identifier>"
+        log_message(info_message, script_name, exit_code=0)
     # !SECTION
-    
-
-    # SECTION : Login info output
-    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_create_table.log"
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler(log_file_name, mode="w"),
-            logging.StreamHandler(sys.stdout),
-        ],
-        )
-    # !SECTION
+    # NOTE:  Login info output - handled by log_error
     
 # SECTION : SCRIPT : Load data and insert into the database
+    info_message = processing_result_message(
+            script_name,
+            args.file_path
+            )
+    log_message(info_message, script_name)
+    
     try:
-        logging.info(f"Processing table '{args.table_name}' for identifier '{args.identifier}' from file '{args.input_csv}' into database '{args.db_file}'.")
-        
         # # NOTE need to create the pandas dataframe from the file and the database connection
         # Load the Pandas DataFrame (replace with your actual data loading method)
         try:
             df = pandas.read_csv(args.input_csv)
+            create_table(df, args.table_name, args.identifier, args.file_path,args.db_file)
+        
         except FileNotFoundError:
-            logging.error(f"Input CSV file not found: {args.input_csv}")
-            sys.exit(1)
+            error_message = f"Input file not found: {args.file_path}"
+            log_message(error_message, script_name, exit_code=1)
 
-        create_table(df, args.table_name, args.identifier, args.file_name,args.db_file)
-        logging.info("create_table.py script completed successfully.")
     except Exception as e:
-        logging.error(f"An error occurred during the script execution: {e}")
-        logging.error(f"Check {log_file_name} for more details.")
+        error_message = processing_error_message(
+            script_name, 
+            args.file_path, 
+            identifier = None, 
+            e = e)
+        log_message(error_message, script_name, exit_code=1)
     # !SECTION
 # !SECTION
