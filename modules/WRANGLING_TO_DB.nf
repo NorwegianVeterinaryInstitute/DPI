@@ -11,11 +11,11 @@ process WRANGLING_TO_DB {
     tuple val(index), val(comment),val(id),path(result_file)
 
     output:
-    path "output_${index}.sqlite", emit: individual_sqlite_ch
+    path "output2_${index}_${id}.sqlite", emit: individual_sqlite_ch
      
     script:
     index_id = "${index}"
-    output_db = "output_${index}.sqlite"
+    output_db = "output2_${index}_${id}.sqlite"
     """
     python ${projectDir}/bin/results_to_db.py \\
         --result_file "${result_file}" \\

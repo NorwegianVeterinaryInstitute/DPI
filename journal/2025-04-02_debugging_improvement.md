@@ -305,6 +305,7 @@ srun --account=nn9305k --mem-per-cpu=4G --cpus-per-task=4 --time=3:00:00 --pty b
 ```
 - output 17, 33 are empty - so no filename (so why adding does not work as should). In merged table there is only 25 out of 38 where comments are added so this is the ones that really worked and are different
 - [ ] nextflow find a way to remove all sqlite files / merging db  from cache - so I do not need to restart all 
+- No we change the process and output name - so it will work as filter. is faster
 - [ ] so we need to add a defencive programming that the sqlite addition make the process exit error status as failed if db is empty - then can find out what is wrong there
 - [ ] We need to add val to sqlite name, using val - because then it will allow checking which sqlite_output had problems more easily . ... 
 ```bash
