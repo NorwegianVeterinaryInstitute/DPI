@@ -60,7 +60,6 @@ def vcf_to_df(file_path):
             
     try:
         df = pd.read_table(file_path, sep="\t", skiprows=start_row, skip_blank_lines=True, index_col=None)
-        # FIXME ? check missing ? each row to dict
 
         # For annotated vcf files 
         if "INFO" in df.columns:
@@ -141,7 +140,7 @@ if __name__ == "__main__":
     
     # NOTE:  Login info output - handled by log_error
     
-# SECTION : SCRIPT : Load data and insert into the database
+    # SECTION : SCRIPT : Load data and insert into the database
     info_message = processing_result_message(
             script_name,
             args.file_path
