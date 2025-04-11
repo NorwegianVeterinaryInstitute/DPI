@@ -144,6 +144,10 @@ if __name__ == "__main__":
         info_message = f"\t\t{script_name} completed successfully.\n\n"
         log_message(info_message, script_name)
         
+    except FileNotFoundError:
+        error_message = f"Input file not found: {args.file_path}"
+        log_message(error_message, script_name, exit_code=1)
+        
     except Exception as e:
         error_message = processing_error_message(
             script_name, 
