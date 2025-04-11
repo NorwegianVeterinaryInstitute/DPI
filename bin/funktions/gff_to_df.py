@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # SECTION : Imports
 import argparse
-# import datetime
 import os
 import sys
-# import logging
 
 
-import gffpandas.gffpandas as gffpd
+import gffpandas.gffpandas as gffpd # type: ignore
 from error_template import log_message
 from error_template import processing_error_message
 from error_template import processing_result_message
