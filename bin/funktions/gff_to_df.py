@@ -25,8 +25,12 @@ def gff_to_df(file_path):
     Returns:
         pd.DataFrame: DataFrame containing the GFF data, or None if the file is not found or empty.
     """
-    # script name
+    # script name and info
     script_name = os.path.basename(__file__)
+    
+    info_message = processing_result_message(script_name, file_path)
+    print(info_message)
+    log_message(info_message, script_name)
 
     try:
         gff_df = gffpd.read_gff3(file_path)
