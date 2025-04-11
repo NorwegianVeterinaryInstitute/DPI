@@ -5,28 +5,37 @@
 # SECTION : Imports
 import argparse
 import os
-import json
-import datetime
 import sys
-import logging
 
-# NOTE : problem if running main 
-if __name__ == "__main__":
-    # Executes when process_result_file.py is run directly
-    from json_to_df import prep_info_df, prep_features_df, prep_sequences_df
-    from gff_to_df import gff_to_df
-    from vcf_to_df import vcf_to_df
-    from stats_to_df import stats_to_df
-    from comment_df import create_comment_df
-    from create_table import create_table
-else:
-    # Executed when funktions is imported as a module  
-    from funktions.json_to_df import prep_info_df, prep_features_df, prep_sequences_df
-    from funktions.gff_to_df import gff_to_df
-    from funktions.vcf_to_df import vcf_to_df
-    from funktions.stats_to_df import stats_to_df
-    from funktions.comment_df import create_comment_df
-    from funktions.create_table import create_table
+import json
+from error_template import log_message
+from error_template import processing_error_message
+from error_template import processing_result_message
+
+from json_to_df import prep_info_df, prep_features_df, prep_sequences_df
+from gff_to_df import gff_to_df
+from vcf_to_df import vcf_to_df
+from stats_to_df import stats_to_df
+from comment_df import create_comment_df
+from create_table import create_table
+
+# # NOTE : problem if running main 
+# if __name__ == "__main__":
+#     # Executes when process_result_file.py is run directly
+#     from json_to_df import prep_info_df, prep_features_df, prep_sequences_df
+#     from gff_to_df import gff_to_df
+#     from vcf_to_df import vcf_to_df
+#     from stats_to_df import stats_to_df
+#     from comment_df import create_comment_df
+#     from create_table import create_table
+# else:
+#     # Executed when funktions is imported as a module  
+#     from funktions.json_to_df import prep_info_df, prep_features_df, prep_sequences_df
+#     from funktions.gff_to_df import gff_to_df
+#     from funktions.vcf_to_df import vcf_to_df
+#     from funktions.stats_to_df import stats_to_df
+#     from funktions.comment_df import create_comment_df
+#     from funktions.create_table import create_table
 # !SECTION
 
 # SECTION : Functions definitions
@@ -63,39 +72,39 @@ def process_result_file(file_path, identifier, db_file, comment):
         db_file (str): Path to the SQLite database file.
         comment (str): Comment for the database entries.
     """
-    file_name = os.path.basename(file_path)
-    print(f"Processing file: {file_name} for {identifier}")
-
-    result_type = determine_result_type(file_name)
+    # script name and info
+    script_name = os.path.basename(__file__)
     
+    info_message = processing_result_message(script_name, file_path, identifier)
+    print(info_message)
+    log_message(info_message, script_name)
+    
+    # script
+    # NOTE: defensive programming implemented with each function to create the df ... each level
+     
     try:        
+        file_name = os.path.basename(file_path)
+        result_type = determine_result_type(file_name)
+   
         if result_type == "json":
             with open(file_path, "r") as f:
                 data = json.load(f)
 
             # NOTE: 3 types of data to extract for the json file
-            try:
-                info_df = prep_info_df(data, identifier)
-                create_table(info_df, "info", identifier, file_name, db_file)
-            except Exception as e:
-                print(f"Error processing info_df for {identifier} filename {file_name}: {e}")
+            
+            info_df = prep_info_df(data, identifier)
+            create_table(info_df, "info", identifier, file_name, db_file)
 
-            try:
-                features_df = prep_features_df(data, identifier)
-                create_table(features_df, "features", identifier, file_name, db_file)
-            except Exception as e:
-                print(f"Error processing features_df for {identifier} filename {file_name}: {e}")
+            features_df = prep_features_df(data, identifier)
+            create_table(features_df, "features", identifier, file_name, db_file)
 
-            try:
-                sequences_df = prep_sequences_df(data, identifier)
-                create_table(sequences_df, "sequences", identifier, file_name, db_file)
-            except Exception as e:
-                print(f"Error processing sequences_df for {identifier} filename {file_name}: {e}")
-
+            sequences_df = prep_sequences_df(data, identifier)
+            create_table(sequences_df, "sequences", identifier, file_name, db_file)
+            
         # NOTE : processing different types of gff files
         elif result_type == "gff":
             df = gff_to_df(file_path)
-
+    
             if "_query_blocks" in file_name:
                 create_table(df, "query_blocks", identifier, file_name, db_file)
             elif "_query_snps" in file_name:
@@ -121,7 +130,7 @@ def process_result_file(file_path, identifier, db_file, comment):
         # NOTE: processing different types of vcf files
         elif result_type == "vcf":
             df = vcf_to_df(file_path)
-
+    
             if "_ref_snps_annotated" in file_name:
                 create_table(df, "ref_snps_annotated", identifier, file_name, db_file)
             elif "_query_snps_annotated" in file_name:
@@ -142,14 +151,19 @@ def process_result_file(file_path, identifier, db_file, comment):
         comment_df = create_comment_df(identifier, comment)
         create_table(comment_df, "comments", identifier, file_name, db_file)
 
-        print(f"Processed and inserted: {file_name} for identifier {identifier}")
-
     except Exception as e:
-        print(f"Error processing {file_path} for identifier {identifier}: {e}")
+        error_message = processing_error_message(
+            script_name, 
+            file_path,
+            identifier= None,
+            e = e
+            )
+        log_message(error_message, script_name, exit_code=1)
 # !SECTION
 
 # SECTION MAIN
 if __name__ == "__main__":
+    script_name = os.path.basename(__file__)    
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(description="Process a result file and add it to an SQLite database.",)
     parser.add_argument("--file_path", required=True, help="Path to the result file",)
@@ -173,31 +187,37 @@ if __name__ == "__main__":
     
     # SECTION : Handling of example
     if args.example:
-        logging.info("Example usage:")
-        logging.info("python process_result_file.py --file_path <path_to_file> --identifier <identifier> --db_file <db_file>")
+        info_message = "Example usage:"
+        info_message += "python {script_name} --file_path <path_to_file> --identifier <identifier> --db_file <db_file>"
+        log_message(info_message, script_name, exit_code=0)
+        
     # !SECTION
     
-
-    
-    # SECTION : Login info output
-    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_process_result_file.log"
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler(log_file_name, mode="w"),
-            logging.StreamHandler(sys.stdout),
-        ],
-        )
-    # !SECTION
+    # NOTE:  Login info output - handled by log_error
     
     # SECTION : SCRIPT : Merge the result files
+    info_message = processing_result_message(
+            script_name,
+            args.file_path
+            )
+    log_message(info_message, script_name)
+    
     try:
-        logging.info(f"processing result file ${args.file_path} for {args.identifier}")
         process_result_file(args.file_path, args.identifier, args.db_file, args.comment)
+        
+    except FileNotFoundError:
+        error_message = f"Input file not found: {args.file_path}"
+        log_message(error_message, script_name, exit_code=1)
+        
     except Exception as e:
-        logging.error(f"An error occurred during the processing of result files: {e}")
-        logging.error(f"Check {log_file_name} for more details")
+        error_message = processing_error_message(
+            script_name, 
+            args.file_path, 
+            identifier = None, 
+            e = e)
+        log_message(error_message, script_name, exit_code=1)
     # !SECTION
 # !SECTION
+
+# NOTE: might still be a bit overkill with all error messages
+# reduced somewhat but there are still some redundancies in error messages
