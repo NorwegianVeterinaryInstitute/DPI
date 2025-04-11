@@ -3,15 +3,12 @@
 import argparse
 import os
 import sys
-#import logging
-#import datetime
-
-from error_template import log_message
-from error_template import processing_error_message
-from error_template import processing_result_message
 
 import pandas as pd # type: ignore
 import numpy as np # type: ignore
+from error_template import log_message
+from error_template import processing_error_message
+from error_template import processing_result_message
 # for main
 import json
 #!SECTION
