@@ -151,7 +151,8 @@ workflow DPI {
                 def index = atomicInteger.incrementAndGet()
                 return tuple(index, item[0], item[1], item[2])
                 }
-        // WRANGLING_TO_DB(results_ch)
+        
+        WRANGLING_TO_DB(results_ch).view()
 
         // // SECTION : prepare chanel for merging of results to a single database
         // db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
