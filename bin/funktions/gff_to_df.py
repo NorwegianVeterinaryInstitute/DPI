@@ -1,14 +1,16 @@
 #!/usr/bin/env python
-
 # SECTION : Imports
 import argparse
-import datetime
-import sys
-import logging
-
+# import datetime
 import os
-import gffpandas.gffpandas as gffpd
+import sys
+# import logging
 
+
+import gffpandas.gffpandas as gffpd
+from error_template import log_message
+from error_template import processing_error_message
+from error_template import processing_result_message
 # !SECTION
 
 # SECTION : Functions definitions
@@ -25,13 +27,15 @@ def gff_to_df(file_path):
     Returns:
         pd.DataFrame: DataFrame containing the GFF data, or None if the file is not found or empty.
     """
-    
+    # script name
+    script_name = os.path.basename(__file__)
+
     # Check if the file exists - report error if not
     if not os.path.exists(file_path):
-        print(f"Error: GFF file not found: {file_path}")
-        return None
-        
-        
+        error_message = f"Error: GFF file not found: {file_path}"
+        print(error_message)
+        log_message(error_message, script_name, exit_code=1) # log and exit
+              
     # Extract the ref and query ids from the file name
     file_name = os.path.basename(file_path)
     parts = file_name.split("_")
@@ -40,36 +44,53 @@ def gff_to_df(file_path):
     try:
         gff_df = gffpd.read_gff3(file_path)
     except Exception as e:
-        print(f"Error reading GFF file {file_path}: {e}")
-        return None
+        error_message = f"Error reading GFF file {file_path}: {e}"
+        print(error_message)
+        log_message(error_message, script_name, exit_code=1) 
+        
         
     # Dealing with empty gff (eg. query_additional): only one line
     with open(file_path, "r") as f:
         file_len = len(f.readlines())
         
     if file_len <= 1:
-        print(f"Warning: Empty GFF file: {file_path}. Skipping.")
-        return None
+        warning_message = f"Warning: Empty GFF file: {file_path}. Skipping."
+        print(warning_message)
+        log_message(warning_message, script_name, exit_code=1)
+        
         
     try:
         gff_df = gff_df.attributes_to_columns().assign(_REF=ref, _QUERY=query)
         # NOTE : in case: Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
         gff_df.columns = [col.replace(".", "_").replace("-", "_") for col in gff_df.columns]
+        
+        if gff_df.empty:
+            warning_message = "Warning: the table gff_df is empty."
+            warning_message += f"Check the GFF file: {file_path}.\n"       
+            print(warning_message)
+            log_message(warning_message, script_name, exit_code=1)
+            
         return gff_df
         
     except Exception as e:
-        print(f"Error processing GFF data for {file_path}: {e}")
-        return None
+        error_message = processing_error_message(
+            script_name, 
+            file_path,
+            identifier= None,
+            e = e
+            )
+        log_message(error_message, script_name, exit_code=1)
+    
 
-# SECTION MAIN
+# SECTION : MAIN
 if __name__ == "__main__":
+    script_name = os.path.basename(__file__)
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(
-        prog="gff_to_df.py",
+        prog=script_name,
         description="Creates a table csv file from a gff file.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         add_help=True,)
-    
     # Version and example arguments (optional)
     parser.add_argument(
         "--example",
@@ -98,27 +119,21 @@ if __name__ == "__main__":
     
     # SECTION : Handling of example
     if args.example:
-        logging.info("Example usage:")
-        logging.info("python gff_to_df.py --file_path <path_to_file>")
+        info_message = "Example usage:"
+        info_message += "\npython gff_to_df.py --file_path <path_to_file>"
+        log_message(info_message, script_name)
     # !SECTION
     
-
-    # SECTION : Login info output
-    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_gff_to_df.log"
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler(log_file_name, mode="w"),
-            logging.StreamHandler(sys.stdout),
-        ],
-        )
-    # !SECTION
+    # NOTE:  Login info output - handled by log_error
     
     # SECTION : SCRIPT : create the data frame and export as csv files
+    info_message = processing_result_message(
+            script_name,
+            args.file_path
+            )
+    log_message(info_message, script_name)
+        
     try:
-        logging.info(f"processing result file ${args.file_path}")
         current_working_directory = os.getcwd()
         df = gff_to_df(args.file_path)
         base_name, extension = os.path.splitext(os.path.basename(args.file_path))        
@@ -128,9 +143,16 @@ if __name__ == "__main__":
             index=False,
             header=True
             )
-        logging.info("gff_to_df.py script completed successfully.")
+        info_message = f"\t\t{script_name} completed successfully.\n\n"
+        log_message(info_message, script_name)
+        
     except Exception as e:
-        logging.error(f"An error occurred during the processing of result files: {e}")
-        logging.error(f"Check {log_file_name} for more details")
+        error_message = processing_error_message(
+            script_name, 
+            args.file_path, 
+            identifier = None, 
+            e = e)
+        
+        log_message(error_message, script_name, exit_code=1)
     # !SECTION
 # !SECTION
