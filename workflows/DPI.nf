@@ -152,17 +152,23 @@ workflow DPI {
                 return tuple(index, item[0], item[1], item[2])
                 }
         
-        WRANGLING_TO_DB(results_ch).out.individual_sqlite_ch.view()
+        WRANGLING_TO_DB(results_ch)
+
 
 
         // // SECTION : prepare chanel for merging of results to a single database
         // db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
 
         // We need to collect to ensure that all the results are ready to merge
+        // Neeed balance ressouces : how many processes will run sequencially 
+        // memory and risks to restart in case of failiure. 
+        // symlink optimisation : chunks sizes can try between 100-500 
+
         // Defensive programing?  compute expected number of results and do not start the process if some errors 
         // aqua if some data is missing? because otherwise the whole process of merging ? because then it will 
         // need to try to merge everything so will run for everything again to add only the missing data ... 
         // question of efficency 
+        
 
         
         // chunked_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
@@ -171,9 +177,6 @@ workflow DPI {
 //       
         // chunked_dbs_ch.view()
 
-        // WRANGLING_TO_DB.out.individual_sqlite_ch = test_ch
-  
-        // // .view()
         
 
         

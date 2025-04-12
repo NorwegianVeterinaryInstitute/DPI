@@ -2,8 +2,10 @@
 DPI_DIR="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI"
 DPI_BIN_DIR="$DPI_DIR/bin"
 IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
-TEST_OUTPUT_BASE=""$TEST_OUTPUT_BASE"
+TEST_OUTPUT_BASE="$TEST_OUTPUT_BASE"
 PYTHON_PATH="$DPI_BIN_DIR"
+## To faciliate checking output files 
+RES_DIR="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/results"
 
 # NOTE : exporting python path do not work inside container 
 # NOTE : for testing the correct way and not directly the in bin we need to add bin to python path 
@@ -59,24 +61,27 @@ echo "SECTION: 1. Testing creation of tables"
 # ANCHOR : GFF tables - OK 
 cd "$TEST_OUTPUT_BASE/04_NUCDIFF/SRR11262179_SRR11262033"
 run_in_container "funktions.gff_to_df" --file_path SRR11262179_SRR11262033_query_blocks.gff
+mv *.csv $RES_DIR
 
 # ANCHOR : vcf tables - OK 
 cd "$TEST_OUTPUT_BASE/04_NUCDIFF/SRR11262179_SRR11262033" 
 run_in_container "funktions.vcf_to_df" --file_path SRR11262179_SRR11262033_query_snps.vcf --identifier nucdiff_vcf 
+mv *.csv $RES_DIR
 
 cd "$TEST_OUTPUT_BASE/06_VCF_ANNOTATOR" -OK
 run_in_container "funktions.vcf_to_df" --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier vcf_annotator_vcf
+mv *.csv $RES_DIR
 
 # ANCHOR : json files - OK
 cd "$TEST_OUTPUT_BASE/02_ANNOTATE/SRR11262033"
 run_in_container "funktions.json_to_df" --input_json SRR11262033.json --identifier json_test
+mv *.csv $RES_DIR
 
 # ANCHOR : stats - OK
 cd "$TEST_OUTPUT_BASE/04_NUCDIFF/SRR11262179_SRR11262033"
 run_in_container "funktions.stats_to_df" --file_path SRR11262179_SRR11262033_stat.out --identifier test
+mv *.csv $RES_DIR
 # !SECTION
-
-
 
 
 # SECTION : WRAPPERS 
@@ -85,24 +90,35 @@ echo "SECTION: 2. WRAPPERS TESTING"
 # NOTE create table - ALL STEPS - OK
 cd "$TEST_OUTPUT_BASE/06_VCF_ANNOTATOR" 
 # I need to create the csv file first
-run_in_container "funktions.vcf_to_df" --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier SRR11262179_SRR11262033
+run_in_container "funktions.vcf_to_df" --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf \
+--identifier SRR11262179_SRR11262033
+mv *.csv $RES_DIR
+
 # Then the sqlite database
-run_in_container "funktions.create_table" --input_csv SRR11262179_SRR11262033_vcf.csv --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --db_file create_table.py_vcf.sqlite --table_name  test_SRR11262179_SRR11262033_vcf --identifier SRR11262179_SRR11262033 
+run_in_container "funktions.create_table" --input_csv $RES_DIR/SRR11262179_SRR11262033_vcf.csv \
+--file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --db_file $RES_DIR/create_table.py_vcf.sqlite \
+--table_name  test_SRR11262179_SRR11262033_vcf --identifier SRR11262179_SRR11262033
 # This is working, now should work for all 
 
 # NOTE process file - OK
 cd "$TEST_OUTPUT_BASE/06_VCF_ANNOTATOR"
-run_in_container "funktions.process_result_file" --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf --identifier SRR11262179_SRR11262033 --db_file process_result_file.py.sqlite  --comment test
+run_in_container "funktions.process_result_file" --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf \
+--identifier SRR11262179_SRR11262033 --db_file $RES_DIR/process_result_file.py.sqlite  --comment test
+
 
 # NOTE merging databses 
 # Need to create 2 files for testing - OK
 cd "$TEST_OUTPUT_BASE/06_VCF_ANNOTATOR"
-run_in_container "funktions.process_result_file" --file_path SRR11262179_SRR11262033_query_snps_annotated.vcf --identifier SRR11262179_SRR11262033 --db_file process_result_file1.py.sqlite  --comment test
-run_in_container "funktions.process_result_file" --file_path SRR11262179_SRR13588387_query_snps_annotated.vcf --identifier SRR11262179_SRR13588387 --db_file process_result_file2.py.sqlite  --comment test
+run_in_container "funktions.process_result_file" --file_path SRR11262179_SRR11262033_query_snps_annotated.vcf \
+--identifier SRR11262179_SRR11262033 --db_file $RES_DIR/res_file1.sqlite  --comment test
+
+run_in_container "funktions.process_result_file" --file_path SRR11262179_SRR13588387_query_snps_annotated.vcf \
+--identifier SRR11262179_SRR13588387 --db_file $RES_DIR/res_file2.sqlite  --comment test
 
 # merge_sqlite_databases.py (which is directly in bin):
-run_in_container "merge_sqlite_databases" --output test_merging.sqlite --input file1.sqlite file2.sqlite
+run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging.sqlite --input $RES_DIR/file1.sqlite $RES_DIR/file2.sqlite
 # !SECTION 
+rm *{.csv,.sqlite,.log}
 
 # rm *{.csv,.sqlite,.log}
 
