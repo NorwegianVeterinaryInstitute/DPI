@@ -59,38 +59,50 @@ workflow DPI {
 
         // ref is the longuest of the two - prepare tags 
         // pairs always sorted - so can always match them 
-        ref_query_ch = 
+        ref_query_long_ch = 
                 PREPARE_NUCDIFF.out.longest_param_ch
                 .splitCsv(header:['ref_query', 'ref', 'query'], skip: 0, sep:",", strip:true)
                 .map {row -> (pair, ref_query, ref, query) = [
                 [row.ref, row.query].sort().join("_"), row.ref_query, row.ref, row.query]}
                 .combine(PREPARE_NUCDIFF.out.fna_ch, by:0)
         
-        RUN_NUCDIFF(ref_query_ch)
-        // !SECTION 
+        // ref_query_long_ch.view(v -> "ref_query_long: ${v}" )
 
+                
+        ref_query_ch = 
+                ref_query_long_ch
+                .map{it -> (ref_query, ref, query, sample1, path1, sample2, path2 ) = [it[1], it[2], it[3], it[4], it[5], it[6], it[7]]}
+
+
+        // ref_query_ch.view(v -> "ref_query: ${v}" )
+      
+        RUN_NUCDIFF(ref_query_ch)
+        // RUN_NUCDIFF.out.nucdiff_vcf_ch.view(v -> "nucdiff_vcf: ${v}" )
+       
+        // !SECTION 
+  
         // SECTION: adding annotations to vcf files 
         PREPARE_VCF_ANNOTATOR(RUN_NUCDIFF.out.nucdiff_vcf_ch)
-
-        // gbff_pairs order must correspond to ref-query (pair - ref_query - ref - query ) //bakta is (sample, path)
+        // PREPARE_VCF_ANNOTATOR.out.prep_vcf_ch.view(v -> "prep_vcf: ${v}" )
+   
+        
+        // gbff_pairs order must correspond to ref-query (ref_query - ref - query ) //bakta is (sample, path)
         vcf_annot_ch = 
                 PREPARE_VCF_ANNOTATOR.out.prep_vcf_ch
-                // first the ref swap 
-                .map{it.swap(0,2)} 
+                // first the ref swap              
+                .map{it.swap(0,1)} 
                 .combine(ANNOTATE.out.bakta_gbff_ch, by: 0)
                 // back to origin
-                .map{it.swap(0,2)} 
+                .map{it.swap(0,1)} 
                 // now query swap 
-                .map{it.swap(0,3)} 
+                .map{it.swap(0,2)} 
                 .combine(ANNOTATE.out.bakta_gbff_ch, by: 0)
                 // back to origin
-                .map{it.swap(0,3)} 
+                .map{it.swap(0,2)} 
+        // vcf_annot_ch.view(v -> "vcf_annot: ${v}" )
         
         RUN_VCF_ANNOTATOR(vcf_annot_ch)
-        RUN_VCF_ANNOTATOR.out.result_todb_ch.view(v -> "vcf_annot: ${v}" )
-        /*
-
-
+        // RUN_VCF_ANNOTATOR.out.result_todb_ch.view(v -> "vcf_annot: ${v}" )
         // !SECTION
         
         // SECTION : wrangle results in sqlite databases 
@@ -98,20 +110,23 @@ workflow DPI {
 
         // results must be emited one by one but collected from all other modules from which we need to add them
         nucdiff_out_ch = RUN_NUCDIFF.out.result_todb_ch
-                .flatMap { id, gff_stat_files ->
+                .flatMap { ref_query, gff_stat_files ->
                         gff_stat_files.collect { gff_stat_file ->
-                        tuple(groupKey(id, gff_stat_files.size()), gff_stat_file)
+                        tuple(groupKey(ref_query, gff_stat_files.size()), gff_stat_file)
                         }}
         
-        nucdiff_out_ch.view(v -> "scattered: ${v}" ) 
+        // nucdiff_out_ch.view(v -> "scattered: ${v}" ) 
         
         vcf_annot_out_ch = RUN_VCF_ANNOTATOR.out.result_todb_ch
-                        .flatMap { id, vcfs ->
+                        .flatMap { ref_query, vcfs ->
                                 vcfs.collect { vcf ->
-                                tuple(groupKey(id, vcfs.size()), vcf)
+                                tuple(groupKey(ref_query, vcfs.size()), vcf)
                                 }}
+
+        // vcf_annot_out_ch.view(v -> "scattered: ${v}" )
         
         // combining all results into one chanel [db_path, comment, id, file] to be inserted into DB (one by one)
+        // id can be sample id of the annotated file OR ref_query pair id
         // We need to add index to the channel - to avoid eventual colisions during merging afterwards
         atomicInteger = new java.util.concurrent.atomic.AtomicInteger(0)
 
@@ -127,12 +142,11 @@ workflow DPI {
                 return tuple(index, item[0], item[1], item[2])
                 }
         // results_ch.view(v -> "results: ${v}" )
-        // WRANGLING_TO_DB(results_ch)
-
-
-
+        
+        WRANGLING_TO_DB(results_ch)
+    
         // // SECTION : prepare chanel for merging of results to a single database
-        // db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
+        db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
 
         // We need to collect to ensure that all the results are ready to merge
         // Neeed balance ressouces : how many processes will run sequencially 
@@ -144,15 +158,13 @@ workflow DPI {
         // need to try to merge everything so will run for everything again to add only the missing data ... 
         // question of efficency 
         
-
-        
-        // chunked_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
-        //         .collect() 
-        //         .buffer (size : 200, remainder: true)
+        chunked_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
+                .collect() 
+                .buffer (size : 200, remainder: true)
       
-        // // chunked_dbs_ch.view()      
-        // MERGE_DBS(db_path_ch, chunked_dbs_ch)
-        */
+        // chunked_dbs_ch.view()      
+        MERGE_DBS(db_path_ch, chunked_dbs_ch)
+        
 
 
         // !SECTION

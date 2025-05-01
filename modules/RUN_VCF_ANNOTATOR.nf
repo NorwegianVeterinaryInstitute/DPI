@@ -5,16 +5,16 @@ process RUN_VCF_ANNOTATOR{
 	container 'quay.io/biocontainers/vcf-annotator:0.7--hdfd78af_0'
 
         debug "${params.debug}"
-        tag "${pair}"
+        tag "${ref_query}"
 
         label 'process_short'
 
         input:
-        tuple val(pair), val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf),
+        tuple val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf),
         path(ref_gbff), path(query_gbff)
         
         output:
-        tuple val("${ref_query}"), path("${ref_query}_{ref,query}_snps_annotated.vcf"), emit: result_todb_ch
+        tuple val(ref_query), path("${ref_query}_{ref,query}_snps_annotated.vcf"), emit: result_todb_ch
         script:
         """
         vcf-annotator ${ref_vcf} ${ref_gbff} --output ${ref_query}_ref_snps_annotated.vcf >  ${ref}.sdout 2>&1 

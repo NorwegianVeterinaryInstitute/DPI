@@ -7,15 +7,16 @@ process RUN_NUCDIFF{
         label 'process_high'
 
         debug "${params.debug}"
-        tag "${pair}"
+        tag "${ref_query}"
 
         input:
-        tuple val(pair), val(ref_query), val(ref), val(query), 
+        tuple val(ref_query), val(ref), val(query), 
         val(sample1), path(path1), val(sample2), path(path2)
 
         output: 
-        tuple val(pair), val(ref_query), val(ref), val(query), path("${ref_query}/${ref_query}_ref_snps.vcf"), path("${ref_query}/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
-        tuple val(pair), path("${ref_query}/*{.gff,_stat.out}"), emit: result_todb_ch
+        tuple val(ref_query), val(ref), val(query), path("${ref_query}/${ref_query}_ref_snps.vcf"), path("${ref_query}/${ref_query}_query_snps.vcf"), emit: nucdiff_vcf_ch 
+        tuple val(ref_query), path("${ref_query}/*{.gff,_stat.out}"), emit: result_todb_ch
+
         // TODO see if necessary 
         file("*")
 

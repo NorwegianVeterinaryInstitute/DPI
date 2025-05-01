@@ -145,7 +145,7 @@ mv *.log $RES_DIR
 # !SECTION 
 
 # SECTION : exploring the merged database
-run_in_container "utilities.sqlite_viewer" $RES_DIR/test_merging2.sqlite ref_snps test_table.csv
+run_in_container "utilities.sqlite_viewer" $RES_DIR/test_merging2.sqlite ref_snps ref_snps_table.csv
 run_in_container "utilities.sqlite_viewer" $RES_DIR/test_merging2.sqlite info  info_table.csv
 run_in_container "utilities.sqlite_viewer" $RES_DIR/test_merging2.sqlite query_blocks query_blocks_table.csv
 

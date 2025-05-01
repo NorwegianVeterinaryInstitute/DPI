@@ -7,13 +7,13 @@ process PREPARE_VCF_ANNOTATOR {
         label 'process_short'
         
         debug "${params.debug}"
-        tag "${pair}"
+        tag "${ref_query}"
 
         input:
-        tuple val(pair), val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf)
+        tuple val(ref_query), val(ref), val(query), path(ref_vcf), path(query_vcf)
 
         output:
-        tuple val(pair), val(ref_query), val(ref), val(query), 
+        tuple val(ref_query), val(ref), val(query), 
         path("${ref_query}_ref_snps_reformated.vcf"), 
         path("${ref_query}_query_snps_reformated.vcf"), emit: prep_vcf_ch
 
