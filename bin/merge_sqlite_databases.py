@@ -6,14 +6,16 @@
 import argparse
 import os
 import sys
-
-
-
-from funktions.error_template import log_message as log_message
-from funktions.error_template import processing_error_message as processing_error_message
-from funktions.error_template import processing_result_message as processing_result_message
-
 import sqlite3
+
+# --- Add script's directory to sys.path ---
+# To be able to import local modules
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
+# --- End sys.path modification ---
+
+from funktions.error_template import log_message,processing_error_message,processing_result_message
 # !SECTION 
 
 # SECTION : FUNCTION Merging datase 

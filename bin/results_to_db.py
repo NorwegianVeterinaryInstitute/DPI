@@ -3,11 +3,21 @@
 
 # SECTION : Imports
 import sys
+import os
 import logging
 import sqlite3
 import argparse
-import funktions.process_result_file as process_result_file
 import datetime
+
+# --- Add script's directory to sys.path ---
+# To be able to import local modules
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
+# --- End sys.path modification ---
+
+from funktions.process_result_file import process_result_file 
+
 # !SECTION
 
 

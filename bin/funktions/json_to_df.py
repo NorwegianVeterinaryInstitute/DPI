@@ -7,11 +7,10 @@ import sys
 import pandas as pd # type: ignore
 import numpy as np # type: ignore
 
-from .error_template import log_message, processing_error_message, processing_result_message
-
 if __name__ == "__main__":
     import json
 
+from .error_template import log_message, processing_error_message, processing_result_message
 #!SECTION
 
 # SECTION : Functions definitions 

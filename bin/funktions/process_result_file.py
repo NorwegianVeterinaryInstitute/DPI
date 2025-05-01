@@ -6,6 +6,7 @@
 import argparse
 import os
 import sys
+import json
 
 # thest python path
 print("--- Python Environment ---")
@@ -14,17 +15,14 @@ print(f"sys.path: {sys.path}")
 print(f"PYTHONPATH env var: {os.environ.get('PYTHONPATH', 'Not Set')}")
 print("------------------------")
 
-import json
 
 from .error_template import log_message, processing_error_message, processing_result_message
-from .json_to_df import prep_info_df as prep_info_df
-from .json_to_df import prep_features_df as prep_features_df
-from .json_to_df import prep_sequences_df as prep_sequences_df
-from .gff_to_df import gff_to_df as gff_to_df
-from .vcf_to_df import vcf_to_df as vcf_to_df
-from .stats_to_df import stats_to_df as stats_to_df
-from .comment_df import create_comment_df as create_comment_df
-from .create_table import create_table as create_table
+from .json_to_df import prep_info_df, prep_features_df, prep_sequences_df
+from .gff_to_df import gff_to_df
+from .vcf_to_df import vcf_to_df
+from .stats_to_df import stats_to_df
+from .comment_df import create_comment_df
+from .create_table import create_table
 
 # !SECTION
 
