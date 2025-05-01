@@ -224,6 +224,11 @@ bash $myscript *.sqlite
 cp /cluster/work/users/evezeyl/2025_DPI_TEST/*/*/output*.sqlite .
 ```
 
+Debbuging the merging script
+```bash
+myscript=""
+
+```
 
 
 

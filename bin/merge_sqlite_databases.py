@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # Made by gemini 2025-04-10
-# Improved by Eve Fiskebeck 
+# Debugged and improved by gemini and Eve Fiskebeck 2025-05-01
+
 
 # SECTION : IMPORTS
 import sys
 import os
-import logging
+#import logging
 import sqlite3
 import argparse
-import datetime
+#import datetime
 
 # --- Add script's directory to sys.path ---
 # To be able to import local modules
@@ -22,197 +23,200 @@ from funktions.error_template import log_message,processing_error_message,proces
 # !SECTION 
 
 # SECTION : FUNCTION Merging datase 
-def merge_databases(output_db_path, input_db_paths):
+def merge_databases(output_db_path, input_list_file):
     """Merges multiple SQLite databases into a single output database,
     handling schema evolution and preventing duplicate rows by checking the
     'file_name' of the first row of each input database's tables.
+    
+    Args:
+        output_db_path (str): Path to the output SQLite database.
+        input_list_file (str): Path to a text file containing a list of input SQLite database paths.
     """
     
     # script name and info
     script_name = os.path.basename(__file__)
     
-    info_message = processing_result_message(script_name, "input_dbs")
+    info_message = f"Starting merge process for output: {output_db_path}"
     print(info_message)
     log_message(info_message, script_name)
     
-    output_conn = None
     try:
-        # Connect to the output database (creates if it doesn't exist)
-        output_conn = sqlite3.connect(output_db_path)
-        output_conn.row_factory = sqlite3.Row  # Access columns by name
-        output_cursor = output_conn.cursor()
-    
-        for i, input_db_path in enumerate(input_db_paths):
-            if not os.path.exists(input_db_path):
-                warning_message = f"Warning: Input database {input_db_path} not found"
-                print(warning_message)
-                log_message(warning_message, script_name, exit_code=0)
-                # NOTE : here I want to continue but through a warning. Data will be missing
-            input_conn = None
-            try:
-                input_conn = sqlite3.connect(input_db_path)
-                input_conn.row_factory = sqlite3.Row
-                input_cursor = input_conn.cursor()
-
-                # Get all table names from the input database
-                input_cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-                input_tables = [row['name'] for row in input_cursor.fetchall()]
-
-                for table_name in input_tables:
-                    # Get column information from the input table
-                    input_cursor.execute(f"PRAGMA table_info({table_name})")
-                    input_columns = {row['name']: row['type'] for row in input_cursor.fetchall()}
-                    input_column_names = list(input_columns.keys())
-
-                    # Check if the table exists in the output database
-                    output_cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';")
-                    output_table_exists = output_cursor.fetchone()
-
-                    if not output_table_exists:
-                        # Create the table in the output database with columns from the input
-                        create_table_sql = f"CREATE TABLE {table_name} ({', '.join([f'{col} {dtype}' for col, dtype in input_columns.items()])});"
-                        output_cursor.execute(create_table_sql)
-                        output_conn.commit()
-                        print(f"Created table '{table_name}' in output database.")
-                        output_column_names = list(input_columns.keys())
-                    else:
-                        # Add missing columns to the output table
-                        output_cursor.execute(f"PRAGMA table_info({table_name})")
-                        output_columns = {row['name']: row['type'] for row in output_cursor.fetchall()}
-                        output_column_names = list(output_columns.keys())
-                        columns_to_add = set(input_columns.keys()) - set(output_columns.keys())
-                        for col_to_add in columns_to_add:
-                            alter_table_sql = f"ALTER TABLE {table_name} ADD COLUMN {col_to_add} NULL;"
-                            output_cursor.execute(alter_table_sql)
-                            output_conn.commit()
-                            print(f"Added column '{col_to_add}' to table '{table_name}' in output database.")
-                            output_column_names.append(col_to_add) # Update output column names
-
-                    # Fetch the first row from the input table to get the 'file_name'
-                    input_cursor.execute(f"SELECT * FROM {table_name} LIMIT 1")
-                    first_input_row = input_cursor.fetchone()
-
-                    if first_input_row and 'file_name' in first_input_row.keys() and first_input_row['file_name'] is not None:
-                        file_name_value = first_input_row['file_name']
-
-                        # Check if this 'file_name' already exists in the output database table
-                        output_cursor.execute(f"SELECT 1 FROM {table_name} WHERE file_name = ?", (file_name_value,))
-                        existing_file_name = output_cursor.fetchone()
-
-                        if not existing_file_name:
-                            # 'file_name' not found, so no duplicates from this input database table
-                            input_cursor.execute(f"SELECT * FROM {table_name}")
-                            rows_to_insert = input_cursor.fetchall()
-                            inserted_count = 0
-                            for input_row in rows_to_insert:
-                                input_row_dict = dict(input_row)
-                                values = [input_row_dict.get(col) for col in output_column_names]
-                                placeholders = ', '.join(['?'] * len(output_column_names))
-                                insert_sql = f"INSERT INTO {table_name} ({', '.join(output_column_names)}) VALUES ({placeholders})"
-                                output_cursor.execute(insert_sql, values)
-                                output_conn.commit()
-                                inserted_count += 1
-                            print(f"Inserted {inserted_count} rows into table '{table_name}' from: {input_db_path} (based on unique file_name).")
-                        else:
-                            # 'file_name' found, need to check for individual row duplicates
-                            input_cursor.execute(f"SELECT * FROM {table_name}")
-                            rows_to_insert = input_cursor.fetchall()
-                            existing_rows_with_filename = [dict(row) for row in output_cursor.execute(f"SELECT * FROM {table_name} WHERE file_name = ?", (file_name_value,)).fetchall()]
-                            inserted_count = 0
-                            for input_row in rows_to_insert:
-                                input_row_dict = dict(input_row)
-                                is_duplicate = False
-                                for existing_row in existing_rows_with_filename:
-                                    match = True
-                                    for col in input_column_names:
-                                        if col in existing_row and input_row_dict.get(col) != existing_row.get(col):
-                                            match = False
-                                            break
-                                        elif col in existing_row and input_row_dict.get(col) is None and existing_row.get(col) is not None:
-                                            match = False
-                                            break
-                                        elif col not in existing_row and input_row_dict.get(col) is not None:
-                                            pass
-
-                                    if match and all(col in existing_row or input_row_dict.get(col) is None for col in output_column_names):
-                                        is_duplicate = True
-                                        break
-                                if not is_duplicate:
-                                    values = [input_row_dict.get(col) for col in output_column_names]
-                                    placeholders = ', '.join(['?'] * len(output_column_names))
-                                    insert_sql = f"INSERT INTO {table_name} ({', '.join(output_column_names)}) VALUES ({placeholders})"
-                                    output_cursor.execute(insert_sql, values)
-                                    output_conn.commit()
-                                    inserted_count += 1
-                            print(f"Inserted {inserted_count} new rows into table '{table_name}' from: {input_db_path} (after individual duplicate check).")
-
-                    else:
-                        # If 'file_name' is missing or None in the first row, fall back to full comparison
-                        print(f"Warning: 'file_name' missing in the first row of table '{table_name}' in {input_db_path}. Performing full row comparison.")
-                        output_cursor.execute(f"SELECT * FROM {table_name}")
-                        existing_rows = [dict(row) for row in output_cursor.fetchall()]
-                        inserted_count = 0
-                        input_cursor.execute(f"SELECT * FROM {table_name}")
-                        rows_to_insert = input_cursor.fetchall()
-                        for input_row in rows_to_insert:
-                            input_row_dict = dict(input_row)
-                            is_duplicate = False
-                            for existing_row in existing_rows:
-                                match = True
-                                for col in input_column_names:
-                                    if col in existing_row and input_row_dict.get(col) != existing_row.get(col):
-                                        match = False
-                                        break
-                                    elif col in existing_row and input_row_dict.get(col) is None and existing_row.get(col) is not None:
-                                        match = False
-                                        break
-                                    elif col not in existing_row and input_row_dict.get(col) is not None:
-                                        pass
-
-                                if match and all(col in existing_row or input_row_dict.get(col) is None for col in output_column_names):
-                                    is_duplicate = True
-                                    break
-                            if not is_duplicate:
-                                values = [input_row_dict.get(col) for col in output_column_names]
-                                placeholders = ', '.join(['?'] * len(output_column_names))
-                                insert_sql = f"INSERT INTO {table_name} ({', '.join(output_column_names)}) VALUES ({placeholders})"
-                                output_cursor.execute(insert_sql, values)
-                                output_conn.commit()
-                                inserted_count += 1
-                        # print(f"Inserted {inserted_count} new rows into table '{table_name}' from: {input_db_path} (full row comparison).")
-
-            except sqlite3.Error as e:
-                error_message = f"SQLite error while processing {input_db_path}: {e}"
-                print(error_message)
-                log_message(error_message, script_name)
-                if input_conn:
-                    input_conn.rollback()
-            finally:
-                if input_conn:
-                    input_conn.close()
+        if not input_list_file:
+            warning_message = "No input text file containing the list paths of databases to process is provided."
+        # Read the list of input database file paths from the input file
+        try:
+            with open(input_list_file, 'r') as f:
+                input_db_paths_list = [line.strip() for line in f if line.strip()]
+            log_message(f"Read {len(input_db_paths_list)} database paths from {input_list_file}", script_name)
+        except FileNotFoundError:
+            error_message = f"Error: Input list file not found at {input_list_file}"
+            log_message(error_message, script_name, exit_code=1)
+            
+        # If found but empty
+        if not input_db_paths_list:
+            warning_message = f"Input list file '{input_list_file}' is empty. No databases to merge."
+            print(warning_message)
+            log_message(warning_message, script_name, exit_code=1)
+            
+                              
+        print(f"Output database: {output_db_path}")
+        print(f"Processing {len(input_db_paths_list)} input databases listed in {input_list_file}.")
         
-        info_message = f"Successfully merged all databases into: {output_db_path}"
+        
+        # Connect to the output database (creates if it doesn't exist)
+        with sqlite3.connect(output_db_path) as output_conn:
+            output_conn.row_factory = sqlite3.Row  # Access columns by name
+            output_cursor = output_conn.cursor()
+
+            # Keep track of tables already created in the output DB
+            created_tables = set()
+            
+            for i, input_db_path in enumerate(input_db_paths_list):
+                info_message = f"Processing input database {i+1}/{len(input_db_paths_list)}: {input_db_path}"
+                log_message(info_message, script_name)
+                
+                # --- Add Debug Print ---
+                debug_message = f"Attempting to attach database path: '{input_db_path}'"
+                log_message(debug_message, script_name)
+                
+                if not os.path.exists(input_db_path):
+                    error_message = f"Warning: Input database {input_db_path} not found. Skipping."
+                    print(error_message)
+                    log_message(error_message, script_name, exit_code=1)
+                    # Important to make fail OR nextflow process will continue to run.
+                    # And it wont be possible to resume. 
+                    
+                try:
+                    # Attach the current input database
+                    # Use a unique alias for each attached database
+                    attach_alias = f'input_db_{i}'
+                    output_cursor.execute(f"ATTACH DATABASE ? AS {attach_alias};", (input_db_path,))
+                    print(f"Attached {input_db_path} as {attach_alias}")
+
+                    # Get list of tables from the attached database
+                    output_cursor.execute(f"SELECT name FROM {attach_alias}.sqlite_master WHERE type='table';")
+                    input_tables = [row['name'] for row in output_cursor.fetchall()]
+
+                    for table_name in input_tables:
+                        if table_name.startswith('sqlite_'): # Skip SQLite internal tables
+                            continue
+
+                        print(f"  Processing table: {table_name}")
+
+                        # Get column information from the input table (via attached db)
+                        output_cursor.execute(f"PRAGMA {attach_alias}.table_info({table_name})")
+                        input_columns = {row['name']: row['type'] for row in output_cursor.fetchall()}
+                        input_column_names = list(input_columns.keys())
+
+                        # Check if the table exists in the main output database
+                        output_cursor.execute("SELECT name FROM main.sqlite_master WHERE type='table' AND name=?;", (table_name,)) 
+                        output_table_exists = output_cursor.fetchone()
+
+                        if not output_table_exists:
+                            # Create the table in the output database using the structure from the input
+                            # Fetch one row to get structure correctly, then create empty
+                            output_cursor.execute(f"SELECT * FROM {attach_alias}.{table_name} LIMIT 0")
+                            col_names_types = [f'"{desc[0]}" {desc[1]}' for desc in output_cursor.description] # Get names and infer types (basic)
+                            create_table_sql = f"CREATE TABLE main.\"{table_name}\" ({', '.join(col_names_types)});"
+                            output_cursor.execute(create_table_sql)
+                            output_conn.commit()
+                            print(f"  Created table '{table_name}' in output database.")
+                            created_tables.add(table_name)
+                            output_column_names = [desc[0] for desc in output_cursor.description] # Get actual column names
+                        else:
+                            # Add missing columns to the output table if needed
+                            output_cursor.execute(f"PRAGMA main.table_info(\"{table_name}\")")
+                            output_columns = {row['name']: row['type'] for row in output_cursor.fetchall()}
+                            output_column_names = list(output_columns.keys())
+                            columns_to_add = set(input_columns.keys()) - set(output_columns.keys())
+                            for col_to_add in columns_to_add:
+                                # Determine type from input if possible, default to TEXT
+                                col_type = input_columns.get(col_to_add, 'TEXT')
+                                alter_table_sql = f"ALTER TABLE main.\"{table_name}\" ADD COLUMN \"{col_to_add}\" {col_type};"
+                                output_cursor.execute(alter_table_sql)
+                                output_conn.commit()
+                                print(f"  Added column '{col_to_add}' to table '{table_name}' in output database.")
+                                output_column_names.append(col_to_add) # Update output column names
+
+                        # --- Duplicate Checking Logic ---
+                        # NOTE - The logic has been simplified - if not ok see commit id 144b6de9ccfcd049d8da96292f842cc200f80f06
+                        # Fetch the first row from the input table to get the 'file_name' (or 'file_path')
+                        # Prefer 'file_path' if it exists, otherwise 'file_name'
+                        id_col_name = None
+                        if 'file_path' in input_column_names:
+                            id_col_name = 'file_path'
+                        elif 'file_name' in input_column_names:
+                            id_col_name = 'file_name'
+
+                        file_identifier_value = None
+                        if id_col_name:
+                            output_cursor.execute(f"SELECT \"{id_col_name}\" FROM {attach_alias}.\"{table_name}\" LIMIT 1")
+                            first_input_row = output_cursor.fetchone()
+                            if first_input_row:
+                                file_identifier_value = first_input_row[id_col_name]
+
+                        # Check if data from this specific file identifier already exists
+                        existing_data_for_file = False
+                        if id_col_name and file_identifier_value is not None:
+                            output_cursor.execute(f"SELECT 1 FROM main.\"{table_name}\" WHERE \"{id_col_name}\" = ? LIMIT 1", (file_identifier_value,))
+                            if output_cursor.fetchone():
+                                existing_data_for_file = True
+                                print(f"    Data for identifier '{file_identifier_value}' already exists in table '{table_name}'. Skipping insertion for this file.")
+
+                        # If no data for this file exists, insert all rows
+                        if not existing_data_for_file:
+                            # Ensure columns match between input and output for insertion
+                            common_columns = [col for col in input_column_names if col in output_column_names]
+                            common_columns_quoted = [f'"{col}"' for col in common_columns]
+                            common_columns_str = ", ".join(common_columns_quoted)
+
+                            insert_sql = f"INSERT INTO main.\"{table_name}\" ({common_columns_str}) SELECT {common_columns_str} FROM {attach_alias}.\"{table_name}\";"
+                            output_cursor.execute(insert_sql)
+                            inserted_count = output_cursor.rowcount
+                            output_conn.commit()
+                            print(f"    Inserted {inserted_count} rows into table '{table_name}' from {input_db_path} (based on unique '{id_col_name}').")
+
+                    # Detach the database
+                    output_cursor.execute(f"DETACH DATABASE {attach_alias};")
+                    print(f"Detached {attach_alias}")
+
+                except sqlite3.Error as e:
+                    error_message = f"SQLite error while processing {input_db_path}: {e}"
+                    print(error_message)
+                    log_message(error_message, script_name)
+                    output_conn.rollback() # Rollback changes made for this input DB
+                except Exception as e:
+                    error_message = f"Unexpected error processing {input_db_path}: {e}"
+                    print(error_message)
+                    log_message(error_message, script_name)
+                    output_conn.rollback()
+
+        info_message = f"Successfully finished merging databases into: {output_db_path}"
         print(info_message)
         log_message(info_message, script_name)
         
+    except FileNotFoundError: # Catch specific error for list file
+        error_message = f"Error: Input list file not found at {input_list_file}"
+        log_message(error_message, script_name, exit_code=1)
     except sqlite3.Error as e:
-        error_message = f"SQLite error while creating/merging into {output_db_path}: {e}"
+        error_message = f"SQLite error with output database {output_db_path}: {e}"
         print(error_message)
-        log_message(error_message, script_name)
-        if output_conn:
-            output_conn.rollback()
-    finally:
-        if output_conn:
-            output_conn.close()
-# !SECTION 
+        log_message(error_message, script_name, exit_code=1)
+    except Exception as e:
+        error_message = f"An unexpected error occurred: {e}"
+        print(error_message)
+        log_message(error_message, script_name, exit_code=1)
 
+# !SECTION
+                
+        
 # SECTION MAIN
 if __name__ == "__main__":
-    script_name = os.path.basename(__file__)    
+    script_name = os.path.basename(__file__)
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(
         prog=script_name,
-        description="Merge multiple SQLite databases, optimizing duplicate check using the first 'file_name' value.",
+        description="Merge multiple SQLite databases, checking for duplicates based on 'file_path' or 'file_name'.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         add_help=True,)
     # Version and example arguments (optional)
@@ -224,70 +228,63 @@ if __name__ == "__main__":
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s 0.0.2",
+        version="%(prog)s 0.0.3", # Incremented version
         help="Print the script version and exit.",
         )
-    # Required arguments        
+    # Required arguments
     parser.add_argument(
         "--output",
         required=True,
         help="Path to the output SQLite database.",
         )
     parser.add_argument(
-        "--input",
-        nargs='+',
+        "--input", # Changed from --input
         required=True,
-        help="List of paths to the input SQLite databases.",
+        help="Path to a text file containing the list of input SQLite database files (one path per line).",
         )
-    
+
     args = parser.parse_args()
     # !SECTION
-    
+
     # SECTION : Check if required arguments are provided
-    if not all([args.output, args.input,]):
+    if not all([args.output, args.input]): # Check args.input
         parser.error(
-            "The following arguments are required: --output <output_db_path>, --input <input_db_paths>.\n"
-        )
-        sys.exit(1)      
+            "The following arguments are required: --output <output_db_path> --inputs <input_list_file>.\n")
+        sys.exit(1)
     # !SECTION
-    
+
     # SECTION : Handling of example
     if args.example:
         info_message = "Example usage:"
-        info_message += "python {script_name} --output <output_db_path> --input <input_db_paths>"
+        info_message += f"python {script_name} --output merged.sqlite --input list_input_dbs.txt"
         log_message(info_message, script_name, exit_code=0)
     # !SECTION
-    
-    # SECTION : Handling of example
-    if args.example:
-        info_message = "Example usage:"
-        info_message += "python {script_name} --output <path output database> --input <list of path, comma separated of input databases>"
-        log_message(info_message, script_name, exit_code=0)
-    # !SECTION
-    
-    
-    # NOTE:  Login info output - handled by log_error
-         
+
+    # NOTE: Logging setup could be moved here from the function
+    # logging.basicConfig(...)
+
     # SECTION : SCRIPT : Merge the result files
+    # NOTE : this became somewhat uselless 
     info_message = processing_result_message(
             script_name,
-            args.input
+            f"list file : {args.input}"
             )
     log_message(info_message, script_name)
-    
+
     try:
-        merge_databases(args.output, args.input)
-        info_message = f"Script ${script_name} ran successfully"
-        log_message(info, script_name, exit_code=1)
-              
-    except FileNotFoundError:
-        error_message = f"One of the input file was not found: {args.input}"
-        log_message(error_message, script_name, exit_code=1)
+        merge_databases(args.output, args.input) # Pass args.input
+        info_message = f"Script {script_name} ran successfully"
+        # log_message(info, script_name, exit_code=1) # This was logging 'info' which is not defined, and exiting on success
+        log_message(info_message, script_name) # Log success message
+
+    # except FileNotFoundError: # This is less likely now as we check existence inside the function
+    #     error_message = f"One of the input file was not found: {args.input}"
+    #     log_message(error_message, script_name, exit_code=1)
     except Exception as e:
         error_message = processing_error_message(
-            script_name, 
-            args.input,
-            identifier = None, 
+            script_name,
+            f"Input list file: {args.input}", 
+            identifier = None,
             e = e)
         log_message(error_message, script_name, exit_code=1)
     # !SECTION

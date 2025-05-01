@@ -119,12 +119,22 @@ run_in_container "funktions.process_result_file" --file_path SRR11262179_SRR1358
 
 mv *.log $RES_DIR
 
-# merge_sqlite_databases.py (which is directly in bin):
-run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging.sqlite --input $RES_DIR/res_file1.sqlite $RES_DIR/res_file2.sqlite
-mv *.log $RES_DIR
+# merge_sqlite_databases.py (which is directly in bin): has been modified since
+# run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging.sqlite --input $RES_DIR/res_file1.sqlite $RES_DIR/res_file2.sqlite
+# mv *.log $RES_DIR
 
 # !SECTION 
 
+# SECTION : individual test merging database 
+# merge_sqlite_databases.py (which is directly in bin):
+# create test file 
+echo  "output2_5_SRR11262179.sqlite" > input_test.txt
+echo  "output2_26_SRR11262033_SRR11262179.sqlite" >> input_test.txt
+
+run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging.sqlite --input input_test.txt
+mv *.log $RES_DIR
+
+# !SECTION 
 # rm *{.csv,.sqlite,.log}
 
 # rm *{.csv,.sqlite,.log}
