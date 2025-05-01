@@ -191,9 +191,11 @@ NB seems some saga random errors, diseapeared after relaunch
 2025-04-12 06:45:19,593 - ERROR - An error occurred during processing of SRR11262033_SRR11262179: 'module' object is not callable
 2025-04-12 06:45:19,593 - ERROR - Check 20250412_064519_results_to_db.log for more details
 ```
-
-
 2025-05-01
+
+Ok - lots of debugging but this is fixed. Hell of a problem with the scopes. It works with the pipeline now, unsure if it will still work for individual testing. I will have to retry.
+
+
 tmux in login node 5
 
 - [ ] testing the merging of the sqlite databases. We might still have to many paths ... will see, but Will be better for nf debugging / processing errors. Will make retry the processes 
@@ -203,11 +205,6 @@ relaunching test to see if still errors
 bash 2025_test_run.sh > 2025-05-01_test_nf_log
 ```
 
-Errors
-```shell
-PYTHONPATH env var: Not Set  
-osv
-```
 
 I need to relaunch the Wrangling DB to be sure what is wrong. So I need to remove all directories
 ```bash
@@ -231,10 +228,14 @@ cp /cluster/work/users/evezeyl/2025_DPI_TEST/*/*/output*.sqlite .
 
 
 # TODO 
-- [ ] script for merge to main github from main, update dev from main and then and continue on working with dev (commands - so do not need to search next time)
+- [ ] retest the scripts indivudally to be sure the scope of the python import are correct now. 
 
-- [ ] optimization sqlite writing in database - need to have it add data efficiently (at the end because basic functions have to work)
-- [ ] automatic script to run unittesting - check if working and improve that  
+- [ ] script to help github merging: update dev from main after having merged dev to main. (commands - so do not need to search next time)
+
+- [ ] optimization sqlite writing in database - need to have it add data efficiently (at the end because basic functions have to work) (wont fix now - too much to do)
+- [ ] automatic script to run unittesting - check if working and improve that  (wont fix now - too much to do)
+- [ ] still require improving the processing of data - that would be best to merge before creating all sqlite OR use a database type that can be written in parallel (wont fix now - too much to do)
+- [ ] improve the loggin system to make it more clear (wont fix now - too much to do)
 
 
 
