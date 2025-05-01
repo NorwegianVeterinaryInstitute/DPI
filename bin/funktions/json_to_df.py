@@ -30,7 +30,7 @@ def prep_info_df(json_object, identifier):
     # script name
     script_name = os.path.basename(__file__)
     
-    info_message = processing_result_message(script_name, "f{prep_info.__name__}", identifier)
+    info_message = processing_result_message(script_name, f"{prep_info.__name__}", identifier)
     print(info_message)
     log_message(info_message, script_name)
     
@@ -77,7 +77,7 @@ def prep_features_df(json_object, identifier):
     # script name
     script_name = os.path.basename(__file__)
     
-    info_message = processing_result_message(script_name, "f{prep_features_df.__name__}", identifier)
+    info_message = processing_result_message(script_name, f"{prep_features_df.__name__}", identifier)
     print(info_message)
     log_message(info_message, script_name)
     
@@ -118,7 +118,7 @@ def prep_sequences_df(json_object, identifier):
     # script name
     script_name = os.path.basename(__file__)
     
-    info_message = processing_result_message(script_name, "f{prep_sequences.__name__}", identifier)
+    info_message = processing_result_message(script_name, f"{prep_sequences.__name__}", identifier)
     print(info_message)
     log_message(info_message, script_name)
     
