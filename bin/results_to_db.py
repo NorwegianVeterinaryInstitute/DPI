@@ -16,7 +16,8 @@ if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 # --- End sys.path modification ---
 
-from funktions.process_result_file import process_result_file 
+from funktions.process_result_file import process_result_file
+
 
 # !SECTION
 
@@ -116,6 +117,9 @@ if __name__ == "__main__":
         process_result_file(args.result_file, args.identifier, db_conn, args.comment)
         db_conn.close()
     except Exception as e:
+        # Need to handle the exception and rollback the transaction
+        if db_conn:
+            db_conn.rollback()
         logging.error(f"An error occurred during processing of {args.identifier}: {e}")
         logging.error(f"Check {log_file_name} for more details")
     # !SECTION

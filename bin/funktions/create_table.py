@@ -10,17 +10,18 @@ from .error_template import log_message, processing_error_message, processing_re
 #!SECTION
 
 # SECTION : Functions definitions
-def create_table(df : pandas.DataFrame, table_name, identifier, file_path, db_file):
+def create_table(df : pandas.DataFrame, table_name, identifier, file_path, db_conn : sqlite3.Connection):
     """
-    Creates or appends data to a SQLite table, using 'identifier' as the primary key,
-    adding missing columns if necessary, and checking for existing data before inserting.
+    Creates or appends data to a SQLite table using an existing connection.
+    Checks if table exists, creates if not. Adds missing columns if necessary.
+    Inserts data from the DataFrame, adding a 'file_path' column.
 
     Args:
-        df (pd.DataFrame): DataFrame to insert.
+        df (pandas.DataFrame): DataFrame to insert.
         table_name (str): Name of the table. When argument is passed, must be between "" and not ''
         identifier (str): The identifier (pair or sample_id) - solely used for error messages.
-        file_path (str): The name of the processed file.
-        db_file (str): Path to the SQLite database file.
+        file_path (str): Path of the source file (added as a column).
+        db_conn (sqlite3.Connection): An active SQLite database connection object.
     """
     # script name and info
     script_name = os.path.basename(__file__)
@@ -29,64 +30,94 @@ def create_table(df : pandas.DataFrame, table_name, identifier, file_path, db_fi
     print(info_message)
     log_message(info_message, script_name)
     
-    db_conn = None
     
     try:
-        # NOTE: creates the db it if does not exists
-        db_conn = sqlite3.connect(db_file)
+        # Use the passed connection object directly
+        # --- Debugging Start (Optional: Remove after fixing) ---
+        print(f"DEBUG create_table: Received db_conn type: {type(db_conn)}")
+        print(f"DEBUG create_table: Received db_conn value: {repr(db_conn)}")
+        # --- Debugging End ---
+        
+        #db_conn = sqlite3.connect(db_file)
         cursor = db_conn.cursor()
-
+        
         # Create a copy of the DataFrame *without* 'file_path' for insertion
         df_to_insert = df.copy().drop(columns=["file_path"], errors="ignore")
 
         if df_to_insert.empty:
                     warning_message = f"Warning: Input DataFrame is empty for {identifier} and file {file_path}. No table will be created."
                     print(warning_message)
+                    log_message(warning_message, script_name)
+                    # The data base should never be empty - this would indicate a failure to a previous step
+                    # While creating the pandas dataframe. 
+                    # It is imperative to make the exit because then the nf process will report the error
+                    # otherwise it might remains undetected. 
                     sys.exit(1)
 
 
-        # NOTE : the table does not exist yet (empty connection) - it must be created
         cursor.execute(
             f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'"
         )
-        columns = ", ".join(f"{col} TEXT" for col in df_to_insert.columns)
-        columns_with_filename = f"file_path TEXT, {columns}"
+        table_exists = cursor.fetchone()
 
-        cursor.execute(f"CREATE TABLE {table_name} ({columns_with_filename})")
-        print(f"Table '{table_name}' created.")
+        df_columns = ["file_path"] + list(df_to_insert.columns) # Include file_path
+        
+        
+        # HERE INSERT 
+        if not table_exists:
+            columns_sql = ", ".join(f'"{col}" TEXT' for col in df_columns) # Quote column names
+            create_sql = f'CREATE TABLE IF NOT EXISTS "{table_name}" ({columns_sql})' # Use IF NOT EXISTS
+            cursor.execute(create_sql)
+            print(f"Table '{table_name}' ensured/created in database.")
+            log_message(f"Table '{table_name}' ensured/created in database.", script_name)
+        else:
+            # Table exists, check for missing columns
+            cursor.execute(f'PRAGMA table_info("{table_name}")')
+            existing_columns = [row[1] for row in cursor.fetchall()]
+            missing_columns = set(df_columns) - set(existing_columns)
+
+            for col in missing_columns:
+                try:
+                    alter_sql = f'ALTER TABLE "{table_name}" ADD COLUMN "{col}" TEXT'
+                    cursor.execute(alter_sql)
+                    print(f"Added missing column '{col}' to table '{table_name}'.")
+                    log_message(f"Added missing column '{col}' to table '{table_name}'.", script_name)
+                except sqlite3.OperationalError as alter_e:
+                    error_message = f"Failed to add column '{col}' to table '{table_name}': {alter_e}"
+                    print(error_message)
+                    log_message(error_message, script_name, exit_code=1) # Exit if schema update fails
+                    
 
         # NOTE : there is no need to check for duplicates. All data is new
-        # Insert data, checking for duplicates across all data columns
-        placeholders = ", ".join("?" for _ in df_to_insert.columns)
+        # Insert data
+        # Prepare insert statement with placeholders for all expected columns
+        placeholders = ", ".join("?" for _ in df_columns)
+        
+        # Construct the column names string separately to avoid f-string quote issues
+        quoted_columns_str = ", ".join(f'"{col}"' for col in df_columns)
+        insert_sql = f'INSERT INTO "{table_name}" ({quoted_columns_str}) VALUES ({placeholders})'
 
+        # Prepare data rows including the file_path
+        rows_to_insert = []
         for row in df_to_insert.itertuples(index=False):
-            row_values = list(row)
-            insert_query = f"INSERT INTO {table_name} VALUES (?, {placeholders})"
-            cursor.execute(insert_query,(file_path, *row_values),)
+            rows_to_insert.append((file_path,) + tuple(row)) # Prepend file_path
 
+        cursor.executemany(insert_sql, rows_to_insert)
+        db_conn.commit() # Commit the changes using the passed connection
+
+        message_info = f"Successfully inserted {len(rows_to_insert)} rows into table '{table_name}' for identifier '{identifier}' from file '{file_path}'."
+        log_message(message_info, script_name)
+        
+        # Close the cursor, but NOT the connection
         cursor.close()
 
-    except Exception as e:
+        # Close the cursor, but NOT the connection
+    except (sqlite3.Error, Exception) as e: # Catch SQLite and other errors
         error_message = processing_error_message(script_name, file_path, identifier, e)
         print(error_message)        
-        if db_conn:
-            db_conn.rollback()
         log_message(error_message, script_name, exit_code=1)
             
-        
     finally:
-        if db_conn:
-            db_conn.commit()
-            cursor = db_conn.cursor()
-            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
-            row_count = cursor.fetchone()[0]
-            cursor.close()
-            db_conn.close()
-            
-            if row_count == 0:
-                error_message = f"Error: Table '{table_name}' in '{db_file}' is empty after processing '{file_path}' for '{identifier}'."
-                log_message(error_message, script_name, exit_code=1)
-
         message_info = f"create_or_append_table function has run for {identifier} and filename {file_path}."
         log_message(message_info, script_name)
 #!SECTION
@@ -149,7 +180,16 @@ if __name__ == "__main__":
         # Load the Pandas DataFrame (replace with your actual data loading method)
         try:
             df = pandas.read_csv(args.input_csv)
-            create_table(df, args.table_name, args.identifier, args.file_path,args.db_file)
+            #create_table(df, args.table_name, args.identifier, args.file_path,args.db_file)
+            standalone_conn = None
+            
+            try:
+                standalone_conn = sqlite3.connect(args.db_file)
+                # Pass the connection object to the function
+                create_table(df, args.table_name, args.identifier, args.file_path, standalone_conn)
+            finally:
+                if standalone_conn:
+                    standalone_conn.close() # Ensure connection is closed
         
         except FileNotFoundError:
             error_message = f"Input file not found: {args.file_path}"
