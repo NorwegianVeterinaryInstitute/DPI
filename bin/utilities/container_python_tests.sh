@@ -126,6 +126,7 @@ mv *.log $RES_DIR
 # !SECTION 
 
 # SECTION : individual test merging database 
+# NOTE : testing for 2
 # merge_sqlite_databases.py (which is directly in bin):
 # create test file 
 echo  "output2_5_SRR11262179.sqlite" > input_test.txt
@@ -133,6 +134,16 @@ echo  "output2_26_SRR11262033_SRR11262179.sqlite" >> input_test.txt
 
 run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging.sqlite --input input_test.txt
 mv *.log $RES_DIR
+
+# merging is working - detected possible problem before on ref_query order - will fix independently 
+# NOTE : testing for the set, so I can see if work in the same dabase 
+
+ls output*.sqlite > input_test2.txt
+run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging2.sqlite --input input_test2.txt
+mv *.log $RES_DIR
+
+
+
 
 # !SECTION 
 # rm *{.csv,.sqlite,.log}

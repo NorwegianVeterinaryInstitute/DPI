@@ -224,7 +224,7 @@ bash $myscript *.sqlite
 cp /cluster/work/users/evezeyl/2025_DPI_TEST/*/*/output*.sqlite .
 ```
 
-Debbuging the merging script
+Debbuging using the merging script and container running ... 
 ```bash
 myscript=""
 
@@ -233,6 +233,10 @@ myscript=""
 
 
 # TODO 
+-[ ] seems to have detected a bug in the file names creation with the inversion of ref and query,
+appears to occur in gff already -> need to check that
+
+
 - [ ] retest the scripts indivudally to be sure the scope of the python import are correct now. 
 
 - [ ] script to help github merging: update dev from main after having merged dev to main. (commands - so do not need to search next time)

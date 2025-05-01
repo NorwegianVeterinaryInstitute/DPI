@@ -114,20 +114,38 @@ def merge_databases(output_db_path, input_list_file):
 
                         if not output_table_exists:
                             # Create the table in the output database using the structure from the input
-                            # Fetch one row to get structure correctly, then create empty
+                            # Fetch column structure from input table    
                             output_cursor.execute(f"SELECT * FROM {attach_alias}.{table_name} LIMIT 0")
-                            col_names_types = [f'"{desc[0]}" {desc[1]}' for desc in output_cursor.description] # Get names and infer types (basic)
-                            create_table_sql = f"CREATE TABLE main.\"{table_name}\" ({', '.join(col_names_types)});"
-                            output_cursor.execute(create_table_sql)
-                            output_conn.commit()
-                            print(f"  Created table '{table_name}' in output database.")
-                            created_tables.add(table_name)
-                            output_column_names = [desc[0] for desc in output_cursor.description] # Get actual column names
+                            
+                            col_defs = []
+                            if output_cursor.description: # Check if description is available
+                                for desc in output_cursor.description:
+                                    col_name = desc[0]
+                                    # Basic type inference (can be improved if needed)
+                                    col_type = "TEXT" # Default to TEXT
+                                    col_defs.append(f'"{col_name}" {col_type}')
+                                create_table_sql = f"CREATE TABLE main.\"{table_name}\" ({', '.join(col_defs)});"
+                                output_cursor.execute(create_table_sql)
+                                output_conn.commit()
+                                print(f"  Created table '{table_name}' in output database.")
+                                created_tables.add(table_name)
+                            else:
+                                # Fallback or error if description is None after SELECT LIMIT 0
+                                print(f"  Warning: Could not determine columns for new table '{table_name}'. Skipping creation.")
+                                continue # Skip to next table
+                            
+                            # col_names_types = [f'"{desc[0]}" {desc[1]}' for desc in output_cursor.description] # Get names and infer types (basic)
+                            # create_table_sql = f"CREATE TABLE main.\"{table_name}\" ({', '.join(col_names_types)});"
+                            # output_cursor.execute(create_table_sql)
+                            # output_conn.commit()
+                            # print(f"  Created table '{table_name}' in output database.")
+                            # created_tables.add(table_name)
+                            # output_column_names = [desc[0] for desc in output_cursor.description] # Get actual column names
                         else:
                             # Add missing columns to the output table if needed
                             output_cursor.execute(f"PRAGMA main.table_info(\"{table_name}\")")
                             output_columns = {row['name']: row['type'] for row in output_cursor.fetchall()}
-                            output_column_names = list(output_columns.keys())
+                            #output_column_names = list(output_columns.keys())
                             columns_to_add = set(input_columns.keys()) - set(output_columns.keys())
                             for col_to_add in columns_to_add:
                                 # Determine type from input if possible, default to TEXT
@@ -136,8 +154,15 @@ def merge_databases(output_db_path, input_list_file):
                                 output_cursor.execute(alter_table_sql)
                                 output_conn.commit()
                                 print(f"  Added column '{col_to_add}' to table '{table_name}' in output database.")
-                                output_column_names.append(col_to_add) # Update output column names
-
+                                #output_column_names.append(col_to_add) # Update output column names
+                                
+                       # --- Get definitive output column names AFTER creation/alteration ---
+                        output_cursor.execute(f"PRAGMA main.table_info(\"{table_name}\")")
+                        output_column_names = [row['name'] for row in output_cursor.fetchall()]
+                        if not output_column_names:
+                             print(f"  Warning: Could not retrieve columns for output table '{table_name}' after creation/alteration. Skipping insertion.")
+                             continue # Skip insertion for this table
+                        
                         # --- Duplicate Checking Logic ---
                         # NOTE - The logic has been simplified - if not ok see commit id 144b6de9ccfcd049d8da96292f842cc200f80f06
                         # Fetch the first row from the input table to get the 'file_name' (or 'file_path')
