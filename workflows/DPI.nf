@@ -145,7 +145,10 @@ workflow DPI {
                 .collect() 
                 .buffer (size : 200, remainder: true)
       
-        chunked_dbs_ch.view()      
+        // chunked_dbs_ch.view()      
+        MERGE_DBS(db_path_ch, chunked_dbs_ch)
+
+
         // !SECTION
 
         // SECTION : output software versions

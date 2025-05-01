@@ -3,10 +3,12 @@
 # Improved by Eve Fiskebeck 
 
 # SECTION : IMPORTS
-import argparse
-import os
 import sys
+import os
+import logging
 import sqlite3
+import argparse
+import datetime
 
 # --- Add script's directory to sys.path ---
 # To be able to import local modules
@@ -16,6 +18,7 @@ if script_dir not in sys.path:
 # --- End sys.path modification ---
 
 from funktions.error_template import log_message,processing_error_message,processing_result_message
+
 # !SECTION 
 
 # SECTION : FUNCTION Merging datase 
@@ -208,19 +211,11 @@ if __name__ == "__main__":
     script_name = os.path.basename(__file__)    
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(
+        prog=script_name,
         description="Merge multiple SQLite databases, optimizing duplicate check using the first 'file_name' value.",
-        )
-    parser.add_argument(
-        "--output",
-        required=True,
-        help="Path to the output SQLite database.",
-        )
-    parser.add_argument(
-        "--input",
-        nargs='+',
-        required=True,
-        help="List of paths to the input SQLite databases.",
-        )
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        add_help=True,)
+    # Version and example arguments (optional)
     parser.add_argument(
         "--example",
         action="store_true",
@@ -231,6 +226,18 @@ if __name__ == "__main__":
         action="version",
         version="%(prog)s 0.0.2",
         help="Print the script version and exit.",
+        )
+    # Required arguments        
+    parser.add_argument(
+        "--output",
+        required=True,
+        help="Path to the output SQLite database.",
+        )
+    parser.add_argument(
+        "--input",
+        nargs='+',
+        required=True,
+        help="List of paths to the input SQLite databases.",
         )
     
     args = parser.parse_args()
@@ -251,23 +258,35 @@ if __name__ == "__main__":
         log_message(info_message, script_name, exit_code=0)
     # !SECTION
     
+    # SECTION : Handling of example
+    if args.example:
+        info_message = "Example usage:"
+        info_message += "python {script_name} --output <path output database> --input <list of path, comma separated of input databases>"
+        log_message(info_message, script_name, exit_code=0)
+    # !SECTION
+    
+    
     # NOTE:  Login info output - handled by log_error
          
     # SECTION : SCRIPT : Merge the result files
     info_message = processing_result_message(
             script_name,
-            "input_dbs",
+            args.input
             )
     log_message(info_message, script_name)
+    
     try:
         merge_databases(args.output, args.input)
+        info_message = f"Script ${script_name} ran successfully"
+        log_message(info, script_name, exit_code=1)
+              
     except FileNotFoundError:
-        error_message = f"Input file not found: {args.file_path}"
+        error_message = f"One of the input file was not found: {args.input}"
         log_message(error_message, script_name, exit_code=1)
     except Exception as e:
         error_message = processing_error_message(
             script_name, 
-            "inputs_db",
+            args.input,
             identifier = None, 
             e = e)
         log_message(error_message, script_name, exit_code=1)

@@ -1,5 +1,4 @@
 // Assisted by Gemini Code assistant 2025-04-02 
-// Adds results to the database, one type at a time (for all pairs)
 process MERGE_DBS {
     conda (params.enable_conda ? './assets/py_test.yml' : null)
     container 'evezeyl/py_test:latest'
@@ -10,30 +9,29 @@ process MERGE_DBS {
 
     input:
     path(sqlite_db)
-    path(db_files)
+    file sqlite_files
+
 
     script:
     """
+    # Create a file containing the list of input database paths, one per line
+    printf '%s\\n' ${sqlite_files} > input_db_list.txt
+
     python ${projectDir}/bin/merge_sqlite_databases.py \\
         --output "${sqlite_db}" \\
-        --inputs "${db_files.join(' ')}"
+        --input input_db_list.txt
     """
 }
+// This approach suggested for robustness because nf creates a list of files and put that in a temp file
+// that it simpling and passes to the python script. 
+// so it needs to be explicit. 
 
-//   process MERGE_DBS {
-//     input:
-//     collect path(db_files)
 
-//     output:
-//     path "merged_database.sqlite"
+    // mapfile input_files < ${sqlite_files}
+    // python ${projectDir}/bin/merge_sqlite_databases.py \\
+    //     --output "${sqlite_db}" \\
+    //     --input ${input_files[@]}
 
-//     script:
-//     python ${projectDir}/merge_sqlite_databases.py --output "merged_database.sqlite" --inputs "${db_files.join(' ')}"
-//   }
-
-//   PARALLEL_WRITER(indexed_data_channel)
-//   MERGE_DBS(PARALLEL_WRITER.out)
-// }
 
 
 process MERGE_DBS_VERSION{
