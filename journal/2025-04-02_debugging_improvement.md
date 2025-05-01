@@ -222,9 +222,12 @@ find . -mindepth 3 -maxdepth 3 -name "*.sqlite" -type f -print0 | xargs -0 -I {}
 
 myscript="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/utilities/rm_nf_selected_testdir.sh"
 bash $myscript *.sqlite
+
+# ok now checking the dbs in results
+cp /cluster/work/users/evezeyl/2025_DPI_TEST/*/*/output*.sqlite .
 ```
 
-```
+
 
 
 # TODO 
