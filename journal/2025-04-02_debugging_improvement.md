@@ -224,17 +224,16 @@ bash $myscript *.sqlite
 cp /cluster/work/users/evezeyl/2025_DPI_TEST/*/*/output*.sqlite .
 ```
 
-Debbuging using the merging script and container running ... 
-```bash
-myscript=""
+Debbuging using the merging script and container running ... script in utilities `container_python_tests.sh`
 
-```
 
 
 
 # TODO 
 -[ ] seems to have detected a bug in the file names creation with the inversion of ref and query,
 appears to occur in gff already -> need to check that
+    - I did not find that in the results, so that might just be the output of the file names for the sqlite ? 
+    - yes it seems so - let see how to fix ... 
 
 
 - [ ] retest the scripts indivudally to be sure the scope of the python import are correct now. 

@@ -87,8 +87,12 @@ workflow DPI {
                 .map{it.swap(0,3)} 
         
         RUN_VCF_ANNOTATOR(vcf_annot_ch)
-        // !SECTION
+        RUN_VCF_ANNOTATOR.out.result_todb_ch.view(v -> "vcf_annot: ${v}" )
+        /*
 
+
+        // !SECTION
+        
         // SECTION : wrangle results in sqlite databases 
         comment_ch=Channel.value(params.comment) 
 
@@ -98,8 +102,9 @@ workflow DPI {
                         gff_stat_files.collect { gff_stat_file ->
                         tuple(groupKey(id, gff_stat_files.size()), gff_stat_file)
                         }}
-        //        .view(v -> "scattered: ${v}" ) 
-
+        
+        nucdiff_out_ch.view(v -> "scattered: ${v}" ) 
+        
         vcf_annot_out_ch = RUN_VCF_ANNOTATOR.out.result_todb_ch
                         .flatMap { id, vcfs ->
                                 vcfs.collect { vcf ->
@@ -121,13 +126,13 @@ workflow DPI {
                 def index = atomicInteger.incrementAndGet()
                 return tuple(index, item[0], item[1], item[2])
                 }
-        
-        WRANGLING_TO_DB(results_ch)
+        // results_ch.view(v -> "results: ${v}" )
+        // WRANGLING_TO_DB(results_ch)
 
 
 
         // // SECTION : prepare chanel for merging of results to a single database
-        db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
+        // db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
 
         // We need to collect to ensure that all the results are ready to merge
         // Neeed balance ressouces : how many processes will run sequencially 
@@ -141,12 +146,13 @@ workflow DPI {
         
 
         
-        chunked_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
-                .collect() 
-                .buffer (size : 200, remainder: true)
+        // chunked_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
+        //         .collect() 
+        //         .buffer (size : 200, remainder: true)
       
-        // chunked_dbs_ch.view()      
-        MERGE_DBS(db_path_ch, chunked_dbs_ch)
+        // // chunked_dbs_ch.view()      
+        // MERGE_DBS(db_path_ch, chunked_dbs_ch)
+        */
 
 
         // !SECTION

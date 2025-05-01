@@ -45,12 +45,12 @@ run_in_container() {
 }
 # --- End Helper Function ---
 
-# SECTION : USAGE IM;PORTANT 
+# SECTION : USAGE IMPORTANT 
 # when in the module 
 # Example for gff_to_df.py:
 # run_in_container "funktions.gff_to_df" --file_path SRR11262179_SRR11262033_query_blocks.gff
 
-# when is a script above modile 
+# when is a script above module 
 # Example for merge_sqlite_databases.py (which is directly in bin):
 # run_in_container "merge_sqlite_databases" --output test_merging.sqlite --input file1.sqlite file2.sqlite
 
@@ -142,11 +142,15 @@ ls output*.sqlite > input_test2.txt
 run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging2.sqlite --input input_test2.txt
 mv *.log $RES_DIR
 
-
-
-
 # !SECTION 
-# rm *{.csv,.sqlite,.log}
 
+# SECTION : exploring the merged database
+run_in_container "utilities.sqlite_viewer" $RES_DIR/test_merging2.sqlite ref_snps test_table.csv
+run_in_container "utilities.sqlite_viewer" $RES_DIR/test_merging2.sqlite info  info_table.csv
+run_in_container "utilities.sqlite_viewer" $RES_DIR/test_merging2.sqlite query_blocks query_blocks_table.csv
+
+
+# rm *{.csv,.sqlite,.log}
+python view_table.py <database_file.sqlite> <table_name>")
 # rm *{.csv,.sqlite,.log}
 

@@ -8,14 +8,14 @@ process WRANGLING_TO_DB {
     label 'process_short'
 
     input:
-    tuple val(index), val(comment),val(id),path(result_file)
+    tuple val(index), val(comment), val(id),path(result_file)
 
     output:
-    path "output2_${index}_${id}.sqlite", emit: individual_sqlite_ch
+    path "output_${index}_${id}.sqlite", emit: individual_sqlite_ch
      
     script:
     index_id = "${index}"
-    output_db = "output2_${index}_${id}.sqlite"
+    output_db = "output_${index}_${id}.sqlite"
     """
     python ${projectDir}/bin/results_to_db.py \\
         --result_file "${result_file}" \\

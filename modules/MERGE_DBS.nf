@@ -22,17 +22,6 @@ process MERGE_DBS {
         --input input_db_list.txt
     """
 }
-// This approach suggested for robustness because nf creates a list of files and put that in a temp file
-// that it simpling and passes to the python script. 
-// so it needs to be explicit. 
-
-
-    // mapfile input_files < ${sqlite_files}
-    // python ${projectDir}/bin/merge_sqlite_databases.py \\
-    //     --output "${sqlite_db}" \\
-    //     --input ${input_files[@]}
-
-
 
 process MERGE_DBS_VERSION{
         conda (params.enable_conda ? './assets/py_test.yml' : null)
