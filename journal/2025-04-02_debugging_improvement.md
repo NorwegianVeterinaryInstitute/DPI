@@ -185,16 +185,46 @@ to test within the container due to scope of python modules. After lots of troub
 scope of package and modules ... though I might forget but  I will have an example to follow.)
 - [x] We need to add val to sqlite name, using val - because then it will allow checking which sqlite_output had problems more easily . ... 
 
-- [ ] script for merge to main github from main, update dev from main and then and continue on working with dev (commands - so do not need to search next time)
-- [ ] testing the merging of the sqlite databases. We might still have to many paths ... will see, but Will be better for nf debugging / processing errors. Will make retry the processes 
-
-
+NB seems some saga random errors, diseapeared after relaunch 
+```shell
 2025-04-12 06:45:19,588 - INFO - Processing SRR11262033_SRR11262179 in SRR11262179_SRR11262033_query_snps_annotated.vcf
 2025-04-12 06:45:19,593 - ERROR - An error occurred during processing of SRR11262033_SRR11262179: 'module' object is not callable
 2025-04-12 06:45:19,593 - ERROR - Check 20250412_064519_results_to_db.log for more details
+```
 
-running now test nf in tmux login 5
+
+2025-05-01
+tmux in login node 5
+
+- [ ] testing the merging of the sqlite databases. We might still have to many paths ... will see, but Will be better for nf debugging / processing errors. Will make retry the processes 
+
+relaunching test to see if still errors
+```bash
+bash 2025_test_run.sh > 2025-05-01_test_nf_log
+```
+
+Errors
+```shell
+PYTHONPATH env var: Not Set  
+osv
+```
+
+I need to relaunch the Wrangling DB to be sure what is wrong. So I need to remove all directories
+```bash
+# Run this from the 'work' directory
+ls */*/*.sqlite | cut -d '/' -f 1 | sort -u
+
+
+myscript="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/utilities/rm_nf_selected_testdir.sh"
+bash $myscript *.sqlite
+```
+
+```
+
+
 # TODO 
+- [ ] script for merge to main github from main, update dev from main and then and continue on working with dev (commands - so do not need to search next time)
+
 - [ ] optimization sqlite writing in database - need to have it add data efficiently (at the end because basic functions have to work)
 - [ ] automatic script to run unittesting - check if working and improve that  
 
