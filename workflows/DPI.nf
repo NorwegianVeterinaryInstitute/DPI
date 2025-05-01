@@ -89,36 +89,6 @@ workflow DPI {
         RUN_VCF_ANNOTATOR(vcf_annot_ch)
         // !SECTION
 
-        // // SECTION : OLD prepare chanel for merging of results to database and merging
-        // db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
-        // comment_ch=Channel.value(params.comment) 
-
-        // // results must be emited one by one but collected from all other modules from which we need to add them
-        // nucdiff_out_ch = RUN_NUCDIFF.out.result_todb_ch
-        //         .flatMap { id, gff_stat_files ->
-        //                 gff_stat_files.collect { gff_stat_file ->
-        //                 tuple(groupKey(id, gff_stat_files.size()), gff_stat_file)
-        //                 }}
-        // //        .view(v -> "scattered: ${v}" ) 
-
-        // vcf_annot_out_ch = RUN_VCF_ANNOTATOR.out.result_todb_ch
-        //                 .flatMap { id, vcfs ->
-        //                         vcfs.collect { vcf ->
-        //                         tuple(groupKey(id, vcfs.size()), vcf)
-        //                         }}
-        
-        // // combining all results into one chanel [db_path, comment, id, file] to be inserted into DB (one by one)
-        // results_ch = 
-        //         db_path_ch.combine(comment_ch).combine(
-        //                 ANNOTATE.out.result_todb_ch
-        //                         .concat(nucdiff_out_ch)
-        //                         .concat(vcf_annot_out_ch)
-        //                         )
-        //         .distinct()
-
-        // WRANGLING_TO_DB(results_ch)
-        // // !SECTION
-
         // SECTION : wrangle results in sqlite databases 
         comment_ch=Channel.value(params.comment) 
 
@@ -157,7 +127,7 @@ workflow DPI {
 
 
         // // SECTION : prepare chanel for merging of results to a single database
-        // db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
+        db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
 
         // We need to collect to ensure that all the results are ready to merge
         // Neeed balance ressouces : how many processes will run sequencially 
@@ -171,17 +141,11 @@ workflow DPI {
         
 
         
-        // chunked_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
-//                 .collect() 
-//                 .buffer (size : 200, reminder: true)
-//       
-        // chunked_dbs_ch.view()
-
-        
-
-        
-        // ok, so I will get a channel of PARALLEL_WRITER which is called WRANGLING_TO_DB  WRANGLING_TO_DB.out.individual_sqlite_ch. This channel contains the paths to all output.sqlite. 
-        
+        chunked_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
+                .collect() 
+                .buffer (size : 200, remainder: true)
+      
+        chunked_dbs_ch.view()      
         // !SECTION
 
         // SECTION : output software versions

@@ -188,6 +188,11 @@ scope of package and modules ... though I might forget but  I will have an examp
 - [ ] script for merge to main github from main, update dev from main and then and continue on working with dev (commands - so do not need to search next time)
 - [ ] testing the merging of the sqlite databases. We might still have to many paths ... will see, but Will be better for nf debugging / processing errors. Will make retry the processes 
 
+
+2025-04-12 06:45:19,588 - INFO - Processing SRR11262033_SRR11262179 in SRR11262179_SRR11262033_query_snps_annotated.vcf
+2025-04-12 06:45:19,593 - ERROR - An error occurred during processing of SRR11262033_SRR11262179: 'module' object is not callable
+2025-04-12 06:45:19,593 - ERROR - Check 20250412_064519_results_to_db.log for more details
+
 running now test nf in tmux login 5
 # TODO 
 - [ ] optimization sqlite writing in database - need to have it add data efficiently (at the end because basic functions have to work)
