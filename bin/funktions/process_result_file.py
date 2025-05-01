@@ -14,9 +14,6 @@ print(f"sys.path: {sys.path}")
 print(f"PYTHONPATH env var: {os.environ.get('PYTHONPATH', 'Not Set')}")
 print("------------------------")
 
-# ... rest of your imports and code ...
-
-
 import json
 
 from .error_template import log_message, processing_error_message, processing_result_message
@@ -27,23 +24,6 @@ from .stats_to_df import stats_to_df
 from .comment_df import create_comment_df
 from .create_table import create_table
 
-# # NOTE : problem if running main 
-# if __name__ == "__main__":
-#     # Executes when process_result_file.py is run directly
-#     from json_to_df import prep_info_df, prep_features_df, prep_sequences_df
-#     from gff_to_df import gff_to_df
-#     from vcf_to_df import vcf_to_df
-#     from stats_to_df import stats_to_df
-#     from comment_df import create_comment_df
-#     from create_table import create_table
-# else:
-#     # Executed when funktions is imported as a module  
-#     from funktions.json_to_df import prep_info_df, prep_features_df, prep_sequences_df
-#     from funktions.gff_to_df import gff_to_df
-#     from funktions.vcf_to_df import vcf_to_df
-#     from funktions.stats_to_df import stats_to_df
-#     from funktions.comment_df import create_comment_df
-#     from funktions.create_table import create_table
 # !SECTION
 
 # SECTION : Functions definitions

@@ -213,7 +213,12 @@ I need to relaunch the Wrangling DB to be sure what is wrong. So I need to remov
 ```bash
 # Run this from the 'work' directory
 ls */*/*.sqlite | cut -d '/' -f 1 | sort -u
+ls */*/*.sqlite | cut -d '/' -f 0 | sort -u
 
+# Run this from the 'work' directory to get the level 2 
+find . -mindepth 3 -maxdepth 3 -name "*.sqlite" -type f -print0 | xargs -0 -I {} dirname {} | sort -u
+
+# ! be carefull can remove also symlinks ! beed to modify pattern then 
 
 myscript="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/utilities/rm_nf_selected_testdir.sh"
 bash $myscript *.sqlite
