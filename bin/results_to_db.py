@@ -1,82 +1,75 @@
 #!/usr/bin/env python
+# rewritten by gemini 2025-07-10
 
-import argparse
+# SECTION : Imports
 import sys
+import os
 import logging
 import sqlite3
-import funktions.process_result_file as process_result_file
+import argparse
+import datetime
+
+# --- Add script's directory to sys.path ---
+# To be able to import local modules
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
+# --- End sys.path modification ---
+
+from funktions.process_result_file import process_result_file
 
 
-# import pandas as pd
-# import numpy as np
-# import json
-# import re
-# import gffpandas.gffpandas as gffpd
-
-# import glob
-# import functools
-# import operator
-# sys.path.append(os.getcwd())
+# !SECTION
 
 
-# ANCHOR : Login info output
-log_file_name = "results_to_db.log"
-# FIXME : Change the log file name to include the when it runs the other functions
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler(log_file_name, mode="w"),
-        logging.StreamHandler(sys.stdout),
-    ],
-    )
-
-
-# ANCHOR : Main Parsing arguments and running
-def main():
+# SECTION: MAIN 
+if __name__ == "__main__":
+    # SECTION: Argument parsing
     parser = argparse.ArgumentParser(
-        prog="results_to_db.py",
-        usage="%(prog)s [options]",
+        prog="results_to_db.py", usage="%(prog)s [options]", 
         description="Wrangle results and insert into SQLite database.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        add_help=True,
+        add_help=True,)
 
-    )
     # Version and example arguments (optional)
     parser.add_argument(
-        "--example", action="store_true", help="Show an example of usage and exit."
-    )
-
+        "--example",
+        action="store_true",
+        help="Show an example of usage and exit.",
+        )
     parser.add_argument(
         "--version",
         action="version",
         version="%(prog)s 0.0.2",
         help="Print the script version and exit.",
-    )
-
-    # Required arguments
+        )
+# Required arguments
     parser.add_argument(
         "--database",
         action="store",
-        default="DPI.sqlite",
+        default="output.sqlite",
         required=False,
-        help="Path to the SQLite database file.\n"
+        help="Path to a SQLite database file where results will be stored.\n"
         "If the path does not exist, it will be created.\n"
         "If not provided, the database will default to: DPI.sqlite",
-    )
+        )
     parser.add_argument(
         "--comment",
+        action="store",
+        default="",
         required=False,
         help="Comment for the database entries.\n"
         "Long comments that include spaces must be surounded by '' ",
-    )
+        )
+    # NOTE: The identifier is required for the process_result_file function but the requirement is 
+    # hanlded afterwards. To allow control of input. Then it is not required in the parser.
     parser.add_argument(
-        "--identifier",
+        "--identifier", 
         required=False,
         help="Either the sample_identifier or the pair identifier.\n"
         "   - sample_identifier: the sample identifier (for results of type json).\n"
         "   - The pair identifier for any other result type.",
-    )
+        )
     parser.add_argument(
         "--result_file",
         required=False,
@@ -84,47 +77,51 @@ def main():
     )
 
     args = parser.parse_args()
-
-    # Handling of examples
+    # !SECTION
+    
+    # SECTION : Check if required arguments are provided
+    if not all([args.identifier, args.result_file,]):
+        parser.error(
+        "The following arguments are required: --comment, --identifier, --result_file"
+        )
+        sys.exit(1)
+    # !SECTION
+    
+    # SECTION : Handling of examples
     if args.example:
         logging.info("Example usage:")
-        logging.info(" python results_to_db.py --database my_database.sqlite \\")
-        logging.info("  --comment 'Analysis on 2023-10-01' \\")
-        logging.info("  --identifier sample123 \\")
-        logging.info("  --result_file file.json")
-        return
-
-    # Check if required arguments are provided when not version or example
-    if (
-        not args.comment
-        or not args.identifier
-        or not args.result_file
-    ):
-        parser.error(
-            "The following arguments are required: --comment, --identifier, --result_file"
-        )
-        return
-
-    # Arguments usage definition
-    db_path = args.database
-    comment = args.comment
-    identifier = args.identifier
-    result_file = args.result_file
-
-    # Connect to the database
-    db_conn = sqlite3.connect(db_path)
-
-    # Process the result files
-    try:
-        logging.info(f"Processing {identifier} in {result_file}")
-        process_result_file(result_file, identifier, db_conn, comment=None)
-    except Exception as e:
-        logging.error(f"An error occurred during processin of {identifier}: {e}")
-        logging.error(f"Check {log_file_name} for more details")
+        logging.info("python results_to_db.py --database my_database.sqlite \\")
+        logging.info(" --comment 'Analysis on 2023-10-01' \\")
+        logging.info(" --identifier sample123 \\")
+        logging.info(" --result_file file.json")
+        sys.exit(0)
+    # !SECTION
     
-    # Close the database connection
-    db_conn.close()
+
+    # SECTION : Logging info output
+    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_results_to_db.log"
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler(log_file_name, mode="w"),
+            logging.StreamHandler(sys.stdout),
+        ],
+    )
+    # !SECTION
+    
+    # SECTION : Process result files
+    try:
+        logging.info(f"Processing {args.identifier} in {args.result_file}")
+        db_conn = sqlite3.connect(args.database)
+        process_result_file(args.result_file, args.identifier, db_conn, args.comment)
+        db_conn.close()
+    except Exception as e:
+        # Need to handle the exception and rollback the transaction
+        if db_conn:
+            db_conn.rollback()
+        logging.error(f"An error occurred during processing of {args.identifier}: {e}")
+        logging.error(f"Check {log_file_name} for more details")
+    # !SECTION
 
 
-if __name__ == "__main__":
-    main()

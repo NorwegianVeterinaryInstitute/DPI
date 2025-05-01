@@ -4,22 +4,23 @@ process WRANGLING_TO_DB {
     conda (params.enable_conda ? './assets/py_test.yml' : null)
     container 'evezeyl/py_test:latest'
 
-    maxForks 1 // Ensure only one instance runs at a time
     debug "${params.debug}"
     label 'process_short'
 
     input:
-    tuple path(sqlite_db),val(comment),val(id),path(result_file)
+    tuple val(index), val(comment), val(id),path(result_file)
 
-    //output:
-    //path("*.sqlite")
-    
+    output:
+    path "output_${index}_${id}.sqlite", emit: individual_sqlite_ch
+     
     script:
+    index_id = "${index}"
+    output_db = "output_${index}_${id}.sqlite"
     """
     python ${projectDir}/bin/results_to_db.py \\
         --result_file "${result_file}" \\
         --id "${id}" \\
-        --database "${sqlite_db}" \\
+        --database "${output_db}" \\
         --comment "${comment}"
     """
 }
