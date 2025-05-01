@@ -8,7 +8,7 @@ import os
 import sys
 import json
 
-# thest python path
+# test python path
 print("--- Python Environment ---")
 print(f"sys.executable: {sys.executable}")
 print(f"sys.path: {sys.path}")
@@ -91,29 +91,61 @@ def process_result_file(file_path, identifier, db_file, comment):
             
         # NOTE : processing different types of gff files
         elif result_type == "gff":
-            df = gff_to_df(file_path)
+            # df = gff_to_df(file_path)
     
-            if "_query_blocks" in file_name:
-                create_table(df, "query_blocks", identifier, file_name, db_file)
-            elif "_query_snps" in file_name:
-                create_table(df, "query_snps", identifier, file_name, db_file)
-            elif "_query_struct" in file_name:
-                create_table(df, "query_struct", identifier, file_name, db_file)
-            elif "_query_additional" in file_name:
-                create_table(df, "query_additional", identifier, file_name, db_file)
-            elif "_query_snps_annotated" in file_name:
-                create_table(df, "query_snps_annotated", identifier, file_name, db_file)
-            elif "_ref_blocks" in file_name:
-                create_table(df, "ref_blocks", identifier, file_name, db_file)
-            elif "_ref_snps" in file_name:
-                create_table(df, "ref_snps", identifier, file_name, db_file)
-            elif "_ref_struct" in file_name:
-                create_table(df, "ref_struct", identifier, file_name, db_file)
-            elif "ref_additional" in file_name:
-                create_table(df, "ref_additional", identifier, file_name, db_file)
-            else:
-                print(f"Warning: Unknown GFF subtype for {result_type} for {identifier}. Filepath {file_path}. Skipping {file_path}.")
-                return
+            # if "_query_blocks" in file_name:
+            #     create_table(df, "query_blocks", identifier, file_name, db_file)
+            # elif "_query_snps" in file_name:
+            #     create_table(df, "query_snps", identifier, file_name, db_file)
+            # elif "_query_struct" in file_name:
+            #     create_table(df, "query_struct", identifier, file_name, db_file)
+            # elif "_query_additional" in file_name:
+            #     create_table(df, "query_additional", identifier, file_name, db_file)
+            # elif "_query_snps_annotated" in file_name:
+            #     create_table(df, "query_snps_annotated", identifier, file_name, db_file)
+            # elif "_ref_blocks" in file_name:
+            #     create_table(df, "ref_blocks", identifier, file_name, db_file)
+            # elif "_ref_snps" in file_name:
+            #     create_table(df, "ref_snps", identifier, file_name, db_file)
+            # elif "_ref_struct" in file_name:
+            #     create_table(df, "ref_struct", identifier, file_name, db_file)
+            # elif "ref_additional" in file_name:
+            #     create_table(df, "ref_additional", identifier, file_name, db_file)
+            # else:
+            #     print(f"Warning: Unknown GFF subtype for {result_type} for {identifier}. Filepath {file_path}. Skipping {file_path}.")
+            #     return
+            try:
+                # --- Debugging Start ---
+                print(f"DEBUG: Attempting to call gff_to_df for {file_path}")
+                print(f"DEBUG: Type of 'gff_to_df' object is: {type(gff_to_df)}")
+                # --- Debugging End ---
+                
+                df = gff_to_df(file_path) # The potential error point
+        
+                if "_query_blocks" in file_name:
+                    create_table(df, "query_blocks", identifier, file_name, db_file)
+                elif "_query_snps" in file_name:
+                    create_table(df, "query_snps", identifier, file_name, db_file)
+                elif "_query_struct" in file_name:
+                    create_table(df, "query_struct", identifier, file_name, db_file)
+                elif "_query_additional" in file_name:
+                    create_table(df, "query_additional", identifier, file_name, db_file)
+                elif "_query_snps_annotated" in file_name:
+                    create_table(df, "query_snps_annotated", identifier, file_name, db_file)
+                elif "_ref_blocks" in file_name:
+                    create_table(df, "ref_blocks", identifier, file_name, db_file)
+                elif "_ref_snps" in file_name:
+                    create_table(df, "ref_snps", identifier, file_name, db_file)
+                elif "_ref_struct" in file_name:
+                    create_table(df, "ref_struct", identifier, file_name, db_file)
+                elif "ref_additional" in file_name:
+                    create_table(df, "ref_additional", identifier, file_name, db_file)
+                else:
+                    print(f"Warning: Unknown GFF subtype for {result_type} for {identifier}. Filepath {file_path}. Skipping {file_path}.")
+                    return
+            except TypeError as te: # Catch the specific error
+                print(f"FATAL DEBUG: Caught TypeError when calling gff_to_df: {te}")
+                # Re-raise the exception to ma
 
         # NOTE: processing different types of vcf files
         elif result_type == "vcf":

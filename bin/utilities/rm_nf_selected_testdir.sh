@@ -37,9 +37,15 @@ echo "Searching for pattern: \"$FILE_PATTERN\" at depth $SEARCH_DEPTH in the cur
 # Extract the first-level directory (e.g., ./fc) for each found file
 # Get the unique list of these directories
 # Use -print0 and read -d '' for safe handling of filenames with special characters
+
+# If want to remove the wole directory tree 
+# mapfile -t unique_top_dirs < <(find . -mindepth $SEARCH_DEPTH -maxdepth $SEARCH_DEPTH -name "$FILE_PATTERN" -type f -print0 | \
+#                                 xargs -0 -I {} dirname {} | \
+#                                 cut -d '/' -f 1,2 | \
+#                                 sort -u)
+
 mapfile -t unique_top_dirs < <(find . -mindepth $SEARCH_DEPTH -maxdepth $SEARCH_DEPTH -name "$FILE_PATTERN" -type f -print0 | \
                                 xargs -0 -I {} dirname {} | \
-                                cut -d '/' -f 1,2 | \
                                 sort -u)
 
 # Check if any directories were found
