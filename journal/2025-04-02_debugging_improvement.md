@@ -232,7 +232,20 @@ appears to occur in gff already -> need to check that
     - yes it seems so - let see how to fix ... ; I have simplified the channel - removing id when when know which one is ref_query
     then rewrote all channels and checked modules input and output to take into account those changes. 
 
+- [ ] bug in passing the list of paths --- hell of debugging - to transform the temp file from nextflow
+sed does not work well because its a java nf file, that contains a path to a temp file
+the temp file contains the paths as a list of paths separated by comma. 
+tried to transform it using groovy in script but it does not find the file because there groovy in script of the process uses the
+path at launch ... tried soooo many things
+Finish to ask gemini to make a python script to read the temp file and transform it correctly. That appears to work.
+Soooo many things tried ... 
+path now : /cluster/work/users/evezeyl/2025_DPI_TEST/bd/1d536c9c09c2ba7814bf1fa2415311 where it seems to work 
 
+
+```bash
+myscript="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/utilities/rm_nf_selected_testdir.sh"
+bash $myscript 2025*.sqlite
+``` 
 
 
 # TODO 

@@ -14,12 +14,15 @@ process MERGE_DBS {
 
     script:
     """
-    # Create a file containing the list of input database paths, one per line
-    printf '%s\\n' ${sqlite_files} > input_db_list.txt
+    # We need to transform the way the paths are given (now that we transformed the script after ...)
+    python ${projectDir}/bin/clean_list_file.py \\
+         --input "${sqlite_files}" \\
+         --output input_db_list.txt
+  
 
     python ${projectDir}/bin/merge_sqlite_databases.py \\
-        --output "${sqlite_db}" \\
-        --input input_db_list.txt
+         --output "${sqlite_db}" \\
+         --input input_db_list.txt
     """
 }
 

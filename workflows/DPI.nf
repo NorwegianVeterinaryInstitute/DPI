@@ -137,12 +137,33 @@ workflow DPI {
                                 .concat(vcf_annot_out_ch)
                                 )
                 .distinct()
+                // to make this deterministic (gemini solution )
+                .toSortedList { a, b ->
+                    // Defensive checks: Ensure a and b are lists/tuples with at least 3 elements
+                    // Return 0 (equal) if structure is unexpected to avoid crashing, though ideally the source should be fixed.
+                    // cant be because of the structure of the pipeline (would have to find other solution then)
+                    if (!(a instanceof List) || a.size() < 3 || !(b instanceof List) || b.size() < 3) return 0
+
+                    // Extract elements safely, converting to String and handling nulls
+                    def id_a = a[1]?.toString() ?: ""
+                    def id_b = b[1]?.toString() ?: ""
+                    def file_a = a[2]?.toString() ?: ""
+                    def file_b = b[2]?.toString() ?: ""
+
+                    // Compare IDs first, then file paths if IDs are equal
+                    return id_a <=> id_b ?: file_a <=> file_b
+                }
+                .flatMap() 
                 .map { item ->
                 def index = atomicInteger.incrementAndGet()
                 return tuple(index, item[0], item[1], item[2])
                 }
         // results_ch.view(v -> "results: ${v}" )
-        
+        // seems that because index are not in the same order then it makes the Wrangling rerun
+        // SO: Sort the distinct results to ensure deterministic order before indexing
+
+                
+
         WRANGLING_TO_DB(results_ch)
     
         // // SECTION : prepare chanel for merging of results to a single database
@@ -157,15 +178,13 @@ workflow DPI {
         // aqua if some data is missing? because otherwise the whole process of merging ? because then it will 
         // need to try to merge everything so will run for everything again to add only the missing data ... 
         // question of efficency 
-        
+
         chunked_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
                 .collect() 
                 .buffer (size : 200, remainder: true)
       
         // chunked_dbs_ch.view()      
         MERGE_DBS(db_path_ch, chunked_dbs_ch)
-        
-
 
         // !SECTION
 
@@ -178,10 +197,6 @@ workflow DPI {
         RUN_VCF_ANNOTATOR_VERSION()
         WRANGLING_TO_DB_VERSION()
         MERGE_DBS_VERSION()
-        // !SECTION
-
-        // SECTION for test
-        // results_ch.view()
         // !SECTION
 }
 
