@@ -28,6 +28,10 @@
     "njpwerner.autodocstring",
     "kevinrose.vsc-python-indent",
     "qwtel.sqlite-viewer",
-    "grapecity.gc-excelviewer"
+    "grapecity.gc-excelviewer",
+    "mermaidchart.vscode-mermaid-chart",
+    "bierner.markdown-mermaid",
+    "ms-vscode.copilot-mermaid-diagram",
+    "vstirbu.vscode-mermaid-preview"
   ]
 }
