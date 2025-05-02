@@ -246,19 +246,18 @@ path now : /cluster/work/users/evezeyl/2025_DPI_TEST/bd/1d536c9c09c2ba7814bf1fa2
 myscript="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/bin/utilities/rm_nf_selected_testdir.sh"
 bash $myscript 2025*.sqlite
 ``` 
+- [x] done script to help github merging: update dev from main after having merged dev to main. (commands - so do not need to search next time)
 
+
+# Relaunching Fargelund data
+```bash
+bash 2025_05_02_Fagerlund_max20_run.sh > 2025_05_02_Fagerlund_max20_run.log
+```
 
 # TODO 
+ 
 
 
-- [ ] retest the scripts indivudally to be sure the scope of the python import are correct now. 
-
-- [ ] script to help github merging: update dev from main after having merged dev to main. (commands - so do not need to search next time)
-
-- [ ] optimization sqlite writing in database - need to have it add data efficiently (at the end because basic functions have to work) (wont fix now - too much to do)
-- [ ] automatic script to run unittesting - check if working and improve that  (wont fix now - too much to do)
-- [ ] still require improving the processing of data - that would be best to merge before creating all sqlite OR use a database type that can be written in parallel (wont fix now - too much to do)
-- [ ] improve the loggin system to make it more clear (wont fix now - too much to do)
 
 
 
