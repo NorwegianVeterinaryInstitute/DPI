@@ -1,0 +1,36 @@
+graph TD
+    subgraph Inputs
+        direction LR
+        InputCSV --> INPUT[INPUT: Read & Validate Input CSV, Extract Samples & Pairs]
+        BaktaDB[Bakta DB: params.baktaDB]
+        Training[Prodigal Training: params.training]
+        Genus[Genus: params.genus]
+        Species[Species: params.species]
+        Comment[Comment: params.comment]
+        OutputDBPath[Output DB Path: params.sqlitedb]
+    end
+
+    subgraph "Workflow: DPI"
+        direction TB
+
+        InputCSV --> INPUT
+        BaktaDB --> ANNOTATE
+        Training --> ANNOTATE
+        Genus --> ANNOTATE
+        Species --> ANNOTATE
+
+        INPUT -- pairs_ch --> ChanManip1{Prepare FNA Pairs: Combine INPUT:pairs_ch & ANNOTATE:bakta_fna_ch}
+        ANNOTATE -- bakta_fna_ch --> ChanManip1
+
+        ChanManip1 -- fna_pairs_ch --> PREPARE_NUCDIFF[PREPARE_NUCDIFF: Prepare inputs for NucDiff, Select longest as ref]
+
+        PREPARE_NUCDIFF -- ref_query_ch --> RUN_NUCDIFF[RUN_NUCDIFF: Run NucDiff\\Mummer for pairwise comparison & classification of differences]
+
+        RUN_NUCDIFF -- nucdiff_vcf_ch --> PREPARE_VCF_ANNOTATOR[PREPARE_VCF_ANNOTATOR: Prepare VCF for annotation]
+
+        PREPARE_VCF_ANNOTATOR -- prep_vcf_ch --> ChanManip2{Prepare VCF Annotation Input: Combine PREPARE_VCF_ANNOTATOR:prep_vcf_ch & ANNOTATE:bakta_gbff_ch}
+        ANNOTATE -- bakta_gbff_ch --> ChanManip2
+
+        ChanManip2 -- vcf_annot_ch --> RUN_VCF_ANNOTATOR[RUN_VCF_ANNOTATOR: Annotate VCF files with gene info with vcf-annotator]
+
+        end
