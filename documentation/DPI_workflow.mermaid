@@ -1,7 +1,7 @@
 graph TD
     subgraph Inputs
         direction LR
-        InputCSV --> INPUT[INPUT: Read & Validate Input CSV, Extract Samples & Pairs]
+        
         BaktaDB[Bakta DB: params.baktaDB]
         Training[Prodigal Training: params.training]
         Genus[Genus: params.genus]
@@ -12,25 +12,59 @@ graph TD
 
     subgraph "Workflow: DPI"
         direction TB
+        %% Node Definitions %%
+        INPUT["`INPUT
+            (_R_)
+            format validation`"]
+        ANNOTATE["`ANNOTATE
+            (_Bakta_)
+            genome annotation`"]
+        PREPARE_NUCDIFF["`PREPARE_NUCDIFF
+            _parsing: python_`"]
+        RUN_NUCDIFF["`RUN_NUCDIFF
+            (_NucDiff via mummer_)
+            pairwise alignment and 
+            differences categorization`"]
+        PREPARE_VCF_ANNOTATOR["`PREPARE_VCF_ANNOTATOR
+            _parsing: python_`"]
+        RUN_VCF_ANNOTATOR["`RUN_VCF_ANNOTATOR
+            (_vcf-annotator_)
+            annotation of VCF files`"]
+        WRANGLING_TO_DB["`WRANGLING_TO_DB
+            (_pyton_)
+            parsing nucdiff results
+            and annotated vcf to dataframes`"]
+        MERGE_DBS["`MERGE_DBS
+            (_python_)
+            merging of all dataframes
+            into a single sqlite3 database`"]
 
-        InputCSV --> INPUT
-        BaktaDB --> ANNOTATE
-        Training --> ANNOTATE
-        Genus --> ANNOTATE
-        Species --> ANNOTATE
-
-        INPUT -- pairs_ch --> ChanManip1{Prepare FNA Pairs: Combine INPUT:pairs_ch & ANNOTATE:bakta_fna_ch}
+        %% Input Definitions %%
+        InputCSV@{ shape: doc, label: "InputCSV"} --> INPUT
+        BaktaDB@{shape: cyl, label; "path baktaDB"} --> ANNOTATE
+        Training@{shape: text, label: "path Training file" } --> ANNOTATE
+        Genus@{shape: text, label: "val Genus" } --> ANNOTATE
+        Species@{shape: text, label: "val Species" } --> ANNOTATE
+        Comment@{shape: text, label: "val Comment" } --> WRANGLING_TO_DB
+        OutputDBPath@{shape: text, label: "path OutputDBPath" } --> MERGE_DBS
+                
+        
+        %% Channels manipulations %% 
+        INPUT -. e1@ .-> ANNOTATE
+        e1@{shape:text, label : "unique samples"} 
+        INPUT -. ChanManip: unique pairs .-> PREPARE_NUCDIFF
+        INPUT -- ChanManip1 --> 
         ANNOTATE -- bakta_fna_ch --> ChanManip1
 
-        ChanManip1 -- fna_pairs_ch --> PREPARE_NUCDIFF[PREPARE_NUCDIFF: Prepare inputs for NucDiff, Select longest as ref]
+        %%ChanManip1 -- fna_pairs_ch --> PREPARE_NUCDIFF[PREPARE_NUCDIFF: Prepare inputs for NucDiff, Select longest as ref]%%
 
-        PREPARE_NUCDIFF -- ref_query_ch --> RUN_NUCDIFF[RUN_NUCDIFF: Run NucDiff\\Mummer for pairwise comparison & classification of differences]
+        %%PREPARE_NUCDIFF -- ref_query_ch --> RUN_NUCDIFF[RUN_NUCDIFF: Run NucDiff\\Mummer for pairwise comparison & classification of differences]%%
 
-        RUN_NUCDIFF -- nucdiff_vcf_ch --> PREPARE_VCF_ANNOTATOR[PREPARE_VCF_ANNOTATOR: Prepare VCF for annotation]
+        %%RUN_NUCDIFF -- nucdiff_vcf_ch --> PREPARE_VCF_ANNOTATOR[PREPARE_VCF_ANNOTATOR: Prepare VCF for annotation]%%
 
-        PREPARE_VCF_ANNOTATOR -- prep_vcf_ch --> ChanManip2{Prepare VCF Annotation Input: Combine PREPARE_VCF_ANNOTATOR:prep_vcf_ch & ANNOTATE:bakta_gbff_ch}
-        ANNOTATE -- bakta_gbff_ch --> ChanManip2
+        %%PREPARE_VCF_ANNOTATOR -- prep_vcf_ch --> ChanManip2{Prepare VCF Annotation Input: Combine PREPARE_VCF_ANNOTATOR:prep_vcf_ch & ANNOTATE:bakta_gbff_ch}%%
+        %%ANNOTATE -- bakta_gbff_ch --> ChanManip2%%
 
-        ChanManip2 -- vcf_annot_ch --> RUN_VCF_ANNOTATOR[RUN_VCF_ANNOTATOR: Annotate VCF files with gene info with vcf-annotator]
+        %%ChanManip2 -- vcf_annot_ch --> RUN_VCF_ANNOTATOR[RUN_VCF_ANNOTATOR: Annotate VCF files with gene info with vcf-annotator]%%
 
-        end
+end
