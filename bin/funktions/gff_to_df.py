@@ -37,8 +37,22 @@ def gff_to_df(file_path):
     print(info_message)
     log_message(info_message, script_name)
 
+    # Ensuring file not empty
     try:
         gff_df = gffpd.read_gff3(file_path)
+
+        # case where empty gff annotations in file (eg. query_additional): only one line
+        if gff_df.df.empty:
+            # exit code cannot be 1 if its query_additional / evt. "ref_additional" beause can be empty
+            # if "query_additional" or "ref_additional" in file_path:
+            if "query_additional" in file_path:
+                warning_message = f"Warning: Empty GFF file: {file_path}. Skipping."
+                log_message(warning_message, script_name, exit_code=0)
+                return None
+            else:
+                warning_message = "Warning: the table gff_df is empty."
+                warning_message += f"Please check the GFF file: {file_path}."
+                log_message(warning_message, script_name, exit_code=1)
 
         # Extract the ref and query ids from the file name
         file_name = os.path.basename(file_path)
@@ -50,31 +64,13 @@ def gff_to_df(file_path):
         print(error_message)
         log_message(error_message, script_name, exit_code=1)
 
-    # Dealing with empty gff (eg. query_additional): only one line
-    with open(file_path, "r") as f:
-        file_len = len(f.readlines())
-
-    if file_len <= 1:
-        warning_message = f"Warning: Empty GFF file: {file_path}. Skipping."
-        print(warning_message)
-        # exit code cannot be 1 if its query_additional beause can be empty
-        if "query_additional" in file_path:
-            log_message(warning_message, script_name, exit_code=0)
-        else:
-            log_message(warning_message, script_name, exit_code=1)
-
     try:
-        gff_df = gff_df.attributes_to_columns().assign(_REF=ref, _QUERY=query)
-        # NOTE : in case: Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
-        gff_df.columns = [
-            col.replace(".", "_").replace("-", "_") for col in gff_df.columns
-        ]
-
-        if gff_df.empty:
-            warning_message = "Warning: the table gff_df is empty."
-            warning_message += f"Check the GFF file: {file_path}.\n"
-            print(warning_message)
-            log_message(warning_message, script_name, exit_code=1)
+        with open(file_path, "r") as f:
+            gff_df = gff_df.attributes_to_columns().assign(_REF=ref, _QUERY=query)
+            # NOTE : in case: Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
+            gff_df.columns = [
+                col.replace(".", "_").replace("-", "_") for col in gff_df.columns
+            ]
 
         return gff_df
 
@@ -141,13 +137,14 @@ if __name__ == "__main__":
         df = gff_to_df(args.file_path)
         base_name, extension = os.path.splitext(os.path.basename(args.file_path))
 
-        df.to_csv(
-            os.path.join(current_working_directory, f"{base_name}.csv"),
-            index=False,
-            header=True,
-        )
-        info_message = f"\t\t{script_name} completed successfully.\n\n"
-        log_message(info_message, script_name)
+        if df is not None:
+            df.to_csv(
+                os.path.join(current_working_directory, f"{base_name}.csv"),
+                index=False,
+                header=True,
+            )
+            info_message = f"\t\t{script_name} completed successfully.\n\n"
+            log_message(info_message, script_name)
 
     except FileNotFoundError:
         error_message = f"Input file not found: {args.file_path}"
