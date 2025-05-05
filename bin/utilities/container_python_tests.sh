@@ -123,6 +123,7 @@ mv *.log $RES_DIR
 # run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging.sqlite --input $RES_DIR/res_file1.sqlite $RES_DIR/res_file2.sqlite
 # mv *.log $RES_DIR
 
+
 # !SECTION 
 
 # SECTION : individual test merging database 
@@ -151,6 +152,33 @@ run_in_container "utilities.sqlite_viewer" $RES_DIR/test_merging2.sqlite query_b
 
 
 # rm *{.csv,.sqlite,.log}
-python view_table.py <database_file.sqlite> <table_name>")
+python view_table.py <database_file.sqlite> <table_name>)
 # rm *{.csv,.sqlite,.log}
 
+# SECTION : debugging - empty gff file - test large dataset 
+run_in_container "funktions.gff_to_df" --file_path ERR2522247_SRR13588145_query_additional.gff # empty 
+run_in_container "funktions.gff_to_df" --file_path SRR11262179_SRR13588387_query_additional.gff # not empty
+
+# empty 
+run_in_container "funktions.create_table" --input_csv ERR2522247_SRR13588145_query_additional.csv \
+--file_path ERR2522247_SRR13588145_query_additional.gff \
+--db_file out1.sqlite --identifier notempty --table_name query_additional 
+
+# Not empty
+run_in_container "funktions.create_table" --input_csv SRR11262179_SRR13588387_query_additional.csv \
+--file_path SRR11262179_SRR13588387_query_additional.gff \
+--db_file out2.sqlite --identifier empty --table_name query_additional 
+
+## ok, this works so far ... not sure for exit codes 
+
+run_in_container "results_to_db" --help
+run_in_container "results_to_db" --result_file ERR2522247_SRR13588145_query_additional.gff \
+--identifier ERR2522247_SRR13588145 --comment "test" --database empty.sqlite # Empty 
+
+
+run_in_container "results_to_db" --result_file SRR11262179_SRR13588387_query_additional.gff \
+--identifier SRR11262179_SRR13588387 --comment "test"  --database not_empty.sqlite # Not Empty 
+
+# Manual 
+# IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
+# apptainer shell "$IMG" 
