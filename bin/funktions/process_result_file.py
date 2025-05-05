@@ -4,16 +4,19 @@
 
 # SECTION : Imports
 import argparse
+from logging import info
 import os
 import sys
 import json
 
 # test python path
-print("--- Python Environment ---")
-print(f"sys.executable: {sys.executable}")
-print(f"sys.path: {sys.path}")
-print(f"PYTHONPATH env var: {os.environ.get('PYTHONPATH', 'Not Set')}")
-print("------------------------")
+info_message = """
+--- Python Environment ----------------------------------------------
+        sys.executable: {sys.executable}"
+        sys.path: {sys.path}
+        PYTHONPATH env var: {os.environ.get('PYTHONPATH', 'Not Set')}
+---------------------------------------------------------------------
+"""
 
 
 from .error_template import (
@@ -69,7 +72,6 @@ def process_result_file(file_path, identifier, db_file, comment):
     script_name = os.path.basename(__file__)
 
     info_message = processing_result_message(script_name, file_path, identifier)
-    print(info_message)
     log_message(info_message, script_name)
 
     # script
@@ -98,8 +100,10 @@ def process_result_file(file_path, identifier, db_file, comment):
         elif result_type == "gff":
             try:
                 # --- Debugging Start ---
-                print(f"DEBUG: Attempting to call gff_to_df for {file_path}")
-                print(f"DEBUG: Type of 'gff_to_df' object is: {type(gff_to_df)}")
+                info_message = f"DEBUG: Attempting to call gff_to_df for {file_path}"
+                info_message += (
+                    f"DEBUG: Type of 'gff_to_df' object is: {type(gff_to_df)}"
+                )
                 # --- Debugging End ---
 
                 df = gff_to_df(file_path)  # The potential error point
@@ -125,16 +129,13 @@ def process_result_file(file_path, identifier, db_file, comment):
                 elif "ref_additional" in file_name:
                     create_table(df, "ref_additional", identifier, file_name, db_file)
                 else:
-                    print(
-                        f"Warning: Unknown GFF subtype for {result_type} for {identifier}. Filepath {file_path}. Skipping {file_path}."
-                    )
-                    return
+                    error_message = f"Warning: Unknown GFF subtype for {result_type} for {identifier}. Filepath {file_path}. Skipping {file_path}."
+                    log_message(error_message, script_name, exit_code=1)
             except TypeError as te:  # Catch the specific error
                 error_message = (
                     f"FATAL DEBUG: Caught TypeError when calling gff_to_df in : {te}."
                 )
-                error_message += f"scripti executing: {script_name}"
-                print(error_message)
+                error_message += f"script executing: {script_name}"
                 # do not need to exit here, will be exited by gff_to_df if necesary
                 log_message(error_message, script_name, exit_code=0)
 
@@ -147,20 +148,16 @@ def process_result_file(file_path, identifier, db_file, comment):
             elif "_query_snps_annotated" in file_name:
                 create_table(df, "query_snps_annotated", identifier, file_name, db_file)
             else:
-                print(
-                    f"Warning: Unknown VCF subtype for {result_type} for {identifier}. Skipping {file_name}."
-                )
-                return
+                error_message = f"Warning: Unknown VCF subtype for {result_type} for {identifier}. Skipping {file_name}."
+                log_message(error_message, script_name, exit_code=1)
 
         elif result_type == "stats":
             df = stats_to_df(file_path)
             if "_stat.out" in file_name:
                 create_table(df, "stat_file", identifier, file_name, db_file)
             else:
-                print(
-                    f"Warning: Unknown stats subtype for {result_type} for {identifier}. Skipping {file_path}."
-                )
-                return
+                error_message = f"Warning: Unknown stats subtype for {result_type} for {identifier}. Skipping {file_path}."
+                log_message(error_message, script_name, exit_code=1)
 
         # NOTE : adding comment table for each type of file processed in the database
         comment_df = create_comment_df(identifier, comment)

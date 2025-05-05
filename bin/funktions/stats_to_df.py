@@ -19,7 +19,6 @@ def stats_to_df(file_path):
     script_name = os.path.basename(__file__)
     
     info_message = processing_result_message(script_name, file_path)
-    print(info_message)
     log_message(info_message, script_name)
         
     # script
@@ -28,7 +27,6 @@ def stats_to_df(file_path):
     
     except Exception as e:
         error_message = f"Error reading stats_out file {file_path}: {e}"
-        print(error_message)
         log_message(error_message, script_name, exit_code=1) 
             
     try:         
@@ -44,7 +42,6 @@ def stats_to_df(file_path):
         if df.empty:
             warning_message = "Warning: the table 'stats' is empty"
             warning_message += "Check the stats_out file.\n"  
-            print(warning_message)
             log_message(warning_message, script_name, exit_code=1)
     
         return df

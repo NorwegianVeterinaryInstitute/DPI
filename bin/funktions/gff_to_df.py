@@ -34,7 +34,6 @@ def gff_to_df(file_path):
     script_name = os.path.basename(__file__)
 
     info_message = processing_result_message(script_name, file_path)
-    print(info_message)
     log_message(info_message, script_name)
 
     # Ensuring file not empty
@@ -61,7 +60,6 @@ def gff_to_df(file_path):
 
     except Exception as e:
         error_message = f"Error reading GFF file {file_path}: {e}"
-        print(error_message)
         log_message(error_message, script_name, exit_code=1)
 
     try:

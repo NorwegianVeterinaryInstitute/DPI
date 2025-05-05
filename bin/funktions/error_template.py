@@ -27,7 +27,7 @@ def log_message(message, script_name, exit_code=None):
     """
     script_name = script_name
     # Basic console output (always do this)
-    print(message)
+    # print(message)
 
     # Determine message type from the object name
     message_type = "unknown"
@@ -58,7 +58,7 @@ def log_message(message, script_name, exit_code=None):
         force=True  # Added force=True for cleaner re-configuration
     )
     
-    print(message)
+    # print(message)
     
     if message_type == "info":
         logging.info(message)
@@ -91,7 +91,7 @@ def processing_error_message(script_name, file_path, identifier = None, e = None
         if identifier:
             error_message += f"\t\tIdentifier {identifier}.\n"
         error_message += f"\t\tCheck log: {log_file_name}\n\n"
-        print(error_message)
+        # print(error_message)
         return error_message
     
 

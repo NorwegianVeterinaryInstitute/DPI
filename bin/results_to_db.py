@@ -22,28 +22,30 @@ from funktions.process_result_file import process_result_file
 # !SECTION
 
 
-# SECTION: MAIN 
+# SECTION: MAIN
 if __name__ == "__main__":
     # SECTION: Argument parsing
     parser = argparse.ArgumentParser(
-        prog="results_to_db.py", usage="%(prog)s [options]", 
+        prog="results_to_db.py",
+        usage="%(prog)s [options]",
         description="Wrangle results and insert into SQLite database.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        add_help=True,)
+        add_help=True,
+    )
 
     # Version and example arguments (optional)
     parser.add_argument(
         "--example",
         action="store_true",
         help="Show an example of usage and exit.",
-        )
+    )
     parser.add_argument(
         "--version",
         action="version",
         version="%(prog)s 0.0.2",
         help="Print the script version and exit.",
-        )
-# Required arguments
+    )
+    # Required arguments
     parser.add_argument(
         "--database",
         action="store",
@@ -52,7 +54,7 @@ if __name__ == "__main__":
         help="Path to a SQLite database file where results will be stored.\n"
         "If the path does not exist, it will be created.\n"
         "If not provided, the database will default to: DPI.sqlite",
-        )
+    )
     parser.add_argument(
         "--comment",
         action="store",
@@ -60,16 +62,16 @@ if __name__ == "__main__":
         required=False,
         help="Comment for the database entries.\n"
         "Long comments that include spaces must be surounded by '' ",
-        )
-    # NOTE: The identifier is required for the process_result_file function but the requirement is 
+    )
+    # NOTE: The identifier is required for the process_result_file function but the requirement is
     # hanlded afterwards. To allow control of input. Then it is not required in the parser.
     parser.add_argument(
-        "--identifier", 
+        "--identifier",
         required=False,
         help="Either the sample_identifier or the pair identifier.\n"
         "   - sample_identifier: the sample identifier (for results of type json).\n"
         "   - The pair identifier for any other result type.",
-        )
+    )
     parser.add_argument(
         "--result_file",
         required=False,
@@ -78,15 +80,20 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     # !SECTION
-    
+
     # SECTION : Check if required arguments are provided
-    if not all([args.identifier, args.result_file,]):
+    if not all(
+        [
+            args.identifier,
+            args.result_file,
+        ]
+    ):
         parser.error(
-        "The following arguments are required: --comment, --identifier, --result_file"
+            "The following arguments are required: --comment, --identifier, --result_file"
         )
         sys.exit(1)
     # !SECTION
-    
+
     # SECTION : Handling of examples
     if args.example:
         logging.info("Example usage:")
@@ -96,10 +103,11 @@ if __name__ == "__main__":
         logging.info(" --result_file file.json")
         sys.exit(0)
     # !SECTION
-    
 
     # SECTION : Logging info output
-    log_file_name = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_results_to_db.log"
+    log_file_name = (
+        f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_results_to_db.log"
+    )
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s - %(levelname)s - %(message)s",
@@ -109,7 +117,7 @@ if __name__ == "__main__":
         ],
     )
     # !SECTION
-    
+
     # SECTION : Process result files
     try:
         logging.info(f"Processing {args.identifier} in {args.result_file}")
@@ -123,5 +131,3 @@ if __name__ == "__main__":
         logging.error(f"An error occurred during processing of {args.identifier}: {e}")
         logging.error(f"Check {log_file_name} for more details")
     # !SECTION
-
-
