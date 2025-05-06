@@ -74,6 +74,13 @@ def vcf_to_df(file_path):
             index_col=None,
         )
 
+        # Possible to have no variants
+        if df.empty:
+            warning_message = "Warning: no variant detected, the table is empty."
+            warning_message += f"Check the VCF file: {file_path}.\n"
+            log_message(warning_message, script_name, exit_code=0)
+            return None
+
         # For annotated vcf files
         if "INFO" in df.columns:
             df["INFO"] = df["INFO"].apply(lambda row: row_to_dic_helper(row))

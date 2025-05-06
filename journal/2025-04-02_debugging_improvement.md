@@ -254,9 +254,18 @@ bash $myscript 2025*.sqlite
 bash 2025_05_02_Fagerlund_max20_run.sh > 2025_05_02_Fagerlund_max20_run.log
 ```
 
+date :: 20256-05-05 
+- running on big dataset bugged
+- [x] fixing allowance of empty query_additional gff 
+- [x] simplifying print (so it does not print all the time) - just report in each log. 
+
+- [x] relaunch small test
+- [x] relaunch full test
+
+
 # TODO 
  
-
+- [ ] improve the error handling - logic and simplification 
 
 
 

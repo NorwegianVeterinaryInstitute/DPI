@@ -41,17 +41,13 @@ def gff_to_df(file_path):
         gff_df = gffpd.read_gff3(file_path)
 
         # case where empty gff annotations in file (eg. query_additional): only one line
+        # some cases ie if did not find snps can also be empty
         if gff_df.df.empty:
             # exit code cannot be 1 if its query_additional / evt. "ref_additional" beause can be empty
-            # if "query_additional" or "ref_additional" in file_path:
-            if "query_additional" in file_path:
-                warning_message = f"Warning: Empty GFF file: {file_path}. Skipping."
-                log_message(warning_message, script_name, exit_code=0)
-                return None
-            else:
-                warning_message = "Warning: the table gff_df is empty."
-                warning_message += f"Please check the GFF file: {file_path}."
-                log_message(warning_message, script_name, exit_code=1)
+            warning_message = "Warning: the table gff_df is empty."
+            warning_message += f"Please check the GFF file: {file_path}."
+            log_message(warning_message, script_name, exit_code=0)
+            return None
 
         # Extract the ref and query ids from the file name
         file_name = os.path.basename(file_path)

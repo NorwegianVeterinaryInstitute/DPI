@@ -120,7 +120,7 @@ def create_table(
     # Close the cursor, but NOT the connection
     except (sqlite3.Error, Exception) as e:  # Catch SQLite and other errors
         # allow some df/gff to be empty
-        if (df is None or df.empty) and ("query_additional" in file_path):
+        if df is None or df.empty:
             warning_message = f"Warning: Input DataFrame is empty for {identifier} and file {file_path}. No table will be created."
             log_message(warning_message, script_name, exit_code=0)
             return None
