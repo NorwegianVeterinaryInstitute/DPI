@@ -254,13 +254,22 @@ bash $myscript 2025*.sqlite
 bash 2025_05_02_Fagerlund_max20_run.sh > 2025_05_02_Fagerlund_max20_run.log
 ```
 
-date :: 20256-05-05 
+date :: 2025-05-05 
 - running on big dataset bugged
 - [x] fixing allowance of empty query_additional gff 
 - [x] simplifying print (so it does not print all the time) - just report in each log. 
 
 - [x] relaunch small test
 - [x] relaunch full test
+- [x] debugging step by step when failing - checking why -> empty files with eg no variants, no differences
+
+
+date :: 2025-05-06
+- [x] created an asset subdirectory for test files -> see bellow descriptions of test files - will be required for further improvement
+
+
+
+
 
 
 # TODO 
@@ -268,6 +277,14 @@ date :: 20256-05-05
 - [ ] improve the error handling - logic and simplification 
 
 
+# Test files description
+cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI/assets/test_files
+
+| characteristics test file | name test file | 
+| :---- | :---- | 
+| VCF : no variant detected - header is present | SRR11262118_SRR11262120_query_snps_annotated.vcf | 
+| GFF : empty gff query_additional | ERR2522247_SRR13588145_query_additional.gff | 
+| GFF : non empty gff query_additional | SRR11262179_SRR13588387_query_additional.gff |
 
 
 

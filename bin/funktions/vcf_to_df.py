@@ -75,6 +75,8 @@ def vcf_to_df(file_path):
         )
 
         # Possible to have no variants
+        # FIXME : This does not kick in because there are headers 
+        # But this is catched afterwards. Improve eg pair: 20250506_122848_SRR11262118_SRR11262120_query_snps_annotated.vcf
         if df.empty:
             warning_message = "Warning: no variant detected, the table is empty."
             warning_message += f"Check the VCF file: {file_path}.\n"
@@ -108,9 +110,10 @@ def vcf_to_df(file_path):
         if snp_df.empty:
             warning_message = "Warning: the table snp_df is empty."
             warning_message += f"Check the SNP file: {file_path}.\n"
-            log_message(warning_message, script_name, exit_code=1)
-
-        return snp_df
+            log_message(warning_message, script_name, exit_code=0)
+            return None
+        else:
+            return snp_df
 
     except Exception as e:
         error_message = processing_error_message(
