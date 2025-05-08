@@ -142,9 +142,9 @@ mv *.log $RES_DIR
 # merging is working - detected possible problem before on ref_query order - will fix independently 
 # NOTE : testing for the set, so I can see if work in the same dabase 
 
-ls output*.sqlite > input_test2.txt
-run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging2.sqlite --input input_test2.txt
-mv *.log $RES_DIR
+# ls output*.sqlite > input_test2.txt
+# run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging2.sqlite --input input_test2.txt
+# mv *.log $RES_DIR
 
 # !SECTION 
 
@@ -163,6 +163,7 @@ run_in_container "funktions.gff_to_df" --file_path ERR2522247_SRR13588145_query_
 run_in_container "funktions.gff_to_df" --file_path SRR11262179_SRR13588387_query_additional.gff # not empty
 
 # empty 
+touch ERR2522247_SRR13588145_query_additional.csv 
 run_in_container "funktions.create_table" --input_csv ERR2522247_SRR13588145_query_additional.csv \
 --file_path ERR2522247_SRR13588145_query_additional.gff \
 --db_file out1.sqlite --identifier notempty --table_name query_additional 
