@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # SECTION : Imports
 import argparse
+import logging
 import os
-import sys
+# import sys
 
 import pandas as pd  # type: ignore
 import numpy as np  # type: ignore
@@ -11,6 +12,7 @@ if __name__ == "__main__":
     import json
 
 from .error_template import (
+    setup_logger,
     log_message,
     processing_error_message,
     processing_result_message,
@@ -34,10 +36,14 @@ def prep_info_df(json_object, identifier):
     # script name
     script_name = os.path.basename(__file__)
 
+    # Log initial processing message
+    info_message = processing_result_message(script_name, json_object, identifier)
+    log_message(info_message, logging.INFO)
+
     info_message = processing_result_message(
         script_name, f"{prep_info_df.__name__}", identifier
     )
-    log_message(info_message, script_name)
+    log_message(info_message, logging.INFO)
 
     try:
         # create df for each separate key
@@ -56,13 +62,13 @@ def prep_info_df(json_object, identifier):
         if info.empty:
             warning_message = "Warning: the table 'info' is empty"
             warning_message += f"Check the JSON file for identifier: {identifier}.\n"
-            log_message(warning_message, script_name, exit_code=1)
+            log_message(warning_message, logging.WARNING, exit_code=1)
 
         return info
 
     except Exception as e:
         error_message = f"Error in processing the json_object with prep_info_df: {e}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
 
 # NOTE : working
@@ -82,7 +88,7 @@ def prep_features_df(json_object, identifier):
     info_message = processing_result_message(
         script_name, f"{prep_features_df.__name__}", identifier
     )
-    log_message(info_message, script_name)
+    log_message(info_message, logging.INFO)
 
     try:
         features = pd.json_normalize(json_object["features"])
@@ -99,7 +105,7 @@ def prep_features_df(json_object, identifier):
         if features.empty:
             warning_message = "Warning: the table 'features' is empty."
             warning_message += f"Check the JSON file for identifier: {identifier}.\n"
-            log_message(warning_message, script_name, exit_code=1)
+            log_message(warning_message, logging.WARNING, exit_code=1)
 
         return features
 
@@ -107,7 +113,7 @@ def prep_features_df(json_object, identifier):
         error_message = (
             f"Error in processing the json_object with prep_features_df: {e}"
         )
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
 
 # NOTE : Working
@@ -127,7 +133,7 @@ def prep_sequences_df(json_object, identifier):
     info_message = processing_result_message(
         script_name, f"{prep_sequences_df.__name__}", identifier
     )
-    log_message(info_message, script_name)
+    log_message(info_message, logging.INFO)
 
     try:
         sequences = pd.json_normalize(json_object["sequences"])
@@ -150,13 +156,13 @@ def prep_sequences_df(json_object, identifier):
                     sequences[col] = new_columns[i]
                 else:
                     info_message = f"Warning: 'orig_description' split did not produce enough values for column '{col}'."
-                    log_message(info_message, script_name)
+                    log_message(info_message, logging.INFO)
 
         except Exception as e:
             warning_message = (
                 f"Error during individual 'orig_description' column assignment: {e}"
             )
-            log_message(warning_message, script_name)
+            log_message(warning_message, logging.WARNING)
 
         ## NOTE : split description field
         try:
@@ -166,7 +172,7 @@ def prep_sequences_df(json_object, identifier):
         except Exception as e:
             warning_message = f"Error during description split: {e}\n"
             warning_message += "Descriptions are not always complete, this might be the reason and not an error.\n"
-            log_message(warning_message, script_name)
+            log_message(warning_message, logging.WARNING)
 
         ## NOTE : Drop orig_description and description columns.
         try:
@@ -175,14 +181,14 @@ def prep_sequences_df(json_object, identifier):
             )
         except Exception as e:
             warning_message = f"Error dropping columns: {e}"
-            log_message(warning_message, script_name)
+            log_message(warning_message, logging.WARNING)
 
         # Replace unwanted patterns
         try:
             sequences.replace(["^.*=", "]", "NaN"], "", inplace=True, regex=True)
         except Exception as e:
             warning_message = f"Error during replace operation: {e}"
-            log_message(warning_message, script_name)
+            log_message(warning_message, logging.WARNING)
 
         # NOTE : do not need to replace dots/- in sequences table - added for eventual compatibility
         sequences.columns = [
@@ -192,7 +198,7 @@ def prep_sequences_df(json_object, identifier):
         if sequences.empty:
             warning_message = "Warning: the table 'sequences' is empty."
             warning_message += f"Check the JSON file for identifier: {identifier}.\n"
-            log_message(warning_message, script_name, exit_code=1)
+            log_message(warning_message, logging.WARNING, exit_code=1)
 
         return sequences
 
@@ -200,7 +206,7 @@ def prep_sequences_df(json_object, identifier):
         error_message = (
             f"Error in processing the json_object with prep_sequencesdf: {e}"
         )
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
 
 #!SECTION
@@ -208,6 +214,8 @@ def prep_sequences_df(json_object, identifier):
 # SECTION MAIN
 if __name__ == "__main__":
     script_name = os.path.basename(__file__)
+    logger_instance, log_file_name_used = setup_logger(script_name)
+
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(
         description="Create a 3 tables to wrangle json results from annotations with Bakta and export as csv files.",
@@ -245,26 +253,30 @@ if __name__ == "__main__":
             args.identifier,
         ]
     ):
-        parser.error(
-            "The following arguments are required: --input_json, --identifier, "
+        error_message = "Error: Missing required arguments. Use --help for details."
+        log_message(error_message, logging.ERROR)
+        parser.exit(
+            1,
+            error_message,
         )
-        sys.exit(1)
     # !SECTION
 
     # SECTION : Handling of example
     if args.example:
         info_message = "Example usage:"
         info_message += f"python {script_name} --input_json <path_to_file> --identifier <identifier>"
-        log_message(info_message, script_name)
+        log_message(info_message, logging.INFO)
     # !SECTION
 
     # NOTE:  Login info output - handled by log_error
 
     # SECTION : SCRIPT : Load data and insert into the database
+
+    # Processing info:
     info_message = processing_result_message(
         script_name, args.input_json, args.identifier
     )
-    log_message(info_message, script_name)
+    log_message(info_message, logging.INFO)
 
     try:
         with open(args.input_json, "r") as f:
@@ -300,26 +312,15 @@ if __name__ == "__main__":
             info_message += (
                 f"DataFrames saved as CSV files in {current_working_directory}.\n"
             )
-            log_message(info_message, script_name)
+            log_message(info_message, logging.INFO)
 
     except FileNotFoundError:
         error_message = f"Input file not found: {args.input_json}"
-        log_message(error_message, script_name, exit_code=1)
-
-    except Exception as e:
-        error_message = processing_error_message(
-            script_name, args.input_json, identifier=None, e=e
-        )
-        log_message(error_message, script_name, exit_code=1)
-
-    except FileNotFoundError:
-        error_message = f"Input file not found: {args.input_json}"
-        log_message(error_message, script_name, exit_code=1)
-
+        log_message(error_message, logging.ERROR, exit_code=1)
     except Exception as e:
         error_message = processing_error_message(
             script_name, args.input_json, identifier=args.identifier, e=e
         )
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
     # !SECTION
 # !SECTION

@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 # SECTION : Imports
 import argparse
+
+# from dbm import error
+import logging
 import os
-import sys
+# import sys
 
 import re
 import pandas as pd  # type: ignore
 
 from .error_template import (
+    setup_logger,
     log_message,
     processing_error_message,
     processing_result_message,
@@ -46,7 +50,7 @@ def vcf_to_df(file_path):
     script_name = os.path.basename(__file__)
 
     info_message = processing_result_message(script_name, file_path)
-    log_message(info_message, script_name)
+    log_message(info_message, logging.INFO)
 
     # script
     try:
@@ -59,11 +63,11 @@ def vcf_to_df(file_path):
                 start_row += 1
 
         info_message = f"starting row for reading vcf file: {start_row}"
-        log_message(info_message, script_name)
+        log_message(info_message, logging.INFO)
 
     except Exception as e:
         error_message = f"Error reading VCF file {file_path}: {e}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
     try:
         df = pd.read_table(
@@ -75,12 +79,12 @@ def vcf_to_df(file_path):
         )
 
         # Possible to have no variants
-        # FIXME : This does not kick in because there are headers 
+        # FIXME : This does not kick in because there are headers
         # But this is catched afterwards. Improve eg pair: 20250506_122848_SRR11262118_SRR11262120_query_snps_annotated.vcf
         if df.empty:
             warning_message = "Warning: no variant detected, the table is empty."
             warning_message += f"Check the VCF file: {file_path}.\n"
-            log_message(warning_message, script_name, exit_code=0)
+            log_message(warning_message, logging.WARNING, exit_code=0)
             return None
 
         # For annotated vcf files
@@ -110,7 +114,7 @@ def vcf_to_df(file_path):
         if snp_df.empty:
             warning_message = "Warning: the table snp_df is empty."
             warning_message += f"Check the SNP file: {file_path}.\n"
-            log_message(warning_message, script_name, exit_code=0)
+            log_message(warning_message, logging.WARNING, exit_code=0)
             return None
         else:
             return snp_df
@@ -119,7 +123,7 @@ def vcf_to_df(file_path):
         error_message = processing_error_message(
             script_name, file_path, identifier=None, e=e
         )
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
 
 #!SECTION
@@ -127,6 +131,8 @@ def vcf_to_df(file_path):
 # SECTION MAIN
 if __name__ == "__main__":
     script_name = os.path.basename(__file__)
+    logger_instance, log_file_name_used = setup_logger(script_name)
+
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(
         description="Process vcf_file created by eg. nucdiff and export as csv files.",
@@ -166,25 +172,32 @@ if __name__ == "__main__":
             args.identifier,
         ]
     ):
-        parser.error("The following arguments are required: --file_path, --identifier")
-        sys.exit(1)
+        error_message = "Error: Missing required arguments. Use --help for details."
+        log_message(
+            error_message,
+            logging.ERROR,
+        )
+        parser.exit(
+            1,
+            error_message,
+        )
+
     # !SECTION
 
     # SECTION : Handling of example
     if args.example:
         info_message = "Example usage:"
-        info_message += (
-            f"python {script_name} --file_path <path_to_file> --identifier <identifier>"
-        )
-        log_message(info_message, script_name, exit_code=0)
+        info_message += f"\t\t python {script_name} --file_path <path_to_file> --identifier <identifier>"
+        log_message(info_message, logging.INFO, exit_code=0)
     # !SECTION
 
-    # NOTE:  Login info output - handled by log_error
+    # Processing info:
+    info_message = processing_result_message(
+        script_name, args.file_path, args.identifier
+    )
+    log_message(info_message, logging.INFO)
 
     # SECTION : SCRIPT : Load data and insert into the database
-    info_message = processing_result_message(script_name, args.file_path)
-    log_message(info_message, script_name)
-
     try:
         current_working_directory = os.getcwd()
         df = vcf_to_df(args.file_path)
@@ -196,16 +209,16 @@ if __name__ == "__main__":
 
         info_message = f"\t\t{script_name} completed successfully.\n\n"
         info_message += f"DataFrame saved as CSV file in {current_working_directory}.\n"
-        log_message(info_message, script_name)
+        log_message(info_message, logging.INFO)
 
     except FileNotFoundError:
         error_message = f"Input file not found: {args.file_path}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
     except Exception as e:
         error_message = processing_error_message(
             script_name, args.file_path, identifier=None, e=e
         )
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
     # !SECTION
 # !SECTION

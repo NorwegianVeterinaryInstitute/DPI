@@ -1,9 +1,14 @@
 # Creates a comment dataframe
 # NOTE : I do not think I make this one a script - as wont be used outside of the pipeline
+import logging
 import os
 
-import pandas as pd
-from .error_template import log_message, processing_result_message
+import pandas as pd # type: ignore
+
+from .error_template import (
+    log_message,
+    processing_result_message,
+)
 
 
 def create_comment_df(identifier, comment):
@@ -16,8 +21,9 @@ def create_comment_df(identifier, comment):
         DataFrame: simple pandas dataframe
     """
     script_name = os.path.basename(__file__)
+
     info_message = processing_result_message(script_name, "NA - comment table creation")
-    log_message(info_message, script_name)
+    log_message(info_message, logging.INFO)
 
     # identifier can be ref or ref_query
     try:
@@ -37,10 +43,10 @@ def create_comment_df(identifier, comment):
         if df.empty:
             warning_message = "Warning: the table 'stats' is empty"
             warning_message += "Check the stats_out file.\n"
-            log_message(warning_message, script_name, exit_code=1)
+            log_message(warning_message, logging.WARNING, exit_code=1)
 
         return df
 
     except Exception as e:
         error_message = f"Error creating comment table: {e}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)

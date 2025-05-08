@@ -7,7 +7,7 @@ import os
 import logging
 import sqlite3
 import argparse
-import datetime
+# import datetime
 
 # --- Add script's directory to sys.path ---
 # To be able to import local modules
@@ -16,7 +16,14 @@ if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 # --- End sys.path modification ---
 
-from funktions.process_result_file import process_result_file
+from funktions.process_result_file import process_result_file  # noqa: E402
+
+from funktions.error_template import (  # noqa: E402
+    setup_logger,
+    log_message,
+    processing_error_message,
+    processing_result_message,
+)
 
 
 # !SECTION
@@ -24,6 +31,9 @@ from funktions.process_result_file import process_result_file
 
 # SECTION: MAIN
 if __name__ == "__main__":
+    script_name = os.path.basename(__file__)
+    logger_instance, log_file_name_used = setup_logger(script_name)
+
     # SECTION: Argument parsing
     parser = argparse.ArgumentParser(
         prog="results_to_db.py",
@@ -88,46 +98,53 @@ if __name__ == "__main__":
             args.result_file,
         ]
     ):
-        parser.error(
-            "The following arguments are required: --comment, --identifier, --result_file"
+        error_message = "Error: Missing required arguments. Use --help for details."
+        log_message(error_message, logging.ERROR)
+        parser.exit(
+            1,
+            error_message,
         )
-        sys.exit(1)
+
     # !SECTION
 
     # SECTION : Handling of examples
     if args.example:
-        logging.info("Example usage:")
-        logging.info("python results_to_db.py --database my_database.sqlite \\")
-        logging.info(" --comment 'Analysis on 2023-10-01' \\")
-        logging.info(" --identifier sample123 \\")
-        logging.info(" --result_file file.json")
-        sys.exit(0)
+        info_message = "Example usage:"
+        info_message += f"\t\t python {script_name} --database my_database.sqlite --comment 'Analysis on 2023-10-01' --identifier sample123 --result_file file.json"
+        log_message(info_message, logging.INFO, exit_code=0)
+
     # !SECTION
 
-    # SECTION : Logging info output
-    log_file_name = (
-        f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_results_to_db.log"
+    # Processing info:
+    info_message = processing_result_message(
+        script_name, args.result_file, args.identifier
     )
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler(log_file_name, mode="w"),
-            logging.StreamHandler(sys.stdout),
-        ],
-    )
+    log_message(info_message, logging.INFO)
+
     # !SECTION
 
     # SECTION : Process result files
     try:
-        logging.info(f"Processing {args.identifier} in {args.result_file}")
         db_conn = sqlite3.connect(args.database)
         process_result_file(args.result_file, args.identifier, db_conn, args.comment)
         db_conn.close()
+
+        log_message(
+            f"Successfully processed file: {args.result_file} for identifier: {args.identifier}",
+            logging.INFO,
+        )
+
+    except FileNotFoundError:
+        error_message = f"Input file not found: {args.file_result_file}"
+        log_message(error_message, logging.ERROR, exit_code=1)
+
     except Exception as e:
         # Need to handle the exception and rollback the transaction
         if db_conn:
             db_conn.rollback()
-        logging.error(f"An error occurred during processing of {args.identifier}: {e}")
-        logging.error(f"Check {log_file_name} for more details")
+
+        error_message = processing_error_message(
+            script_name, args.result_file, identifier=args.identifier, e=e
+        )
+        log_message(error_message, logging.ERROR, exit_code=1)
     # !SECTION

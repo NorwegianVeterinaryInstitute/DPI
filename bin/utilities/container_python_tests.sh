@@ -182,3 +182,10 @@ run_in_container "results_to_db" --result_file SRR11262179_SRR13588387_query_add
 # Manual 
 # IMG="/cluster/work/users/evezeyl/images/evezeyl-py_test-latest.img"
 # apptainer shell "$IMG" 
+
+
+# NOTE process file 
+cd "$TEST_OUTPUT_BASE/06_VCF_ANNOTATOR"
+run_in_container "funktions.process_result_file" --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf \
+--identifier SRR11262179_SRR11262033 --db_file $RES_DIR/process_result_file.sqlite  --comment test
+mv *.log $RES_DIR

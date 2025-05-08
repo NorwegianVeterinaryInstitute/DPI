@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # SECTION : Imports
 import argparse
+import logging
 import os
-import sys
+# import sys
 
 
 import gffpandas.gffpandas as gffpd  # type: ignore
 
 from .error_template import (
+    setup_logger,
     log_message,
     processing_error_message,
     processing_result_message,
@@ -34,7 +36,7 @@ def gff_to_df(file_path):
     script_name = os.path.basename(__file__)
 
     info_message = processing_result_message(script_name, file_path)
-    log_message(info_message, script_name)
+    log_message(info_message, logging.INFO)
 
     # Ensuring file not empty
     try:
@@ -46,7 +48,7 @@ def gff_to_df(file_path):
             # exit code cannot be 1 if its query_additional / evt. "ref_additional" beause can be empty
             warning_message = "Warning: the table gff_df is empty."
             warning_message += f"Please check the GFF file: {file_path}."
-            log_message(warning_message, script_name, exit_code=0)
+            log_message(warning_message, logging.WARNING, exit_code=0)
             return None
 
         # Extract the ref and query ids from the file name
@@ -56,15 +58,15 @@ def gff_to_df(file_path):
 
     except Exception as e:
         error_message = f"Error reading GFF file {file_path}: {e}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
     try:
-        with open(file_path, "r") as f:
-            gff_df = gff_df.attributes_to_columns().assign(_REF=ref, _QUERY=query)
-            # NOTE : in case: Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
-            gff_df.columns = [
-                col.replace(".", "_").replace("-", "_") for col in gff_df.columns
-            ]
+        # with open(file_path, "r") as f:
+        gff_df = gff_df.attributes_to_columns().assign(_REF=ref, _QUERY=query)
+        # NOTE : in case: Replacing dots/- is important for SQLite compatibility for insertion into sqlite db
+        gff_df.columns = [
+            col.replace(".", "_").replace("-", "_") for col in gff_df.columns
+        ]
 
         return gff_df
 
@@ -72,12 +74,14 @@ def gff_to_df(file_path):
         error_message = processing_error_message(
             script_name, file_path, identifier=None, e=e
         )
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
 
 # SECTION : MAIN
 if __name__ == "__main__":
     script_name = os.path.basename(__file__)
+    logger_instance, log_file_name_used = setup_logger(script_name)
+
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(
         prog=script_name,
@@ -109,23 +113,27 @@ if __name__ == "__main__":
 
     # SECTION : Check if required arguments are provided
     if not all([args.file_path]):
-        parser.error("The following arguments are required: --file_path")
-        sys.exit(1)
+        error_message = "Error: Missing required arguments. Use --help for details."
+        log_message(error_message, logging.ERROR)
+        parser.exit(
+            1,
+            error_message,
+        )
     # !SECTION
 
     # SECTION : Handling of example
     if args.example:
         info_message = "Example usage:"
-        info_message += "python {script_name} --file_path <path_to_file>"
-        log_message(info_message, script_name, exit_code=0)
+        info_message += f"\t\t python {script_name} --file_path <path_to_file>"
+        log_message(info_message, logging.INFO, exit_code=0)
     # !SECTION
 
     # NOTE:  Login info output - handled by log_error
+    # Processing info:
+    info_message = processing_result_message(script_name, args.file_path)
+    log_message(info_message, logging.INFO)
 
     # SECTION : SCRIPT : create the data frame and export as csv files
-    info_message = processing_result_message(script_name, args.file_path)
-    log_message(info_message, script_name)
-
     try:
         current_working_directory = os.getcwd()
         df = gff_to_df(args.file_path)
@@ -138,16 +146,16 @@ if __name__ == "__main__":
                 header=True,
             )
             info_message = f"\t\t{script_name} completed successfully.\n\n"
-            log_message(info_message, script_name)
+            log_message(info_message, logging.INFO)
 
     except FileNotFoundError:
         error_message = f"Input file not found: {args.file_path}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
     except Exception as e:
         error_message = processing_error_message(
             script_name, args.file_path, identifier=None, e=e
         )
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
     # !SECTION
 # !SECTION

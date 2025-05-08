@@ -4,7 +4,7 @@ import argparse
 import sys
 import os
 import csv
-from Bio import SeqIO
+from Bio import SeqIO # type: ignore
 
 def parse_args(args):
 

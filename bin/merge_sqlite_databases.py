@@ -6,8 +6,7 @@
 # SECTION : IMPORTS
 import sys
 import os
-
-# import logging
+import logging
 import sqlite3
 import argparse
 # import datetime
@@ -19,12 +18,12 @@ if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 # --- End sys.path modification ---
 
-from funktions.error_template import (
+from funktions.error_template import (  # noqa: E402
+    setup_logger,
     log_message,
     processing_error_message,
     processing_result_message,
 )
-
 # !SECTION
 
 
@@ -43,7 +42,7 @@ def merge_databases(output_db_path, input_list_file):
     script_name = os.path.basename(__file__)
 
     info_message = f"Starting merge process for output: {output_db_path}"
-    log_message(info_message, script_name)
+    log_message(info_message, logging.INFO)
 
     try:
         if not input_list_file:
@@ -54,25 +53,25 @@ def merge_databases(output_db_path, input_list_file):
                 input_db_paths_list = [line.strip() for line in f if line.strip()]
             log_message(
                 f"Read {len(input_db_paths_list)} database paths from {input_list_file}",
-                script_name,
+                logging.INFO,
             )
         except FileNotFoundError:
             error_message = f"Error: Input list file not found at {input_list_file}"
-            log_message(error_message, script_name, exit_code=1)
+            log_message(error_message, logging.ERROR, exit_code=1)
 
         # If found but empty
         if not input_db_paths_list:
             warning_message = (
                 f"Input list file '{input_list_file}' is empty. No databases to merge."
             )
-            log_message(warning_message, script_name, exit_code=1)
+            log_message(warning_message, logging.WARNING, exit_code=1)
 
         info_message = f"""
         Output database: {output_db_path}")
         Processing {len(input_db_paths_list)} 
         input databases listed in {input_list_file}.
         """
-        log_message(info_message, script_name)
+        log_message(info_message, logging.INFO)
 
         # Connect to the output database (creates if it doesn't exist)
         with sqlite3.connect(output_db_path) as output_conn:
@@ -84,7 +83,7 @@ def merge_databases(output_db_path, input_list_file):
 
             for i, input_db_path in enumerate(input_db_paths_list):
                 info_message = f"Processing input database {i + 1}/{len(input_db_paths_list)}: {input_db_path}"
-                log_message(info_message, script_name)
+                log_message(info_message, logging.INFO)
 
                 # --- Add Debug Print ---
                 debug_message = f"Attempting to attach database path: '{input_db_path}'"
@@ -94,7 +93,7 @@ def merge_databases(output_db_path, input_list_file):
                     error_message = (
                         f"Warning: Input database {input_db_path} not found. Skipping."
                     )
-                    log_message(error_message, script_name, exit_code=1)
+                    log_message(error_message, logging.ERROR, exit_code=1)
                     # Important to make fail OR nextflow process will continue to run.
                     # And it wont be possible to resume.
 
@@ -106,7 +105,7 @@ def merge_databases(output_db_path, input_list_file):
                         f"ATTACH DATABASE ? AS {attach_alias};", (input_db_path,)
                     )
                     info_message = f"Attached {input_db_path} as {attach_alias}"
-                    log_message(info_message, script_name)
+                    log_message(info_message, logging.INFO)
 
                     # Get list of tables from the attached database
                     output_cursor.execute(
@@ -121,7 +120,7 @@ def merge_databases(output_db_path, input_list_file):
                             continue
 
                         info_message = f"  Processing table: {table_name}"
-                        log_message(info_message, script_name)
+                        log_message(info_message, logging.INFO)
 
                         # Get column information from the input table (via attached db)
                         output_cursor.execute(
@@ -159,12 +158,12 @@ def merge_databases(output_db_path, input_list_file):
                                 output_cursor.execute(create_table_sql)
                                 output_conn.commit()
                                 info_message = f"  Created table '{table_name}' in output database."
-                                log_message(info_message, script_name)
+                                log_message(info_message, logging.INFO)
                                 created_tables.add(table_name)
                             else:
                                 # Fallback or error if description is None after SELECT LIMIT 0
                                 warning_message = f"  Warning: Could not determine columns for new table '{table_name}'. Skipping creation."
-                                log_message(warning_message, script_name)
+                                log_message(warning_message, logging.WARNING)
                                 continue  # Skip to next table
 
                         else:
@@ -187,7 +186,7 @@ def merge_databases(output_db_path, input_list_file):
                                 output_cursor.execute(alter_table_sql)
                                 output_conn.commit()
                                 info_message = f"  Added column '{col_to_add}' to table '{table_name}' in output database."
-                                log_message(info_message, script_name)
+                                log_message(info_message, logging.INFO)
                                 # output_column_names.append(col_to_add) # Update output column names
 
                         # --- Get definitive output column names AFTER creation/alteration ---
@@ -197,7 +196,7 @@ def merge_databases(output_db_path, input_list_file):
                         ]
                         if not output_column_names:
                             warning_message = f"  Warning: Could not retrieve columns for output table '{table_name}' after creation/alteration. Skipping insertion."
-                            log_message(warning_message, script_name)
+                            log_message(warning_message, logging.WARNING)
                             continue  # Skip insertion for this table
 
                         # --- Duplicate Checking Logic ---
@@ -229,7 +228,7 @@ def merge_databases(output_db_path, input_list_file):
                             if output_cursor.fetchone():
                                 existing_data_for_file = True
                                 info_message = f"    Data for identifier '{file_identifier_value}' already exists in table '{table_name}'. Skipping insertion for this file."
-                                log_message(info_message, script_name)
+                                log_message(info_message, logging.INFO)
 
                         # If no data for this file exists, insert all rows
                         if not existing_data_for_file:
@@ -253,31 +252,31 @@ def merge_databases(output_db_path, input_list_file):
                     # Detach the database
                     output_cursor.execute(f"DETACH DATABASE {attach_alias};")
                     info_message = f"Detached {attach_alias}"
-                    log_message(info_message, script_name)
+                    log_message(info_message, logging.INFO)
 
                 except sqlite3.Error as e:
                     error_message = (
                         f"SQLite error while processing {input_db_path}: {e}"
                     )
-                    log_message(error_message, script_name)
+                    log_message(error_message, logging.ERROR)
                     output_conn.rollback()  # Rollback changes made for this input DB
                 except Exception as e:
                     error_message = f"Unexpected error processing {input_db_path}: {e}"
-                    log_message(error_message, script_name)
+                    log_message(error_message, logging.ERROR)
                     output_conn.rollback()
 
         info_message = f"Successfully finished merging databases into: {output_db_path}"
-        log_message(info_message, script_name)
+        log_message(info_message, logging.INFO)
 
     except FileNotFoundError:  # Catch specific error for list file
         error_message = f"Error: Input list file not found at {input_list_file}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
     except sqlite3.Error as e:
         error_message = f"SQLite error with output database {output_db_path}: {e}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
     except Exception as e:
         error_message = f"An unexpected error occurred: {e}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
 
 # !SECTION
@@ -286,6 +285,8 @@ def merge_databases(output_db_path, input_list_file):
 # SECTION MAIN
 if __name__ == "__main__":
     script_name = os.path.basename(__file__)
+    logger_instance, log_file_name_used = setup_logger(script_name)
+
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(
         prog=script_name,
@@ -322,43 +323,40 @@ if __name__ == "__main__":
 
     # SECTION : Check if required arguments are provided
     if not all([args.output, args.input]):  # Check args.input
-        parser.error(
-            "The following arguments are required: --output <output_db_path> --inputs <input_list_file>.\n"
+        error_message = "Error: Missing required arguments. Use --help for details."
+        log_message(error_message, logging.ERROR)
+        parser.exit(
+            1,
+            error_message,
         )
-        sys.exit(1)
+
     # !SECTION
 
     # SECTION : Handling of example
     if args.example:
         info_message = "Example usage:"
-        info_message += (
-            f"python {script_name} --output merged.sqlite --input list_input_dbs.txt"
-        )
-        log_message(info_message, script_name, exit_code=0)
+        info_message += f"\t\t python {script_name} --output merged.sqlite --input list_input_dbs.txt"
+        log_message(info_message, logging.INFO)
     # !SECTION
 
     # NOTE: Logging setup could be moved here from the function
     # logging.basicConfig(...)
 
     # SECTION : SCRIPT : Merge the result files
-    # NOTE : this became somewhat uselless
+    # Processing info:
     info_message = processing_result_message(script_name, f"list file : {args.input}")
-    log_message(info_message, script_name)
+    log_message(info_message, logging.INFO)
 
     try:
         merge_databases(args.output, args.input)  # Pass args.input
         info_message = f"Script {script_name} ran successfully"
-        # log_message(info, script_name, exit_code=1) # This was logging 'info' which is not defined, and exiting on success
-        log_message(info_message, script_name)  # Log success message
+        log_message(info_message, logging.INFO)  # Log success message
 
-    # except FileNotFoundError: # This is less likely now as we check existence inside the function
-    #     error_message = f"One of the input file was not found: {args.input}"
-    #     log_message(error_message, script_name, exit_code=1)
     except Exception as e:
         error_message = processing_error_message(
             script_name, f"Input list file: {args.input}", identifier=None, e=e
         )
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
     # !SECTION
 
 # !SECTION

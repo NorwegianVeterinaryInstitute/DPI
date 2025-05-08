@@ -4,26 +4,21 @@
 
 # SECTION : Imports
 import argparse
-from logging import info
+import logging
 import os
-import sys
-import json
+import sqlite3
 
-# test python path
-info_message = """
---- Python Environment ----------------------------------------------
-        sys.executable: {sys.executable}"
-        sys.path: {sys.path}
-        PYTHONPATH env var: {os.environ.get('PYTHONPATH', 'Not Set')}
----------------------------------------------------------------------
-"""
+# import sys
+import json
 
 
 from .error_template import (
+    setup_logger,
     log_message,
     processing_error_message,
     processing_result_message,
 )
+
 from .json_to_df import prep_info_df, prep_features_df, prep_sequences_df
 from .gff_to_df import gff_to_df
 from .vcf_to_df import vcf_to_df
@@ -72,11 +67,10 @@ def process_result_file(file_path, identifier, db_file, comment):
     script_name = os.path.basename(__file__)
 
     info_message = processing_result_message(script_name, file_path, identifier)
-    log_message(info_message, script_name)
+    log_message(info_message, logging.INFO)
 
     # script
     # NOTE: defensive programming implemented with each function to create the df ... each level
-
     try:
         file_name = os.path.basename(file_path)
         result_type = determine_result_type(file_name)
@@ -99,13 +93,6 @@ def process_result_file(file_path, identifier, db_file, comment):
         # NOTE : processing different types of gff files
         elif result_type == "gff":
             try:
-                # --- Debugging Start ---
-                info_message = f"DEBUG: Attempting to call gff_to_df for {file_path}"
-                info_message += (
-                    f"DEBUG: Type of 'gff_to_df' object is: {type(gff_to_df)}"
-                )
-                # --- Debugging End ---
-
                 df = gff_to_df(file_path)  # The potential error point
 
                 if "_query_blocks" in file_name:
@@ -130,14 +117,14 @@ def process_result_file(file_path, identifier, db_file, comment):
                     create_table(df, "ref_additional", identifier, file_name, db_file)
                 else:
                     error_message = f"Warning: Unknown GFF subtype for {result_type} for {identifier}. Filepath {file_path}. Skipping {file_path}."
-                    log_message(error_message, script_name, exit_code=1)
+                    log_message(error_message, logging.WARNING, exit_code=1)
             except TypeError as te:  # Catch the specific error
                 error_message = (
                     f"FATAL DEBUG: Caught TypeError when calling gff_to_df in : {te}."
                 )
                 error_message += f"script executing: {script_name}"
                 # do not need to exit here, will be exited by gff_to_df if necesary
-                log_message(error_message, script_name, exit_code=0)
+                log_message(error_message, logging.ERROR, exit_code=0)
 
         # NOTE: processing different types of vcf files
         elif result_type == "vcf":
@@ -149,7 +136,7 @@ def process_result_file(file_path, identifier, db_file, comment):
                 create_table(df, "query_snps_annotated", identifier, file_name, db_file)
             else:
                 error_message = f"Warning: Unknown VCF subtype for {result_type} for {identifier}. Skipping {file_name}."
-                log_message(error_message, script_name, exit_code=1)
+                log_message(error_message, logging.ERROR, exit_code=1)
 
         elif result_type == "stats":
             df = stats_to_df(file_path)
@@ -157,7 +144,7 @@ def process_result_file(file_path, identifier, db_file, comment):
                 create_table(df, "stat_file", identifier, file_name, db_file)
             else:
                 error_message = f"Warning: Unknown stats subtype for {result_type} for {identifier}. Skipping {file_path}."
-                log_message(error_message, script_name, exit_code=1)
+                log_message(error_message, logging.ERROR, exit_code=1)
 
         # NOTE : adding comment table for each type of file processed in the database
         comment_df = create_comment_df(identifier, comment)
@@ -167,7 +154,7 @@ def process_result_file(file_path, identifier, db_file, comment):
         error_message = processing_error_message(
             script_name, file_path, identifier=None, e=e
         )
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
 
 # !SECTION
@@ -175,6 +162,8 @@ def process_result_file(file_path, identifier, db_file, comment):
 # SECTION MAIN
 if __name__ == "__main__":
     script_name = os.path.basename(__file__)
+    logger_instance, log_file_name_used = setup_logger(script_name)
+
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(
         description="Process a result file and add it to an SQLite database.",
@@ -218,38 +207,60 @@ if __name__ == "__main__":
 
     # SECTION : Check if required arguments are provided
     if not all([args.file_path, args.identifier, args.db_file]):
-        parser.error(
-            "The following arguments are required: --file_path, --identifier, --db_file"
+        error_message = "Error: Missing required arguments. Use --help for details."
+        log_message(error_message, logging.ERROR)
+        parser.exit(
+            1,
+            error_message,
         )
-        sys.exit(1)
     # !SECTION
 
     # SECTION : Handling of example
     if args.example:
         info_message = "Example usage:"
-        info_message += "python {script_name} --file_path <path_to_file> --identifier <identifier> --db_file <db_file>"
-        log_message(info_message, script_name, exit_code=0)
+
+        info_message += f"\t\t python {script_name} --file_path <path_to_file> --identifier <identifier> --db_file <db_file>"
+        log_message(info_message, logging.INFO, exit_code=0)
+
+    # Processing info:
+    info_message = processing_result_message(
+        script_name, args.file_path, args.identifier
+    )
+    log_message(info_message, logging.INFO)
+
+    # Python environment info
+    # python_env_info = f"""
+    # --- Python Environment ---
+    # sys.executable: {sys.executable}
+    # sys.path: {sys.path}
+    # PYTHONPATH env var: {os.environ.get("PYTHONPATH", "Not Set")}
+    # ---
+    # """
+
+    # log_message(python_env_info, logging.DEBUG)
 
     # !SECTION
 
-    # NOTE:  Login info output - handled by log_error
-
     # SECTION : SCRIPT : Merge the result files
-    info_message = processing_result_message(script_name, args.file_path)
-    log_message(info_message, script_name)
 
     try:
-        process_result_file(args.file_path, args.identifier, args.db_file, args.comment)
+        db_conn = sqlite3.connect(args.db_file)
+        process_result_file(args.file_path, args.identifier, db_conn, args.comment)
+        db_conn.close()
 
+        log_message(
+            f"Successfully processed file: {args.file_path} for identifier: {args.identifier}",
+            logging.INFO,
+        )
     except FileNotFoundError:
         error_message = f"Input file not found: {args.file_path}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
     except Exception as e:
         error_message = processing_error_message(
             script_name, args.file_path, identifier=None, e=e
         )
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
     # !SECTION
 # !SECTION
 

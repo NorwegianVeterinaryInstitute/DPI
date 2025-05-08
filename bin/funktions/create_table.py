@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # SECTION : Imports
 import argparse
+import logging
 import os
-import re
-import sys
+#import re
+#import sys
 
 import sqlite3
 import pandas  # type: ignore
 from .error_template import (
+    setup_logger,
     log_message,
     processing_error_message,
     processing_result_message,
@@ -34,9 +36,8 @@ def create_table(
     # script name and info
     script_name = os.path.basename(__file__)
 
-    info_message = processing_result_message(script_name, file_path)
-    print(info_message)
-    log_message(info_message, script_name)
+    info_message = processing_result_message(script_name, file_path, identifier)
+    log_message(info_message, logging.INFO)
 
     # Case empty or None
     try:
@@ -44,8 +45,8 @@ def create_table(
 
         # Use the passed connection object directly
         # --- Debugging Start (Optional: Remove after fixing) ---
-        print(f"DEBUG create_table: Received db_conn type: {type(db_conn)}")
-        print(f"DEBUG create_table: Received db_conn value: {repr(db_conn)}")
+        # print(f"DEBUG create_table: Received db_conn type: {type(db_conn)}")
+        # print(f"DEBUG create_table: Received db_conn value: {repr(db_conn)}")
         # --- Debugging End ---
 
         # connect to the database
@@ -68,7 +69,8 @@ def create_table(
             cursor.execute(create_sql)
             print(f"Table '{table_name}' ensured/created in database.")
             log_message(
-                f"Table '{table_name}' ensured/created in database.", script_name
+                f"Table '{table_name}' ensured/created in database.",
+                logging.INFO,
             )
         else:
             # Table exists, check for missing columns
@@ -83,13 +85,15 @@ def create_table(
                     print(f"Added missing column '{col}' to table '{table_name}'.")
                     log_message(
                         f"Added missing column '{col}' to table '{table_name}'.",
-                        script_name,
+                        logging.INFO,
                     )
                 except sqlite3.OperationalError as alter_e:
                     error_message = f"Failed to add column '{col}' to table '{table_name}': {alter_e}"
                     print(error_message)
                     log_message(
-                        error_message, script_name, exit_code=1
+                        error_message,
+                        logging.ERROR,
+                        exit_code=1,
                     )  # Exit if schema update fails
 
         # NOTE : there is no need to check for duplicates. All data is new
@@ -112,7 +116,7 @@ def create_table(
         db_conn.commit()  # Commit the changes using the passed connection
 
         message_info = f"Successfully inserted {len(rows_to_insert)} rows into table '{table_name}' for identifier '{identifier}' from file '{file_path}'."
-        log_message(message_info, script_name)
+        log_message(message_info, logging.INFO)
 
         # Close the cursor, but NOT the connection
         cursor.close()
@@ -122,18 +126,18 @@ def create_table(
         # allow some df/gff to be empty
         if df is None or df.empty:
             warning_message = f"Warning: Input DataFrame is empty for {identifier} and file {file_path}. No table will be created."
-            log_message(warning_message, script_name, exit_code=0)
+            log_message(warning_message, logging.WARNING, exit_code=0)
             return None
 
         else:
             error_message = processing_error_message(
                 script_name, file_path, identifier, e
             )
-            log_message(warning_message, script_name, exit_code=1)
+            log_message(error_message, logging.ERROR, exit_code=1)
 
-    finally:
-        message_info = f"create_or_append_table function has run for {identifier} and filename {file_path}."
-        log_message(message_info, script_name)
+    # finally:
+    #     message_info = f"create_or_append_table function has run for {identifier} and filename {file_path}."
+    #     log_message(message_info, logging.INFO)
 
 
 #!SECTION
@@ -141,6 +145,8 @@ def create_table(
 # SECTION MAIN
 if __name__ == "__main__":
     script_name = os.path.basename(__file__)
+    logger_instance, log_file_name_used = setup_logger(script_name)
+
     # SECTION : Argument parsing
     parser = argparse.ArgumentParser(
         description="Create a table in a sqlite database and add results from a Pandas dataframe.",
@@ -196,23 +202,28 @@ if __name__ == "__main__":
             args.identifier,
         ]
     ):
-        parser.error(
-            "The following arguments are required: --input_csv --db_cfile, --table_name, --identifier, "
+        error_message = "Error: Missing required arguments. Use --help for details."
+        log_message(error_message, logging.ERROR)
+        parser.exit(
+            1,
+            error_message,
         )
-        sys.exit(1)
     # !SECTION
 
     # SECTION : Handling of example
     if args.example:
         info_message = "Example usage:"
-        info_message += f"python {script_name} --input_csv <path_to_file> --db_file <db_file> --table_name <table_name> --identifier <identifier>"
-        log_message(info_message, script_name, exit_code=0)
+        info_message += f"\t\t python {script_name} --input_csv <path_to_file> --db_file <db_file> --table_name <table_name> --identifier <identifier>"
+        log_message(info_message, logging.INFO, exit_code=0)
     # !SECTION
     # NOTE:  Login info output - handled by log_error
 
     # SECTION : SCRIPT : Load data and insert into the database
-    info_message = processing_result_message(script_name, args.file_path)
-    log_message(info_message, script_name)
+    # Processing info:
+    info_message = processing_result_message(
+        script_name, args.file_path, args.identifier
+    )
+    log_message(info_message, logging.INFO)
 
     # # NOTE need to create the pandas dataframe from the file and the database connection
     # Load the Pandas DataFrame (replace with your actual data loading method)
@@ -232,15 +243,20 @@ if __name__ == "__main__":
         if standalone_conn:
             standalone_conn.close()  # Ensure connection is closed
 
+            log_message(
+                f"Successfully processed file: {args.file_path} for identifier: {args.identifier}",
+                logging.INFO,
+            )
+
     except FileNotFoundError:
         error_message = f"Input file not found: {args.file_path}"
-        log_message(error_message, script_name, exit_code=1)
+        log_message(error_message, logging.ERROR, exit_code=1)
 
     except Exception as e:
         error_message = processing_error_message(
             script_name, args.file_path, identifier=None, e=e
         )
-        log_message(error_message, script_name, exit_code=0)
+        log_message(error_message, logging.ERROR, exit_code=0)
 
     # Other errors will be taken into account by the function
     # !SECTION
