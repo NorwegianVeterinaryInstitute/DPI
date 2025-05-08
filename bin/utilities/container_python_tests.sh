@@ -62,7 +62,7 @@ echo "SECTION: 1. Testing creation of tables"
 cd "$TEST_OUTPUT_BASE/04_NUCDIFF/SRR11262179_SRR11262033"
 run_in_container "funktions.gff_to_df" --file_path SRR11262179_SRR11262033_query_blocks.gff
 mv *{.csv,.log} $RES_DIR
-
+rm *{.csv,.log} 
 # ANCHOR : vcf tables - OK 
 cd "$TEST_OUTPUT_BASE/04_NUCDIFF/SRR11262179_SRR11262033" 
 run_in_container "funktions.vcf_to_df" --file_path SRR11262179_SRR11262033_query_snps.vcf --identifier nucdiff_vcf 
@@ -91,6 +91,7 @@ echo "SECTION: 2. WRAPPERS TESTING"
 # NOTE create table - ALL STEPS - OK
 cd "$TEST_OUTPUT_BASE/06_VCF_ANNOTATOR" 
 # I need to create the csv file first
+rm *{.csv,.log}
 run_in_container "funktions.vcf_to_df" --file_path SRR11262179_SRR11262033_ref_snps_annotated.vcf \
 --identifier SRR11262179_SRR11262033
 mv *{.csv,.log} $RES_DIR
@@ -130,10 +131,12 @@ mv *.log $RES_DIR
 # NOTE : testing for 2
 # merge_sqlite_databases.py (which is directly in bin):
 # create test file 
-echo  "output2_5_SRR11262179.sqlite" > input_test.txt
-echo  "output2_26_SRR11262033_SRR11262179.sqlite" >> input_test.txt
+cd $RES_DIR
+echo  "res_file1.sqlite" > input_test.txt
+echo  "res_file2.sqlite" >> input_test.txt
 
 run_in_container "merge_sqlite_databases" --output $RES_DIR/test_merging.sqlite --input input_test.txt
+
 mv *.log $RES_DIR
 
 # merging is working - detected possible problem before on ref_query order - will fix independently 

@@ -67,7 +67,7 @@ def merge_databases(output_db_path, input_list_file):
             log_message(warning_message, logging.WARNING, exit_code=1)
 
         info_message = f"""
-        Output database: {output_db_path}")
+        Output database: {output_db_path}"
         Processing {len(input_db_paths_list)} 
         input databases listed in {input_list_file}.
         """
@@ -87,7 +87,7 @@ def merge_databases(output_db_path, input_list_file):
 
                 # --- Add Debug Print ---
                 debug_message = f"Attempting to attach database path: '{input_db_path}'"
-                log_message(debug_message, script_name)
+                log_message(debug_message, logging.DEBUG)
 
                 if not os.path.exists(input_db_path):
                     error_message = (
