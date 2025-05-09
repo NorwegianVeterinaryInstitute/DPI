@@ -67,7 +67,6 @@ def create_table(
             )  # Quote column names
             create_sql = f'CREATE TABLE IF NOT EXISTS "{table_name}" ({columns_sql})'  # Use IF NOT EXISTS
             cursor.execute(create_sql)
-            print(f"Table '{table_name}' ensured/created in database.")
             log_message(
                 f"Table '{table_name}' ensured/created in database.",
                 logging.INFO,
@@ -82,14 +81,12 @@ def create_table(
                 try:
                     alter_sql = f'ALTER TABLE "{table_name}" ADD COLUMN "{col}" TEXT'
                     cursor.execute(alter_sql)
-                    print(f"Added missing column '{col}' to table '{table_name}'.")
                     log_message(
                         f"Added missing column '{col}' to table '{table_name}'.",
                         logging.INFO,
                     )
                 except sqlite3.OperationalError as alter_e:
                     error_message = f"Failed to add column '{col}' to table '{table_name}': {alter_e}"
-                    print(error_message)
                     log_message(
                         error_message,
                         logging.ERROR,
