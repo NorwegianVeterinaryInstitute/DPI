@@ -165,8 +165,8 @@ workflow DPI {
                 
 
         WRANGLING_TO_DB(results_ch)
-        /*
-        // // SECTION : prepare chanel for merging of results to a single database
+  
+        // SECTION : prepare chanel for merging of results to a single database
         db_path_ch = Channel.fromPath(params.sqlitedb, checkIfExists: false) 
 
         // We need to collect to ensure that all the results are ready to merge
@@ -185,7 +185,7 @@ workflow DPI {
       
         // chunked_dbs_ch.view()      
         MERGE_DBS(db_path_ch, chunked_dbs_ch)
-        */
+
 
         // !SECTION
 
