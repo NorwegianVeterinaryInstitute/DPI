@@ -1,9 +1,10 @@
 // modules/local_pg/setup_postgres.nf
+// Note that all the processes depend on the server will have to be run on the same node
 nextflow.enable.dsl=2
  
 process SETUP_POSTGRES {
     
-    label 'with_postgres'
+    label 'pg_server_host'
     tag "Setup PG at ${pg_instance_path} on port ${pg_port}"
     // Move publishDir "${params.outdir}/logs/setup_postgres", mode: 'copy', overwrite: false, saveAs: { pg_instance_path.name + "_logfile.log" }
 
@@ -12,7 +13,7 @@ process SETUP_POSTGRES {
     val pg_port
 
     output:
-    tuple val(pg_connection_map), emit: connection_params // Emits a map: [host, port, user, dbname, pgdata]
+    tuple val(pg_connection_map), emit: connection_params // Emits a map: [host, port, user, nodename, dbname, pgdata]
     path "logfile.log", emit: server_log_file          // Emits the path to the server log file
 
     script:
@@ -21,6 +22,7 @@ process SETUP_POSTGRES {
     def pg_user_val = System.getProperty("user.name") ?: "nextflow_user" // Default if system property is not set
     def pg_host_val = "localhost" // Host for client connections from the same node.
                                   // For pg_hba.conf, '0.0.0.0/0' is used for wider network access.
+    def pg_node_val = "localhost" // node name to be able to use the same node name
     def pg_dbname_val = pg_user_val // Default database name, often same as user or 'postgres'
 
     // Construct the map to be emitted.
@@ -29,6 +31,7 @@ process SETUP_POSTGRES {
         host:   pg_host_val,
         port:   pg_port,             // pg_port is an input val (Integer)
         user:   pg_user_val,
+        node:   pg_node_val, // Node name where the process is running, useful for debugging
         dbname: pg_dbname_val,
         pgdata: pg_instance_path.toString() // pg_instance_path is an input path
     ]
@@ -77,11 +80,17 @@ process SETUP_POSTGRES {
 
     echo "PostgreSQL server started. Log: ${pg_instance_path}/logfile.log"
 
+    # need to keep the server alive for the duration of the workflow
+    // need to wait for a signal to stop the server gracefully
+
+    // signal handler for graceful shutdown is handled by : workflow.onComplete and workflow.onError
+
 
     # Kept temporarily for debugging purposes
     echo "${pg_host_val}" > pg_params_host.txt
     echo "${pg_port}" > pg_params_port.txt
     echo "${pg_user_val}" > pg_params_user.txt
+    echo "${pg_node_val}" > pg_params_node.txt
     echo "${pg_dbname_val}" > pg_params_dbname.txt
     echo "${pg_instance_path}" > pg_params_pgdata.txt
     # Copy logfile to current workDir for capture by `path "logfile.log"`    
