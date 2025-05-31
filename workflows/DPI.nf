@@ -5,7 +5,11 @@ include { RUN_NUCDIFF; RUN_NUCDIFF_VERSION } from "../modules/RUN_NUCDIFF.nf"
 include { PREPARE_VCF_ANNOTATOR; PREPARE_VCF_ANNOTATOR_VERSION } from "../modules/PREPARE_VCF_ANNOTATOR.nf"
 include { RUN_VCF_ANNOTATOR; RUN_VCF_ANNOTATOR_VERSION } from "../modules/RUN_VCF_ANNOTATOR.nf"
 include { WRANGLING_TO_DB; WRANGLING_TO_DB_VERSION  } from "../modules/WRANGLING_TO_DB.nf"
-include { MERGE_DBS; MERGE_DBS_VERSION } from "../modules/MERGE_DBS.nf"
+// include { MERGE_DBS; MERGE_DBS_VERSION } from "../modules/MERGE_DBS.nf"
+
+include { POSTGRE } from '../subworkflows/POSTGRE.nf'
+
+
 
 
 workflow DPI {
@@ -179,12 +183,27 @@ workflow DPI {
         // need to try to merge everything so will run for everything again to add only the missing data ... 
         // question of efficency 
 
-        chunked_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
+        chunked_sqlite_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
                 .collect() 
                 .buffer (size : 50, remainder: true)
       
-        // chunked_dbs_ch.view()      
-        MERGE_DBS(db_path_ch, chunked_dbs_ch)
+        chunked_sqlite_dbs_ch.view()      
+        
+        //POSTGRE subworkflow - handles setup postgre, merging of individual sqlite databases and export to duckdb
+
+        POSTGRE(pg_instance_path, params.pg_port, chunked_sqlite_dbs_ch)
+
+        // need to merge all the databases into one postgreSQL database
+        // need to be modified MERGE_DBS(db_path_ch, chunked_dbs_ch)
+        // MERGE_DBS(db_path_ch, chunked_dbs_ch)
+
+        // Export all postgreSQL databases to DuckDB - we need output file for duckdb database 
+        // POSTGRE_TO_DUCKDB(pg_params_ch, db_path_ch, chunked_dbs_ch)
+        // in connection parameters to postgreSQL db - target table names - duckdb_file_path.duckdb loop over all the tables
+        // out : the file is copied to the path defined by user 
+
+        // 
+        
 
 
         // !SECTION
@@ -197,7 +216,6 @@ workflow DPI {
         PREPARE_VCF_ANNOTATOR_VERSION()
         RUN_VCF_ANNOTATOR_VERSION()
         WRANGLING_TO_DB_VERSION()
-        MERGE_DBS_VERSION()
         // !SECTION
 }
 
