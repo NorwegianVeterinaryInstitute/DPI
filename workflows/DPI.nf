@@ -183,6 +183,8 @@ workflow DPI {
         // need to try to merge everything so will run for everything again to add only the missing data ... 
         // question of efficency 
 
+        // FIXME We need to remove that it does not emit the traget, only the filepaths 
+        // check that it does that
         chunked_sqlite_dbs_ch = WRANGLING_TO_DB.out.individual_sqlite_ch
                 .collect() 
                 .buffer (size : 50, remainder: true)
@@ -191,7 +193,8 @@ workflow DPI {
         
         //POSTGRE subworkflow - handles setup postgre, merging of individual sqlite databases and export to duckdb
 
-        POSTGRE(pg_instance_path, params.pg_port, chunked_sqlite_dbs_ch)
+        POSTGRE(
+                params.pg_instance_path, params.pg_port, params.pg_shutdown_signal_file, chunked_sqlite_dbs_ch)
 
         // need to merge all the databases into one postgreSQL database
         // need to be modified MERGE_DBS(db_path_ch, chunked_dbs_ch)

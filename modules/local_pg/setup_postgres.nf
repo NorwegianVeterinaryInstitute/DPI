@@ -1,99 +1,136 @@
 // modules/local_pg/setup_postgres.nf
-// Note that all the processes depend on the server will have to be run on the same node
 nextflow.enable.dsl=2
  
 process SETUP_POSTGRES {
-    
-    label 'pg_server_host'
-    tag "Setup PG at ${pg_instance_path} on port ${pg_port}"
-    // Move publishDir "${params.outdir}/logs/setup_postgres", mode: 'copy', overwrite: false, saveAs: { pg_instance_path.name + "_logfile.log" }
+    label 'pg_server_host' // Label for targeting with 'withLabel' in nextflow.config
+    tag "PG Server on ${pg_instance_path.name} port ${pg_port}" // Updated tag for clarity
 
     input:
-    path pg_instance_path  // This will be the PGDATA directory itself e.g., work/pg_temp_data/some_hash/my_pg_data
-    val pg_port
+    path pg_instance_path  // Path for PGDATA, e.g., work/pg_temp_instances/workflow_run_name
+    val pg_port            // Integer for the PostgreSQL port
+    path shutdown_signal_file_to_watch     // Path to a file that will signal the process to stop PostgreSQL server
 
     output:
-    tuple val(pg_connection_map), emit: connection_params // Emits a map: [host, port, user, nodename, dbname, pgdata]
-    path "logfile.log", emit: server_log_file          // Emits the path to the server log file
+    // Individual parameter files that will be used to construct the connection map later
+    path "pg_host.txt", emit: host_file         // Will contain 'localhost' for clients on the same node
+    path "pg_port.txt", emit: port_file         // Will contain the port number
+    path "pg_user.txt", emit: user_file         // Will contain the database user
+    path "pg_node.txt", emit: node_name_file    // Will contain the ACTUAL hostname of this node (for SLURM --nodelist)
+    path "pg_dbname.txt", emit: dbname_file     // Will contain the database name
+    path "pg_pgdata.txt", emit: pgdata_file     // Will contain the PGDATA path
+    
+    path "logfile.log", emit: server_log_file   // The PostgreSQL server log
+
+    // This tuple output is what the subworkflow will primarily use.
+    // It groups all parameter files and the log file.
+    // We'll construct the map from these files in the subworkflow.
+    tuple path("pg_host.txt"), path("pg_port.txt"), path("pg_user.txt"), \
+          path("pg_node.txt"), path("pg_dbname.txt"), path("pg_pgdata.txt"), \
+          path("logfile.log"), emit: pg_server_details
+
 
     script:
-    // Define connection parameters as Groovy variables
-    // These are accessible for the `val()` output and for interpolation in the shell script block
-    def pg_user_val = System.getProperty("user.name") ?: "nextflow_user" // Default if system property is not set
-    def pg_host_val = "localhost" // Host for client connections from the same node.
-                                  // For pg_hba.conf, '0.0.0.0/0' is used for wider network access.
-    def pg_node_val = "localhost" // node name to be able to use the same node name
-    def pg_dbname_val = pg_user_val // Default database name, often same as user or 'postgres'
+    // Groovy variable for initdb username, determined before shell script runs
+    def pg_user_for_initdb = System.getProperty("user.name") ?: "nextflow_user"
+    def db_name_to_use = pg_user_for_initdb // Or 'postgres' or a fixed name
 
-    // Construct the map to be emitted.
-    // This map is defined in the Groovy scope of the process.
-    pg_connection_map = [
-        host:   pg_host_val,
-        port:   pg_port,             // pg_port is an input val (Integer)
-        user:   pg_user_val,
-        node:   pg_node_val, // Node name where the process is running, useful for debugging
-        dbname: pg_dbname_val,
-        pgdata: pg_instance_path.toString() // pg_instance_path is an input path
-    ]
-
-    
-    // For cross-node access, host should be the actual IP/hostname of this node.
-    // Getting it robustly within a generic HPC job can be tricky.
-    // '*' for listen_addresses makes PG listen on all interfaces.
-    // 'hostname --fqdn' or similar might get the node's name|FQDN.
-    // For now, we'll assume clients might use this node's name if not on the same node.
-    // If all Nextflow tasks for this subworkflow are forced onto the same node, 'localhost' is fine.
-    // Let's default to '*' for listen_addresses and clients will need the correct hostname.
-    def effective_host_for_clients = "*" // Placeholder, might need to be actual hostname for clients
-                                         // For pg_hba.conf, 0.0.0.0/0 covers all IPv4
-
-    script:    
     """
-    set -e
-    echo "Initializing PostgreSQL instance in: ${pg_instance_path}"
-    echo "Using port: ${pg_port}"
-    echo "System user (for initdb): ${pg_user_val}"
+    # Exit immediately if a command exits with a non-zero status.
+    set -e 
+    
+    echo "--- Starting SETUP_POSTGRES ---"
+    echo "Target PGDATA directory: ${pg_instance_path}"
+    echo "Target Port: ${pg_port}"
+    echo "User for initdb: ${pg_user_for_initdb}"
 
-    # Ensure the directory exists and is empty (or clean it)
-    # Be careful with 'rm -rf' in automated scripts.
+    # 1. Determine Actual Node Hostname - the name SLURM clients will use to target this node
+    ACTUAL_NODE_HOSTNAME=\$(hostname -f)
+    # ... (Initial PGDATA prep, initdb, conf changes, pg_ctl start as before) ...
+    # ... (Ensure listen_addresses = 'localhost' is set in postgresql.conf) ...
+    # ... (Ensure parameter files like pg_host.txt, pg_node.txt are written) ...
+    if [ -z "\${ACTUAL_NODE_HOSTNAME}" ]; then
+        # Fallback if hostname -f fails (shouldn't usually happen on HPC)
+        ACTUAL_NODE_HOSTNAME=\$(hostname)
+    fi
+    
+    echo "This process is running on node: \${ACTUAL_NODE_HOSTNAME}"   
+    echo "PostgreSQL server confirmed running. PID: \$(head -n 1 "${pg_instance_path}/postmaster.pid")"
+    echo "Watching for shutdown signal file: ${shutdown_signal_file_to_watch}" 
+
+
+    # 2. Prepare PGDATA directory
     if [ -d "${pg_instance_path}" ]; then
       echo "Warning: PGDATA directory ${pg_instance_path} already exists."
       echo "Attempting to stop any existing server and clean up..."
-      pg_ctl -D "${pg_instance_path}" -o "-p ${pg_port}" stop || echo "PG already stopped or directory was not a valid PGDATA."
-      rm -rf "${pg_instance_path}/*" # Clean inside, not the dir itself if NF manages the parent
+      # Use timeout for pg_ctl stop in case it hangs on a defunct instance
+      timeout 30s pg_ctl -D "${pg_instance_path}" -o "-p ${pg_port}" stop || echo "INFO: PG stop command timed out, failed, or server was not running."
+      rm -rf "${pg_instance_path}/*"
+      echo "Cleaned inside ${pg_instance_path}."
+    else
+      mkdir -p "${pg_instance_path}"
+      echo "Created PGDATA directory: ${pg_instance_path}"
     fi
-    mkdir -p "${pg_instance_path}"
 
-    initdb --username=${pg_user_val} --pgdata="${pg_instance_path}" --auth=trust --no-locale --encoding=UTF8
+    # 3. Initialize PostgreSQL Database Cluster
+    initdb --username=${pg_user_for_initdb} --pgdata="${pg_instance_path}" --auth=trust --no-locale --encoding=UTF8
+    echo "initdb complete."
 
+    # 4. Configure PostgreSQL (postgresql.conf and pg_hba.conf)
     echo "port = ${pg_port}" >> "${pg_instance_path}/postgresql.conf"
-    echo "listen_addresses = '*'" >> "${pg_instance_path}/postgresql.conf"
-    # For 'trust' authentication with listen_addresses = '*'
-    # you might need to adjust pg_hba.conf if initdb doesn't set it wide enough.
-    # 'trust' means it won't ask for a password from allowed hosts.
-    # This is generally okay for a temporary, isolated server.
-    echo "host    all             all             0.0.0.0/0               trust" >> "${pg_instance_path}/pg_hba.conf"
-    echo "host    all             all             ::/0                    trust" >> "${pg_instance_path}/pg_hba.conf"
+    # Listen on 'localhost' because we aim for client processes to run on the SAME node.
+    # If co-location fails and clients are on other nodes, this 'localhost' would prevent connection.
+    # The robust co-location strategy makes 'localhost' the correct & secure choice here.
+    echo "listen_addresses = 'localhost'" >> "${pg_instance_path}/postgresql.conf"
+    echo "PostgreSQL configured to listen on localhost:${pg_port}"
 
-
+    # 5. Start PostgreSQL Server
     pg_ctl -D "${pg_instance_path}" -l "${pg_instance_path}/logfile.log" -o "-p ${pg_port}" start
+    echo "PostgreSQL server start command issued."
+    # Add a small delay and check status to ensure it started cleanly
+    sleep 5
+    pg_ctl -D "${pg_instance_path}" status || (echo "ERROR: PostgreSQL server failed to start cleanly. Check logfile.log." && exit 1)
+    echo "PostgreSQL server confirmed running."
 
-    echo "PostgreSQL server started. Log: ${pg_instance_path}/logfile.log"
+    # 6. Write connection parameters to files for output
+    # 'localhost' is the host clients on this same node will use
+    echo "localhost" > pg_host.txt
+    echo "${pg_port}" > pg_port.txt
+    echo "${pg_user_for_initdb}" > pg_user.txt # User to connect as
+    echo "\${ACTUAL_NODE_HOSTNAME}" > pg_node.txt   # Actual node (for SLURM --nodelist of clients)
+    echo "${db_name_to_use}" > pg_dbname.txt   # Database to connect to
+    echo "${pg_instance_path}" > pg_pgdata.txt # PGDATA path
 
-    # need to keep the server alive for the duration of the workflow
-    // need to wait for a signal to stop the server gracefully
+    # Copy the server log to the current Nextflow task work directory for easy capture
+    cp "${pg_instance_path}/logfile.log" "logfile.log"
+    echo "Parameter files written. Server log copied."
 
-    // signal handler for graceful shutdown is handled by : workflow.onComplete and workflow.onError
+    # 7. Wait for shutdown signal
+    while true; do
+        if [ -f "${shutdown_signal_file_to_watch}" ]; then # Check for the specific file passed as input
+            echo "Shutdown signal '${shutdown_signal_file_to_watch}' received."
+            echo "Stopping PostgreSQL server at PGDATA ${pg_instance_path}..."
+            pg_ctl -D "${pg_instance_path}" -o "-p ${pg_port}" -m fast stop
+            echo "PostgreSQL server stopped."
 
+            rm -f "${shutdown_signal_file_to_watch}" # Clean up the signal file
+            echo "Signal file removed."
 
-    # Kept temporarily for debugging purposes
-    echo "${pg_host_val}" > pg_params_host.txt
-    echo "${pg_port}" > pg_params_port.txt
-    echo "${pg_user_val}" > pg_params_user.txt
-    echo "${pg_node_val}" > pg_params_node.txt
-    echo "${pg_dbname_val}" > pg_params_dbname.txt
-    echo "${pg_instance_path}" > pg_params_pgdata.txt
-    # Copy logfile to current workDir for capture by `path "logfile.log"`    
-    cp "${pg_instance_path}/logfile.log" "logfile.log" 
+            
+            # Optional: Clean up the PGDATA directory itself by this process before exiting
+            # This is good if pg_instance_path is an absolute path managed by the main workflow
+            # If pg_instance_path is *inside* this task's workDir, SLURM/Nextflow will clean it eventually.
+            # echo "Cleaning up PGDATA directory: ${pg_instance_path}..."
+            # rm -rf "${pg_instance_path}"
+            # echo "PGDATA directory removed."
+            
+            break # Exit the loop, allowing the script and SLURM job to finish
+        fi
+        sleep 15 # Check every 15 seconds
+    done
+
+    echo "--- SETUP_POSTGRES script finished ---"
     """
 }
+
+
+

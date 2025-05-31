@@ -13,6 +13,7 @@ workflow POSTGRE {
         
         pg_instance_path        // Path for PGDATA (e.g., "$workDir/pg_temp/\$workflow.runName")
         pg_port                 // Integer for PostgreSQL port
+        pg_shutdown_signal_file // path for the shutdown signal file
         //sqlite databases to be imported - we will need parallel processing 
         // we need to setup the max of the parallel processes for the sqlite import  (max 50 files)
         chunked_sqlite_dbs_ch // channel emitting: [ sqlite_file1, sqlite_file2, ... ]
@@ -20,18 +21,29 @@ workflow POSTGRE {
 
 
     main:
+
+        // setup paths for temporary PostgreSQL instance and shutdown signal in nextflow.config
+
+
         // 1. Setup PostgreSQL
          // SETUP_POSTGRES now emits a map of connection parameters directly via 'connection_params'
         // and the server log file path via 'server_log_file'.
-        setup_out_ch = SETUP_POSTGRES(pg_instance_path, pg_port)
+        setup_out_ch = SETUP_POSTGRES(
+            params.pg_instance_path, params.pg_port, file(params.pg_shutdown_signal_file)
+        )
 
         //This channel emits the connection parameters map
-        pg_params_ch = setup_out_ch.connection_params 
+        // pg_params_ch = setup_out_ch.connection_params 
+
+        pg_params_ch = setup_out_ch.pg_server_details
+        pg_params_ch.view()
+
+        
 
         // This channel emits the server log file
         setup_out_ch.server_log_file.view()
 
-
+        // HERE IS WHAT HAPPENS with postgreSQL:
 
         // // 2. Create schema and import SQLite to PostgreSQL - incl. adding columns
         // // python script 
@@ -65,7 +77,38 @@ workflow POSTGRE {
         //     )
         // }
 
-        // // 4. stop postgres server and removes the temporary pg database and clean logs
+        // 4. Creates a stop signal to stop the postgres server that is run in the SETUP_POSTGRES process
+        //  It should remove removes the temporary pg database (maybe clean logs)
+
+        // 3. Workflow Event Handlers to Create the Shutdown Signal File
+    workflow.onComplete {
+        println "[POSTGRE WORKFLOW COMPLETED] Creating PostgreSQL shutdown signal..."
+        def signal_file = file(params.pg_shutdown_signal_file)
+        // Ensure parent directory exists (might be needed if workDir structure is deep)
+        if (!signal_file.getParentFile().exists()) {
+            signal_file.getParentFile().mkdirs()
+        }
+        signal_file.text = "Shutdown triggered by POSTGRE workflow completion at ${new Date()}" // Create the file
+        println "PostgreSQL shutdown signal created at: ${signal_file}"
+        // The SETUP_POSTGRES process will see this file, stop PostgreSQL, and then exit its own SLURM job.
+        // If pg_instance_path (PGDATA) was inside SETUP_POSTGRES's task workDir, SLURM + Nextflow handle its cleanup.
+        // If pg_instance_path was an absolute path elsewhere (like in the main workDir),
+        // you might add an explicit 'rm -rf ${current_pg_instance_path}' here, but ensure PG is stopped first.
+        // For simplicity, it's often best if pg_instance_path is within what SETUP_POSTGRES "owns".
+        // The current setup where current_pg_instance_path is passed to SETUP_POSTGRES means SETUP_POSTGRES
+        // should ideally clean it up after stopping the server, before its script exits.
+    }
+
+    workflow.onError {
+        println "[POSTGRE WORKFLOW ERROR] Creating PostgreSQL shutdown signal due to error..."
+        def signal_file = file(params.pg_shutdown_signal_file)
+        if (!signal_file.getParentFile().exists()) {
+            signal_file.getParentFile().mkdirs()
+        }
+        signal_file.text = "Shutdown triggered by POSTGRE workflow error at ${new Date()}"
+        println "PostgreSQL shutdown signal created at: ${signal_file}"
+        // Similar considerations for cleaning up pg_instance_path if needed.
+        }
 
     emit:
         //postgres_params      = pg_params_ch              // Emit PG params map (as a channel)
