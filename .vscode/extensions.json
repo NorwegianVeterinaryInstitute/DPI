@@ -32,6 +32,8 @@
     "mermaidchart.vscode-mermaid-chart",
     "bierner.markdown-mermaid",
     "ms-vscode.copilot-mermaid-diagram",
-    "vstirbu.vscode-mermaid-preview"
+    "vstirbu.vscode-mermaid-preview",
+    "google.gemini-cli-vscode-ide-companion",
+    "dracula-theme.theme-dracula"
   ]
 }
