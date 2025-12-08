@@ -11,14 +11,24 @@ Challenges
 - [ ] collecting intermediary files -> too many files which creates too many symlinks ... so I need to have a certain size of collecting otherwise nextflow will bug
 - [ ] need adding missing columns
 - [ ] need to use jsonDB datatype -> will be easier to store the diff files -- so need to chane that in the nf script
+- [ ] I need a way to control orders of results that go into the database, are given in the same order, in case I need to resume the job --- maybe use the list of pairs to get the results in order -> collect the results and sort them using the pair ID before batching to output
+- [ ] choose an appropriate batch size eg 50 for a starter
+- [ ] make output order deterministic 
+- [ ] create one table per result type ! -> that will be easier to debug
 
 
 
+## Initiation database 
 
+```bash 
+
+```
+
+
+# Relics 
 ```bash
-# module load PostgreSQL/16.1-GCCcore-13.2.0 # not available any more
 
-apptainer pull postgres.sif docker://postgres:16
+apptainer pull postgres.sif docker://postgres:latest
 # prepare data directory
 mkdir -p $HOME/pg_data
 mkdir -p $HOME/pg_run

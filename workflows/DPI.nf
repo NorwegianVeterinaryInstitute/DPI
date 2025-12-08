@@ -1,7 +1,7 @@
 // include { DB_SETUP } from "../modules/DB_SETUP.nf"
 
-// include { INPUT; INPUT_VERSION } from "../modules/INPUT.nf"
-// include { ANNOTATE; ANNOTATE_VERSION } from "../modules/ANNOTATE.nf"
+include { INPUT; INPUT_VERSION } from "../modules/INPUT.nf"
+include { ANNOTATE; ANNOTATE_VERSION } from "../modules/ANNOTATE.nf"
 // include { PREPARE_NUCDIFF; PREPARE_NUCDIFF_VERSION } from "../modules/PREPARE_NUCDIFF.nf"
 // include { RUN_NUCDIFF; RUN_NUCDIFF_VERSION } from "../modules/RUN_NUCDIFF.nf"
 // include { PREPARE_VCF_ANNOTATOR; PREPARE_VCF_ANNOTATOR_VERSION } from "../modules/PREPARE_VCF_ANNOTATOR.nf"
@@ -48,6 +48,8 @@ workflow DPI {
         
         ANNOTATE(input_samples_ch, params.baktaDB, params.training, params.genus, params.species)
         // !SECTION
+
+        // SECTION  initiating database 
 
  
         // // SECTION: reforming pairs for pairwise analysis
@@ -141,6 +143,25 @@ workflow DPI {
         // // id can be sample id of the annotated file OR ref_query pair id
         // // We need to add index to the channel - to avoid eventual colisions during merging afterwards
         // atomicInteger = new java.util.concurrent.atomic.AtomicInteger(0)
+
+        // TODO example for results ... 
+        // chunked_ch = PROCESS_SAMPLE.out.json_results
+        // // Collect all outputs into a single list and sort by meta.id
+        // .toSortedList { a, b -> a[0].id <=> b[0].id } 
+        // // Flatten the list back into a stream so we can collate
+        // .flatMap() 
+        // // Group items into chunks of 'batchSize' (e.g., 50)
+        // .collate( params.batchSize ) 
+        // // Add an index so we can track which batch is which (0, 1, 2...)
+        // .map { chunk -> 
+        //     def meta_list = chunk.collect { it[0] } // Extract metadatas
+        //     def files = chunk.collect { it[1] }     // Extract files
+        //     tuple(workflow.runName.hashCode(), meta_list, files) // Add a batch ID
+        // }
+        // // Add a clean index (optional, for nicer logging)
+        // .withIndex() 
+        // .map { tuple, index -> [index, tuple[1], tuple[2]] }
+
 
         // results_ch = 
         //         comment_ch.combine(

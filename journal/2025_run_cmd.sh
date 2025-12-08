@@ -4,10 +4,11 @@ srun --account=nn9305k --mem-per-cpu=16G --cpus-per-task=4 --time=2:00:00 --pty 
 
 
 
-tmux
 cd /cluster/projects/nn9305k/active/evezeyl/projects/OEIO/2025-12_TEST_DPI
 
 
+
+tmux #login 3
 module purge
 module load Java/21.0.2 
 DPI="/cluster/projects/nn9305k/active/evezeyl/projects/OEIO/git/DPI_dev/DPI"
@@ -24,6 +25,6 @@ TEST="${DPI}/conf/test_DPI.config"
 ## with container and slurm 
 $NF run $MAIN -c $CONFIG -c $TEST --out_dir . -work-dir $WORKDIR  --track DPI -profile apptainer -resume 
 # OR 
-$NF run $MAIN -c $CONFIG --out_dir . -work-dir $WORKDIR -profile apptainer,test_DPI -resume 
+# $NF run $MAIN -c $CONFIG --out_dir . -work-dir $WORKDIR -profile apptainer,test_DPI -resume 
 
 
