@@ -34,6 +34,7 @@
     "ms-vscode.copilot-mermaid-diagram",
     "vstirbu.vscode-mermaid-preview",
     "google.gemini-cli-vscode-ide-companion",
-    "dracula-theme.theme-dracula"
+    "dracula-theme.theme-dracula",
+    "pomdtr.excalidraw-editor"
   ]
 }
